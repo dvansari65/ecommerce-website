@@ -1,11 +1,13 @@
 
-
+import cookieParser from "cookie-parser";
 import cors from "cors"
 import express from "express";
 
 
 
 const app = express()
+
+app.use(cookieParser())
 
 app.use(cors({
     origin:"http://localhost:5173",
@@ -14,7 +16,7 @@ app.use(cors({
 
 app.use(express.json()); 
 
-app.use(cors())
+
 
 import { userRouter } from "./Routes/user.routes";
 

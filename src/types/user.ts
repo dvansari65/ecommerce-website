@@ -3,7 +3,13 @@ export interface newUserTypes  {
     email:String,
     password:String,
     photo:string,
-    dob:Date,
+    dob:string,
     gender:"male" | "female" | "transgender",
     role?:"admin" | "user"
+   }
+
+   export interface optionsType{
+    httpOnly:boolean,
+    secure:boolean,
+    sameSite:string
    }
