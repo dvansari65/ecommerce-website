@@ -4,11 +4,16 @@ import { Request, Response } from "express";
 import ApiError from "../utils/errorHanlder";
 import { User } from "../models/user.model";
 
+import fs from "fs"
+
+import imageKit from "../utils/imageKit";
 
 export const newUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:Response)=>{
+    
     console.log("✅ /new-user hit with data:", req.body);
-    const {userName,photo,email,password,gender,dob} = req.body
-    if(!userName || !email || !password || !gender || !dob){
+    const {userName,email,password,gender,dob} = req.body
+    const photo = req.file
+    if(!userName || !email || !password || !gender || !dob || !photo){
         throw new ApiError("please enter all fields", 402)
     }
 
@@ -22,12 +27,20 @@ export const newUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:Re
     if(existingUser){
         throw new ApiError("user already exists!", 402)
     }
+    const uploadedPhoto = await imageKit.upload({
+        file:fs.readFileSync(photo.path),
+        fileName:photo.originalname
+    })
+    if(!uploadedPhoto){
+        throw new ApiError("photo not uploaded on the imagekit",401)
+    }
+
 
     const newUser = new User({
         userName,
         email,
-        photo,
         password,
+        photo:uploadedPhoto.url,
         gender,
         dob: new Date(dob)
     })
@@ -43,7 +56,8 @@ export const newUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:Re
                 userName: newUser.userName,
                 email: newUser.email,
                 gender: newUser.gender,
-                dob: newUser.dob
+                dob: newUser.dob,
+                photo:newUser.photo
             }
         })
     } catch (error) {
@@ -95,7 +109,7 @@ export const loginUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:
         }
         console.log("isPasswordCorrect",isPasswordCorrect)
         const {refreshToken,accessToken} = await generateAccessAndRefreshToken(user?._id as string)
-        const loggedInUser = await User.findById(user?._id).select("-password refreshToken")
+        const loggedInUser = await User.findById(user?._id).select("-password -refreshToken")
         
         return res
         .status(200)
@@ -112,5 +126,137 @@ export const loginUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:
             message:"user successfully loggedIn",
             loggedInUser
         })
+})
+
+export const logoutUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:Response)=>{
+       if(!req.user?._id || !req.user){
+        throw new ApiError("user is not logged in",402)
+       }
+       await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $unset:{
+                refreshToken:1
+            }
+        },
+        {
+            new:true
+        }
+       )
+       const options={
+        httpOnly:true,
+        secure:false
+       }
+
+       return res
+       .status(200)
+       .clearCookie("refreshToken",options)
+       .clearCookie("accessToken",options)
+       .json({
+        message:"user successfully logout",
+        success:true,
+       })
+
+})
+
+export const updateUserNameFromProfile = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:Response)=>{
+    const {userName} = req.body
+    const user = req.user?._id
+    if(!user){
+        new ApiError("user not log in",404)
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+        user,
+        {
+            userName:userName
+        },
+        {
+            new:true
+        }
+    ).select("-password -refreshToken ")
+    return res
+    .status(200)
+    .json({
+        message:"user name updated successfully",
+        success:true,
+        updatedUser
+    })
+})
+
+export const updatePhoto = AsyncHandler( async (req:Request<{},{},newUserTypes>,res:Response)=>{
+    console.log("i am danish")
+    const photo = req.file!
+    const user  = req.user?._id
+    if(!user){
+        throw new ApiError("usr is not logged in",402)
+    }
+    console.log("photo:",photo)
+    if(!photo ){
+        throw new ApiError("please provide photo",402)
+    }
+    const existingUser = await User.findById(user)
+    if(!existingUser){
+        throw new ApiError("user not found",402)
+    }
+
+    //delete old photo
+    const url = existingUser?.photo
+    if(url){
+        try {
+            // Extract file ID from the URL
+            // ImageKit URLs are in format: https://ik.imagekit.io/your_imagekit_id/filename.jpg
+            const urlParts = url.split('/')
+            const fileName = urlParts[urlParts.length - 1]
+            const fileId = fileName.split('.')[0] // Remove file extension
+            
+            if(fileId){
+                await imageKit.deleteFile(fileId)
+                console.log("Successfully deleted old photo with ID:", fileId)
+            }
+        } catch (error) {
+            console.log("Error deleting old photo:", error)
+            // Continue with the update even if deletion fails
+        }
+    }
+
+    //upload new photo
+    const uploadedPhoto = await imageKit.upload({
+        file: fs.readFileSync(photo.path),
+        fileName: photo.originalname
+    })
+
+    const updatedUser = await User.findByIdAndUpdate(
+        user,
+        {
+            photo: uploadedPhoto.url
+        },
+        {
+            new: true
+        }
+    ).select("-password -refreshToken")
+
+    return res
+    .status(200)
+    .json({
+        message: "photo updated successfully",
+        success: true,
+        updatedUser
+    })
+})
+
+export const getAllUser = AsyncHandler( async (req:Request<{},{},newUserTypes>,res:Response)=>{
+    const AllUsers = await User.find({}).select("-password -refreshToken")
+    if(AllUsers.length == 0){
+        return res.status(200).json({
+            message:"no user found !",
+            success:true,
+            AllUsers
+        })
+    }
+    return res.status(200).json({
+        message:"all users found !",
+            success:true,
+            AllUsers
+    })
 })
 
