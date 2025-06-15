@@ -1,7 +1,9 @@
 
+
 import cookieParser from "cookie-parser";
 import cors from "cors"
 import express from "express";
+
 
 
 
@@ -19,8 +21,9 @@ app.use(express.json());
 
 
 import { userRouter } from "./Routes/user.routes";
-
+import { productRouter } from "./Routes/product.route";
 app.use("/api/v1/user",userRouter)
+app.use("/api/v1/product",productRouter)
 
 
 export default app
