@@ -7,13 +7,13 @@ export type shippingInfoType = {
     country: string,
     pinCode: number
 }
-export type OrderItemType = {
+export type OrderItemType =[ {
     name: string;
     photo: string;
     price: number;
     quantity: number;
     productId?: string;
-  };
+  }];
 
 export type requestOrderBodyType = {
     shippingInfo?: shippingInfoType,

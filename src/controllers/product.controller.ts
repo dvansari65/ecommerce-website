@@ -9,72 +9,71 @@ import { baseQuery } from "../types/types"
 import { myCache } from "../app"
 
 import { current } from "@reduxjs/toolkit"
+import { invalidateCache } from "../utils/invalidateCache"
 
-export const newProduct = AsyncHandler(async(req:Request<{},{},newProductTypes>,res:Response)=>{
-    console.log("req.body",req.body)
-        const {name,stock,description,price,ratings,numberOfRating,category} = req.body
+export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
+    console.log("req.body", req.body)
+    const { name, stock, description, price, ratings, numberOfRating, category } = req.body
 
-        const photo = req.file
-        
-        if (!name || !stock || !description || !price  || !category || !photo) {
-          throw new ApiError("All fields are required", 400);
-        }
-        const uploadedPhoto = await imageKit.upload({
-            file:fs.readFileSync(photo.path),
-            fileName:photo.originalname
+    const photo = req.file
+
+    if (!name || !stock || !description || !price || !category || !photo) {
+        throw new ApiError("All fields are required", 400);
+    }
+    const uploadedPhoto = await imageKit.upload({
+        file: fs.readFileSync(photo.path),
+        fileName: photo.originalname
+    })
+    if (!uploadedPhoto) {
+        throw new ApiError("photo not uploaded on the imagekit", 401)
+    }
+    try {
+        const newProduct = await Product.create({
+            name,
+            stock,
+            description,
+            price,
+            ratings,
+            numberOfRating,
+            category: category.toLowerCase(),
+            photo: uploadedPhoto.url
         })
-        if(!uploadedPhoto){
-            throw new ApiError("photo not uploaded on the imagekit",401)
-        }
-        try {
-            const newProduct = await Product.create({
-                name,
-                stock,
-                description,
-                price,
-                ratings,
-                numberOfRating,
-                category:category.toLowerCase(),
-                photo:uploadedPhoto.url
-            })
-            return res
+        return res
             .status(200)
             .json({
-                message:"new product created successfully ",
-                success:true,
+                message: "new product created successfully ",
+                success: true,
                 newProduct
             })
-        } catch (error) {
-            console.error("failed to create new product",error)
-            throw new ApiError("failed to create new product",500)
-        }
-    })
+    } catch (error) {
+        console.error("failed to create new product", error)
+        throw new ApiError("failed to create new product", 500)
+    }
+})
 
-export const updateProduct = AsyncHandler( async(req:Request,res:Response)=>{
-    const {name, stock, description, price, category} = req.body
+export const updateProduct = AsyncHandler(async (req: Request, res: Response) => {
+    const { name, stock, description, price, category } = req.body
     const photo = req.file
-    const productId = req.params.id
+    const id = req.params.id
 
-    if(!productId){
+    if (!id) {
         throw new ApiError("Product ID is required", 400)
     }
 
-    const existingProduct = await Product.findById(productId)
-    if(!existingProduct){
+    const existingProduct = await Product.findById(id)
+    if (!existingProduct) {
         throw new ApiError("Product not found", 404)
     }
-
-    // If new photo is provided, handle photo update
-    if(photo){
-        // Delete old photo from ImageKit
+    if (photo) {
+       
         const oldPhotoUrl = existingProduct.photo
-        if(oldPhotoUrl){
+        if (oldPhotoUrl) {
             try {
                 const urlParts = oldPhotoUrl.split('/')
                 const fileName = urlParts[urlParts.length - 1]
                 const fileId = fileName.split('.')[0]
-                
-                if(fileId){
+
+                if (fileId) {
                     await imageKit.deleteFile(fileId)
                     console.log("Successfully deleted old photo with ID:", fileId)
                 }
@@ -83,29 +82,31 @@ export const updateProduct = AsyncHandler( async(req:Request,res:Response)=>{
             }
         }
 
-        // Upload new photo
         const uploadedPhoto = await imageKit.upload({
             file: fs.readFileSync(photo.path),
             fileName: photo.originalname
         })
 
-        if(!uploadedPhoto){
+        if (!uploadedPhoto) {
             throw new ApiError("Failed to upload new photo", 500)
         }
 
-        // Update product with new photo
         existingProduct.photo = uploadedPhoto.url
     }
 
-    // Update other fields if provided
-    if(name) existingProduct.name = name
-    if(stock) existingProduct.stock = stock
-    if(description) existingProduct.description = description
-    if(price) existingProduct.price = price
-    if(category) existingProduct.category = category
+    if (name) existingProduct.name = name
+    if (stock) existingProduct.stock = stock
+    if (description) existingProduct.description = description
+    if (price) existingProduct.price = price
+    if (category) existingProduct.category = category
 
     // Save the updated product
     await existingProduct.save()
+    invalidateCache([
+        `all-products-page-limit`,
+        `product-${id}`,
+        `products-category-${existingProduct.category}-1-8`
+    ])
 
     return res.status(200).json({
         message: "Product updated successfully",
@@ -113,30 +114,31 @@ export const updateProduct = AsyncHandler( async(req:Request,res:Response)=>{
         updatedProduct: existingProduct
     })
 })
-export const deleteProduct = AsyncHandler(async(
-    req:Request,
-    res:Response
-    ) => {
-    const productId = req.params.id
 
-    if(!productId){
+export const deleteProduct = AsyncHandler(async (
+    req: Request,
+    res: Response
+) => {
+    const { id } = req.params
+
+    if (!id) {
         throw new ApiError("Product ID is required", 400)
     }
 
-    const existingProduct = await Product.findById(productId)
-    if(!existingProduct){
+    const existingProduct = await Product.findById(id)
+    if (!existingProduct) {
         throw new ApiError("Product not found", 404)
     }
 
-    // Delete photo from ImageKit
+    
     const photoUrl = existingProduct.photo
-    if(photoUrl){
+    if (photoUrl) {
         try {
             const urlParts = photoUrl.split('/')
             const fileName = urlParts[urlParts.length - 1]
             const fileId = fileName.split('.')[0]
-            
-            if(fileId){
+
+            if (fileId) {
                 await imageKit.deleteFile(fileId)
             }
         } catch (error) {
@@ -144,63 +146,72 @@ export const deleteProduct = AsyncHandler(async(
         }
     }
 
-    // Delete product from database
-    await Product.findByIdAndDelete(productId)
+    await Product.findByIdAndDelete(id) 
+    const keysToDelete = [
+        `product-${id}`,                    
+        `all-products-1-8`,                
+        `products-category-${existingProduct.category}-1-8`  // Category page
+    ];
+
+    keysToDelete.forEach(key => {
+        if (myCache.has(key)) {
+            myCache.del(key);
+        }
+    });
 
     return res.status(200).json({
         message: "Product deleted successfully",
         success: true
     })
 })
+export const filterProduct = AsyncHandler(async (req: Request, res: Response) => {
+    const { category, price, search, sort } = req.query
 
-export const filterProduct = AsyncHandler( async (req:Request,res:Response)=>{
-    const {category,price,search,sort} = req.query
+    const page = Number(req.query.page) || 1;
+    const limit = Number(process.env.PRODUCT_PER_PAGE) || 8
+    const skip = (page - 1) * limit
 
-    const page =  Number(req.query.page) || 1;
-    const limit = Number( process.env.PRODUCT_PER_PAGE) || 8
-    const skip  = (page-1)*limit
+    const basequery: baseQuery = {}
 
-    const basequery:baseQuery = {}
+    if (category && typeof category === "string") basequery.category = category;
 
-    if(category && typeof category === "string") basequery.category = category;
+    if (price && !isNaN(Number(price))) basequery.price =
+    {
+        $lte: Number(price)
+    };
 
-    if(price && !isNaN(Number(price))) basequery.price = 
-        {
-            $lte:Number(price)
-        };
+    if (search && typeof search === "string") basequery.search =
+    {
+        $regex: String(search),
+        $options: "i"
+    };
 
-    if(search && typeof search === "string") basequery.search = 
-        { 
-            $regex:String(search),
-            $options:"i"
-        };
-
-    let sortOptions : any = {}
-    if(sort === "asc"){
+    let sortOptions: any = {}
+    if (sort === "asc") {
         sortOptions.price = 1
-    }else{
+    } else {
         sortOptions.price = -1
     }
 
     const sortedProducts = await Product.find(basequery)
-    .sort(sortOptions)
-    .limit(limit)
-    .skip(skip)
-    
-    const [allProducts,filteredOnlyProducts] = await  Promise.all([
+        .sort(sortOptions)
+        .limit(limit)
+        .skip(skip)
+
+    const [allProducts, filteredOnlyProducts] = await Promise.all([
         sortedProducts,
         Product.find(basequery)
     ])
     const products = allProducts
-    const totalPage = Math.ceil(filteredOnlyProducts.length/limit)
+    const totalPage = Math.ceil(filteredOnlyProducts.length / limit)
     return res
-    .status(200)
-    .json({
-        message:"filtered successfully",
-        success:true,
-        products,
-        totalPage
-    })
+        .status(200)
+        .json({
+            message: "filtered successfully",
+            success: true,
+            products,
+            totalPage
+        })
 })
 
 export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Response) => {
@@ -208,19 +219,19 @@ export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Respon
     const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
     const skip = (page - 1) * limit;
 
-    
+    const key = `all-products-${page}-${limit}`
 
-    if(myCache.has("all-products")) {
-        const cachedProducts =  JSON.parse(myCache.get("all-products") as string)
+    if (myCache.has(key)) {
+        const cachedProducts = JSON.parse(myCache.get(key) as string)
         return res
-        .status(200)
-        .json({
-            message:"data cached successfully ",
-            success:true,
-            totalPage:Math.ceil(cachedProducts.length/limit),
-            cachedProducts,
-            currentPage:page
-        })
+            .status(200)
+            .json({
+                message: "data cached successfully ",
+                success: true,
+                totalPage: Math.ceil(cachedProducts.length / limit),
+                cachedProducts,
+                currentPage: page
+            })
     }
 
 
@@ -230,60 +241,67 @@ export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Respon
             .skip(skip),
         Product.countDocuments()
     ]);
-    myCache.set("all-products",JSON.stringify(products))
-
-     const totalPages = Math.ceil(totalProducts / limit);
+    const totalPages = Math.ceil(totalProducts / limit);
+    const cacheData = {
+        products,
+        totalProducts,
+        totalPages
+    }
+    myCache.set(key, JSON.stringify(cacheData))
 
     return res.status(200).json({
         message: "Products fetched successfully",
         success: true,
-        products,
-        totalPages,
         currentPage: page,
-        totalProducts
+        cacheData
     });
 });
 
-export const getAllCategories = AsyncHandler( async(req: Request, res: Response)=>{
-    
+export const getAllCategories = AsyncHandler(async (req: Request, res: Response) => {
 
-    const productsByCategories = await Product.distinct("category").populate("name","stock")
-    if(productsByCategories.length === 0){
+
+    const productsByCategories = await Product.distinct("category").populate("name", "stock")
+    if (productsByCategories.length === 0) {
         return res.status(200).json({
-            message:"no products found",
-            success:true
+            message: "no products found",
+            success: true
         })
     }
     return res
-    .status(200)
-    .json(
-        {
-            message:"all products obtain by their catogories!",
-            success:true,
-            productsByCategories
-        }
-    )
+        .status(200)
+        .json(
+            {
+                message: "all products obtain by their catogories!",
+                success: true,
+                productsByCategories
+            }
+        )
 })
 
-export const getSingleProduct = AsyncHandler(async (req:Request,res:Response,next:NextFunction)=>{
+export const getSingleProduct = AsyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user?._id
-    const {productId} = req.params
-    if(!productId){
-        throw new ApiError("please provide product id",402)
+    const { id } = req.params
+    const key = `product-${id}`
+    let product;
+    if (!id) {
+        throw new ApiError("please provide product id", 402)
     }
-    if(!user){
-        throw new ApiError("unAuthorised request!",402)
+    if (!user) {
+        throw new ApiError("unAuthorised request!", 402)
     }
-    const product = await Product.findById(productId)
-    if(!product){
-        throw new ApiError("product not found!",404)
+    if (key) {
+        product = myCache.get(JSON.parse(key) as string)
+    }
+    product = await Product.findById(id)
+    if (!product) {
+        throw new ApiError(" product not found!", 404)
     }
     return res
-    .status(200)
-    .json({
-        message:"product obtain successfully",
-        success:true,
-        product
-    })
+        .status(200)
+        .json({
+            message: "product obtain successfully",
+            success: true,
+            product
+        })
 
 })

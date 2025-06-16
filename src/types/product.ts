@@ -9,3 +9,5 @@ export interface newProductTypes  {
    ratings:number,
    numberOfRating:number
    }
+
+   

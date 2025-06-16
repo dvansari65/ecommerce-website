@@ -40,11 +40,9 @@ export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrder
     }
 
     // Validate each order item
-    for (const item of orderItems) {
-        if (!item.name || !item.photo || !item.price || !item.quantity) {
-            throw new ApiError("Invalid order item format", 400);
-        }
-    }
+    const orderItemObject = orderItems.map(i=>{
+        
+    })
 
     // Create order
     const order = await Order.create({
