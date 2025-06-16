@@ -1,0 +1,151 @@
+import { Request, Response } from "express";
+import AsyncHandler from "../utils/asyncHandler";
+import { requestOrderBodyType } from "../types/order";
+import { Order } from "../models/order.model";
+import ApiError from "../utils/errorHanlder";
+import { myCache } from "../app";
+
+
+
+export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrderBodyType>, res: Response) => {
+    const user = req.user?._id;
+    if (!user) {
+        throw new ApiError("please login first", 402)
+    }
+    const {
+        shippingInfo,
+        orderItems,
+        subtotal,
+        tax,
+        shippingCharges,
+        discount,
+        total
+    } = req.body;
+    // console.log("req.body",req.body)
+
+    // Validate required fields
+    if (!shippingInfo || !orderItems || !subtotal || !shippingCharges || !discount || !total) {
+        throw new ApiError("All fields are required", 400);
+    }
+
+    // Validate shipping info
+    const { address, city, state, country, pinCode } = shippingInfo;
+    if (!address || !city || !state || !country || !pinCode) {
+        throw new ApiError("All shipping information fields are required", 400);
+    }
+
+    // Validate order items
+    if (!Array.isArray(orderItems) || orderItems.length === 0) {
+        throw new ApiError("Order items are required", 400);
+    }
+
+    // Validate each order item
+    for (const item of orderItems) {
+        if (!item.name || !item.photo || !item.price || !item.quantity) {
+            throw new ApiError("Invalid order item format", 400);
+        }
+    }
+
+    // Create order
+    const order = await Order.create({
+        shippingInfo: {
+            address,
+            city,
+            state,
+            country,
+            pinCode
+        },
+        orderItems,
+        user: user,
+        subtotal,
+        tax,
+        shippingCharges,
+        discount,
+        total,
+        status: "Processing"
+    });
+    let key = `my-orders-${user}`;
+    myCache.set(key, JSON.stringify(order) as string)
+
+    return res.status(201).json({
+        success: true,
+        message: "Order created successfully",
+        order
+    });
+});
+
+export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
+    const user = req.user?._id
+    if (!user) {
+        throw new ApiError("User not authenticated", 401);
+    }
+    const key = `my-orders-${user}`;
+
+    let orders;
+    let numberOfOrders;
+    if (myCache.has(key)) {
+        orders = JSON.parse(myCache.get(key) as string);
+    } else {
+        orders = await Order.find({ user });
+        numberOfOrders = await Order.countDocuments({ user })
+        myCache.set(key, JSON.stringify(orders));
+    }
+
+    return res.status(200).json({
+        message: "here is your orders",
+        success: true,
+        numberOfOrders,
+        orders,
+
+    });
+})
+
+
+export const getAllOrders = AsyncHandler(async (req: Request, res: Response) => {
+
+    const orders = await Order.find({})
+    return res
+        .status(200)
+        .json({
+            message: "alll orders fetched successfully!",
+            success: true,
+            orders
+        })
+
+})
+
+export const deleteOrder = AsyncHandler( async (req: Request, res: Response)=>{
+    const {orderId} = req.params
+    if(!orderId){
+        throw new ApiError("please provide product id", 401);
+    }
+    await Order.findByIdAndDelete(orderId)
+    return res
+    .status(200)
+    .json({
+        message:"order deleted successfully!",
+        success:true,
+    })
+})
+export const getSingleOrder = AsyncHandler ( async(req: Request, res: Response)=>{
+    
+    const {id} = req.params
+    if(!id){
+        throw new ApiError("please provide order id", 401);
+    }
+    let key = `order-${id}`
+    let order;
+    if(myCache.has(key)){
+        order = JSON.parse(myCache.get(key) as string)
+    }else{
+        order = await Order.findById(id).populate("user","userName")
+        myCache.set(key,JSON.stringify(order))
+    }
+   return res
+   .status(200)
+   .json({
+    message:"your single order",
+    success:true,
+    order
+   })
+} )
