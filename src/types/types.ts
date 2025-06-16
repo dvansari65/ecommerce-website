@@ -7,3 +7,23 @@ export type controllerType = (
     res:Response,
     next:NextFunction
 )=>Promise< void | Response <any, Record<string,any>>>
+
+
+export interface baseQuery {
+    search?:{
+        $regex:string,
+        $options:string
+    },
+    price?:{
+        $lte:number
+    },
+    category?:string
+}
+
+export type searchQuery = {
+    search:string,
+    price:number,
+    category:string,
+    stock?:number,
+    sort?:string
+}

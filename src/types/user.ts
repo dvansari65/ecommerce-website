@@ -13,3 +13,9 @@ export interface newUserTypes  {
     secure:boolean,
     sameSite:string
    }
+
+   export type updateUsertype = {
+        email?:string,
+        password?:string,
+        dob?:Date
+   }

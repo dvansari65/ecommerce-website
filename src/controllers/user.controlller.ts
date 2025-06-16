@@ -1,4 +1,4 @@
-import { newUserTypes } from "../types/user";
+import { newUserTypes, updateUsertype } from "../types/user";
 import AsyncHandler from "../utils/asyncHandler";
 import { Request, Response } from "express";
 import ApiError from "../utils/errorHanlder";
@@ -260,3 +260,34 @@ export const getAllUser = AsyncHandler( async (req:Request<{},{},newUserTypes>,r
     })
 })
 
+export const updateUser = AsyncHandler( async (req:Request<{},{},updateUsertype>, res: Response)=>{
+    const {email,password,dob} = req.body
+    const user = req.user?._id
+    if(!user){
+        throw new ApiError("user not found",404)
+    }
+    const existingEmail = await User.findOne({email:email})
+    if(existingEmail){
+        throw new ApiError("email already exist",402)
+    }
+    const udatedUser = await User.findByIdAndUpdate(
+        user,
+        {
+            email:email,
+            password:password,
+            dob:dob
+        },
+        {
+            new:true
+        }
+    ).select("-password")
+    return res
+    .status(200)
+    .json(
+        {
+            messsage:"user updated successfully",
+            success:true,
+            udatedUser
+        }
+    )
+})

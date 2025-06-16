@@ -5,7 +5,8 @@ import { newUser,
     logoutUser,
     updateUserNameFromProfile ,
     updatePhoto,
-    getAllUser
+    getAllUser,
+    updateUser
 } from "../controllers/user.controlller";
 import { verifyJwt } from "../middlewares/authMiddleWare";
 export const userRouter = Router()
@@ -16,3 +17,4 @@ userRouter.route("/logout").post(verifyJwt,logoutUser);
 userRouter.route("/update-username").post(verifyJwt,updateUserNameFromProfile);
 userRouter.route("/update-photo").post(verifyJwt,upload.single("photo"),updatePhoto);
 userRouter.route("/get-all-users").get(verifyJwt,getAllUser);
+userRouter.route("/update-user").patch(verifyJwt,updateUser);
