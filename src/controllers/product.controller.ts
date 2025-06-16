@@ -6,6 +6,9 @@ import { Product } from "../models/product.model"
 import imageKit from "../utils/imageKit"
 import fs from "fs"
 import { baseQuery } from "../types/types"
+import { myCache } from "../app"
+
+import { current } from "@reduxjs/toolkit"
 
 export const newProduct = AsyncHandler(async(req:Request<{},{},newProductTypes>,res:Response)=>{
     console.log("req.body",req.body)
@@ -113,7 +116,7 @@ export const updateProduct = AsyncHandler( async(req:Request,res:Response)=>{
 export const deleteProduct = AsyncHandler(async(
     req:Request,
     res:Response
-) => {
+    ) => {
     const productId = req.params.id
 
     if(!productId){
@@ -178,6 +181,7 @@ export const filterProduct = AsyncHandler( async (req:Request,res:Response)=>{
     }else{
         sortOptions.price = -1
     }
+
     const sortedProducts = await Product.find(basequery)
     .sort(sortOptions)
     .limit(limit)
@@ -199,10 +203,26 @@ export const filterProduct = AsyncHandler( async (req:Request,res:Response)=>{
     })
 })
 
-export const getAllProducts = AsyncHandler(async (req: Request, res: Response) => {
+export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
     const skip = (page - 1) * limit;
+
+    
+
+    if(myCache.has("all-products")) {
+        const cachedProducts =  JSON.parse(myCache.get("all-products") as string)
+        return res
+        .status(200)
+        .json({
+            message:"data cached successfully ",
+            success:true,
+            totalPage:Math.ceil(cachedProducts.length/limit),
+            cachedProducts,
+            currentPage:page
+        })
+    }
+
 
     const [products, totalProducts] = await Promise.all([
         Product.find()
@@ -210,8 +230,9 @@ export const getAllProducts = AsyncHandler(async (req: Request, res: Response) =
             .skip(skip),
         Product.countDocuments()
     ]);
+    myCache.set("all-products",JSON.stringify(products))
 
-    const totalPages = Math.ceil(totalProducts / limit);
+     const totalPages = Math.ceil(totalProducts / limit);
 
     return res.status(200).json({
         message: "Products fetched successfully",
@@ -222,3 +243,47 @@ export const getAllProducts = AsyncHandler(async (req: Request, res: Response) =
         totalProducts
     });
 });
+
+export const getAllCategories = AsyncHandler( async(req: Request, res: Response)=>{
+    
+
+    const productsByCategories = await Product.distinct("category").populate("name","stock")
+    if(productsByCategories.length === 0){
+        return res.status(200).json({
+            message:"no products found",
+            success:true
+        })
+    }
+    return res
+    .status(200)
+    .json(
+        {
+            message:"all products obtain by their catogories!",
+            success:true,
+            productsByCategories
+        }
+    )
+})
+
+export const getSingleProduct = AsyncHandler(async (req:Request,res:Response,next:NextFunction)=>{
+    const user = req.user?._id
+    const {productId} = req.params
+    if(!productId){
+        throw new ApiError("please provide product id",402)
+    }
+    if(!user){
+        throw new ApiError("unAuthorised request!",402)
+    }
+    const product = await Product.findById(productId)
+    if(!product){
+        throw new ApiError("product not found!",404)
+    }
+    return res
+    .status(200)
+    .json({
+        message:"product obtain successfully",
+        success:true,
+        product
+    })
+
+})
