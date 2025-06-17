@@ -8,7 +8,7 @@ import fs from "fs"
 import { baseQuery } from "../types/types"
 import { myCache } from "../app"
 
-import { current } from "@reduxjs/toolkit"
+
 import { invalidateCache } from "../utils/invalidateCache"
 
 export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
@@ -20,6 +20,18 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
     if (!name || !stock || !description || !price || !category || !photo) {
         throw new ApiError("All fields are required", 400);
     }
+    if (stock < 0) {
+        throw new ApiError("Stock cannot be negative", 400);
+    }
+
+    if (price < 0) {
+        throw new ApiError("Price cannot be negative", 400);
+    }
+
+    if (ratings && (ratings < 0 || ratings > 5)) {
+        throw new ApiError("Ratings must be between 0 and 5", 400);
+    }
+
     const uploadedPhoto = await imageKit.upload({
         file: fs.readFileSync(photo.path),
         fileName: photo.originalname
@@ -38,6 +50,10 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             category: category.toLowerCase(),
             photo: uploadedPhoto.url
         })
+        invalidateCache([
+            `all-products-page-limit`,
+            `products-category-${category}-1-8`
+        ])
         return res
             .status(200)
             .json({
@@ -65,7 +81,6 @@ export const updateProduct = AsyncHandler(async (req: Request, res: Response) =>
         throw new ApiError("Product not found", 404)
     }
     if (photo) {
-       
         const oldPhotoUrl = existingProduct.photo
         if (oldPhotoUrl) {
             try {
@@ -263,7 +278,7 @@ export const getAllCategories = AsyncHandler(async (req: Request, res: Response)
     const productsByCategories = await Product.distinct("category").populate("name", "stock")
     if (productsByCategories.length === 0) {
         return res.status(200).json({
-            message: "no products found",
+            message:"no products found",
             success: true
         })
     }
