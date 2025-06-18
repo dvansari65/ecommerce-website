@@ -27,3 +27,11 @@ export type searchQuery = {
     stock?:number,
     sort?:string
 }
+
+export interface reviewPropsType  {
+    comment?:string,
+    rating?:number,
+}
+export type productIdType = {
+    productId:string
+}
