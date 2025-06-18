@@ -112,12 +112,13 @@ export const getAllOrders = AsyncHandler(async (req: Request, res: Response) => 
 
 })
 
+
 export const deleteOrder = AsyncHandler( async (req: Request, res: Response)=>{
-    const {orderId} = req.params
-    if(!orderId){
+    const {id} = req.params
+    if(!id){
         throw new ApiError("please provide product id", 401);
     }
-    await Order.findByIdAndDelete(orderId)
+    await Order.findByIdAndDelete(id)
     return res
     .status(200)
     .json({

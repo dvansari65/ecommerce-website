@@ -18,12 +18,14 @@ export interface IProduct extends Document {
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, "enter product name"]
+        required: [true, "enter product name"],
+        index:true
     },
     category: {
         type: String,
         required: [true, "enter product category"],
-        trim: true
+        trim: true,
+        index:true
     },
     stock: {
         type: Number,
@@ -31,7 +33,8 @@ const productSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        required: [true, "enter price"]
+        required: [true, "enter price"],
+        index:true
     },
     photo: {
         type: String,

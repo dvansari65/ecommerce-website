@@ -21,14 +21,16 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!,{
 app.use(express.json()); 
 
 
-
+import { reviewtRouter } from "./Routes/review.route";
 import { userRouter } from "./Routes/user.routes";
 import { productRouter } from "./Routes/product.route";
 import { orderRouter } from "./Routes/order.route";
 import couponRouter from "./Routes/coupon.route";
+import { adminRouter } from "./Routes/admin.route";
 app.use("/api/v1/user",userRouter)
 app.use("/api/v1/product",productRouter)
 app.use("/api/v1/order",orderRouter)
 app.use("/api/v1/coupon",couponRouter)
-
+app.use("/api/v1/review",reviewtRouter)
+app.use("/api/v1/admin",adminRouter)
 export default app

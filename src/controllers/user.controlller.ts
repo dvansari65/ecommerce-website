@@ -52,13 +52,7 @@ export const newUser = AsyncHandler(async(req:Request<{},{},newUserTypes>,res:Re
         return res.status(200).json({
             message: "newUser created successfully",
             success: true,
-            newUser: {
-                userName: newUser.userName,
-                email: newUser.email,
-                gender: newUser.gender,
-                dob: newUser.dob,
-                photo:newUser.photo
-            }
+            newUser
         })
     } catch (error) {
         console.error("Error saving user:", error)
@@ -244,21 +238,6 @@ export const updatePhoto = AsyncHandler( async (req:Request<{},{},newUserTypes>,
     })
 })
 
-export const getAllUser = AsyncHandler( async (req:Request<{},{},newUserTypes>,res:Response)=>{
-    const AllUsers = await User.find({}).select("-password -refreshToken")
-    if(AllUsers.length == 0){
-        return res.status(200).json({
-            message:"no user found !",
-            success:true,
-            AllUsers
-        })
-    }
-    return res.status(200).json({
-        message:"all users found !",
-            success:true,
-            AllUsers
-    })
-})
 
 export const updateUser = AsyncHandler( async (req:Request<{},{},updateUsertype>, res: Response)=>{
     const {email,password,dob} = req.body
@@ -291,3 +270,56 @@ export const updateUser = AsyncHandler( async (req:Request<{},{},updateUsertype>
         }
     )
 })
+
+export const getAllUser = AsyncHandler( async (req:Request<{},{},newUserTypes>,res:Response)=>{
+    const AllUsers = await User.find({}).select("-password -refreshToken")
+    if(AllUsers.length == 0){
+        return res.status(200).json({
+            message:"no user found !",
+            success:true,
+            AllUsers
+        })
+    }
+    return res.status(200).json({
+        message:"all users found !",
+            success:true,
+            AllUsers
+    })
+})
+
+export const getSingleUser = AsyncHandler( async (req:Request,res:Response)=>{
+    const {id} = req.params
+    if(!id){
+        throw new ApiError("please provide id",402)
+    }
+    const user =  await User.findById(id)
+    if(!user){
+        throw new ApiError("user not found",404)
+    }
+    return res
+    .status(200)
+    .json(
+        {
+            message:`user ${user.userName} obtain`,
+            success:true,
+            user
+        }
+    )
+})
+
+export const deleteUser = AsyncHandler( async (req:Request,res:Response)=>{
+    const {id} = req.params
+    if(!id){
+        throw new ApiError("please provide user id",404)
+    }
+    await User.findByIdAndDelete(id)
+    return res
+    .status(200)
+    .json(
+        {
+            message:"user deleted!",
+            success:true
+        }
+    )
+   }
+)

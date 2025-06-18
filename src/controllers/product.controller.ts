@@ -50,6 +50,7 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             category: category.toLowerCase(),
             photo: uploadedPhoto.url
         })
+        const productCount = await Product.countDocuments()
         invalidateCache([
             `all-products-page-limit`,
             `products-category-${category}-1-8`
@@ -59,7 +60,8 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             .json({
                 message: "new product created successfully ",
                 success: true,
-                newProduct
+                newProduct,
+                productCount
             })
     } catch (error) {
         console.error("failed to create new product", error)
@@ -145,7 +147,7 @@ export const deleteProduct = AsyncHandler(async (
         throw new ApiError("Product not found", 404)
     }
 
-    
+
     const photoUrl = existingProduct.photo
     if (photoUrl) {
         try {
@@ -161,10 +163,24 @@ export const deleteProduct = AsyncHandler(async (
         }
     }
 
-    await Product.findByIdAndDelete(id) 
+    await Product.findByIdAndDelete(id)
+
+    //decrease stock count
+    const [minimizeStockAfterDelete, stockCount] = await Promise.all([
+        Product.findByIdAndUpdate(
+            id,
+            {
+                $inc: { stock: -1 }
+            },
+            {
+                new: true
+            }
+        ),
+        Product.countDocuments({})
+    ])
     const keysToDelete = [
-        `product-${id}`,                    
-        `all-products-1-8`,                
+        `product-${id}`,
+        `all-products-1-8`,
         `products-category-${existingProduct.category}-1-8`  // Category page
     ];
 
@@ -173,12 +189,16 @@ export const deleteProduct = AsyncHandler(async (
             myCache.del(key);
         }
     });
+    // decrease product stock
 
     return res.status(200).json({
         message: "Product deleted successfully",
-        success: true
+        success: true,
+        minimizeStockAfterDelete,
+        stockCount
     })
 })
+
 export const filterProduct = AsyncHandler(async (req: Request, res: Response) => {
     const { category, price, search, sort } = req.query
 
@@ -278,7 +298,7 @@ export const getAllCategories = AsyncHandler(async (req: Request, res: Response)
     const productsByCategories = await Product.distinct("category").populate("name", "stock")
     if (productsByCategories.length === 0) {
         return res.status(200).json({
-            message:"no products found",
+            message: "no products found",
             success: true
         })
     }
