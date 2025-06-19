@@ -4,6 +4,7 @@ import { requestOrderBodyType } from "../types/order";
 import { Order } from "../models/order.model";
 import ApiError from "../utils/errorHanlder";
 import { myCache } from "../app";
+import { invalidateCache } from "../utils/invalidateCache";
 
 
 
@@ -39,11 +40,7 @@ export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrder
         throw new ApiError("Order items are required", 400);
     }
 
-    // Validate each order item
-    const orderItemObject = orderItems.map(i=>{
-        
-    })
-
+    
     // Create order
     const order = await Order.create({
         shippingInfo: {
@@ -62,8 +59,10 @@ export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrder
         total,
         status: "Processing"
     });
-    let key = `my-orders-${user}`;
-    myCache.set(key, JSON.stringify(order) as string)
+    const key = `my-orders-${user}`;
+    if (myCache.has(key)) {
+        myCache.del(key);
+    }
 
     return res.status(201).json({
         success: true,
@@ -71,6 +70,36 @@ export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrder
         order
     });
 });
+
+export const processOrder = AsyncHandler( async (req:Request,res:Response)=>{
+    const {id} = req.params
+    const order = await Order.findById(id)
+    if(!order){
+        throw new ApiError("order not found!",404)
+    }
+    switch (order.status) {
+        case "Processing":
+            order.status = "Shipped";
+            break;
+        case "Shipped":
+            order.status = "Delivered"
+        case "Delivered":
+            order.status = "Cancelled"
+            break;
+        default:
+            order.status = "Returned"
+    }
+    await order.save()
+    // Invalidate the cache for the specific order
+    invalidateCache([
+        `order-${id}`
+    ])
+    return res
+    .json({
+        message:"order processed successfully ",
+        success:true
+    })
+})
 
 export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
     const user = req.user?._id
