@@ -8,11 +8,15 @@ import {
     deleteOrder,
     getSingleOrder
 } from "../controllers/order.controller"
+import { updateLastActive } from "../middlewares/updateLastActiveMiddleWare";
 
 
 export const orderRouter = Router()
-orderRouter.route("/my-orders").get(verifyJwt, myOrders);
-orderRouter.route("/create-order").post(verifyJwt, createOrder);
-orderRouter.route("/all-orders").get(Admin, getAllOrders);
-orderRouter.route("/delete-order/:orderId").delete(verifyJwt, deleteOrder);
+orderRouter.route("/my-orders").get(verifyJwt,updateLastActive, myOrders);
+orderRouter.route("/create-order").post(verifyJwt, updateLastActive,createOrder);
+orderRouter.route("/delete-order/:orderId").delete(verifyJwt,updateLastActive, deleteOrder);
+
+
+
 orderRouter.route("/single-order/:id").get(Admin, getSingleOrder);
+orderRouter.route("/all-orders").get(Admin, getAllOrders);

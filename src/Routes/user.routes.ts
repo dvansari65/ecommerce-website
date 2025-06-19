@@ -12,14 +12,15 @@ import { newUser,
     deleteUser
 } from "../controllers/user.controlller";
 import { verifyJwt } from "../middlewares/authMiddleWare";
+import { updateLastActive } from "../middlewares/updateLastActiveMiddleWare";
 export const userRouter = Router()
 
 userRouter.route("/new-user").post(upload.single("photo"),newUser);
 userRouter.route("/login").post(loginUser);
-userRouter.route("/logout").post(verifyJwt,logoutUser);
-userRouter.route("/update-username").post(verifyJwt,updateUserNameFromProfile);
-userRouter.route("/update-photo").post(verifyJwt,upload.single("photo"),updatePhoto);
-userRouter.route("/update-user").patch(verifyJwt,updateUser);
+userRouter.route("/logout").post(verifyJwt,updateLastActive,logoutUser);
+userRouter.route("/update-username").post(verifyJwt,updateLastActive,updateUserNameFromProfile);
+userRouter.route("/update-photo").post(verifyJwt,upload.single("photo"),updateLastActive,updatePhoto);
+userRouter.route("/update-user").patch(verifyJwt,updateLastActive,updateUser);
 
 //  admin only actvities ____
 

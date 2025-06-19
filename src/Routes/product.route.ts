@@ -14,7 +14,7 @@ import {newProduct,
 
 export const productRouter = Router()
 
-productRouter.route("/filter-product").get(verifyJwt, filterProduct);
+productRouter.route("/filter-product").get(verifyJwt,updateProduct, filterProduct);
 
 productRouter.route("/new-product").post(Admin,upload.single("photo"),newProduct);
 productRouter.route("/update-product/:id").patch(upload.single("photo"), Admin, updateProduct);
