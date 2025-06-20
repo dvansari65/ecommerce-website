@@ -5,7 +5,8 @@ import { OrderItemType, shippingInfoType } from "../types/order";
 import { User } from "../models/user.model";
 import { Coupon } from "../models/coupon.model";
 import { Product } from "../models/product.model";
-import { stripe } from "../app";
+import { myCache, stripe } from "../app";
+import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
 export const createPaymentIntent = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id
@@ -69,6 +70,18 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
             }
         }
     )
+    await Product.findByIdAndUpdate(
+        productIds,
+        {
+            $inc: {
+                stock: -1
+            }
+        },
+        {
+            new: true
+        }
+    )
+    invalidateKeys({ product: true, order: true,coupon:true,admin:true })
     return res
         .status(200)
         .json(
@@ -94,6 +107,7 @@ export const createCoupon = AsyncHandler(async (req: Request, res: Response) => 
     if (!newCoupon) {
         throw new ApiError("coupon not generated!", 402)
     }
+    invalidateKeys({coupon:true,admin:true})
     return res
         .status(200)
         .json(
@@ -111,6 +125,7 @@ export const deleteCoupon = AsyncHandler(async (req: Request, res: Response) => 
         throw new ApiError("please provide coupon id!", 402)
     }
     await Coupon.findByIdAndDelete(id)
+    invalidateKeys({coupon:true,admin:true})
     return res
         .status(200)
         .json(
@@ -123,13 +138,22 @@ export const deleteCoupon = AsyncHandler(async (req: Request, res: Response) => 
 
 export const getCoupon = AsyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
+    const key = `coupon-${id}`
+    let coupon
     if (!id) {
         throw new ApiError("please provide coupon id!", 402)
     }
-    const coupon = await Coupon.findOne({ _id: id.toString() })
-    if (!coupon) {
-        throw new ApiError("coupon not found!", 404)
+    if (myCache.has(key)) {
+        coupon = JSON.parse(myCache.get(key) as string)
+    } else {
+        coupon = await Coupon.findOne({ _id: id.toString() })
+        if (!coupon) {
+            throw new ApiError("coupon not found!", 404)
+        }
+        myCache.set(key,JSON.stringify(coupon))
+        addCacheKey(key)
     }
+
     return res
         .status(200)
         .json(
@@ -140,36 +164,44 @@ export const getCoupon = AsyncHandler(async (req: Request, res: Response) => {
             }
         )
 })
- 
-export const allCoupon = AsyncHandler( async (req:Request,res:Response)=>{
-    const allCoupon = await Coupon.find({})
+
+export const allCoupon = AsyncHandler(async (req: Request, res: Response) => {
+    const key = `all-coupons`
+    let allCoupons
+    if (myCache.has(key)) {
+        allCoupons = JSON.parse(myCache.get(key) as string)
+    } else {
+        allCoupons = await Coupon.find({})
+        myCache.set(key, JSON.stringify(allCoupons))
+        addCacheKey(key)
+    }
     return res
-    .status(200)
-    .json(
-        {
-            message:"all coupons!",
-            success:true,
-            allCoupon
-        }
-    )
+        .status(200)
+        .json(
+            {
+                message: "all coupons!",
+                success: true,
+                allCoupons
+            }
+        )
 })
 
-export const applyDiscount = AsyncHandler ( async (req:Request,res:Response)=>{
-    const {code} = req.query
-    if(!code){
+export const applyDiscount = AsyncHandler(async (req: Request, res: Response) => {
+    const { code } = req.query
+    if (!code) {
         throw new ApiError("please provide coupon code", 402)
     }
-    const coupon = await Coupon.findOne({code:code})
-    if(!coupon){
+    const coupon = await Coupon.findOne({ code: code })
+    if (!coupon) {
         throw new ApiError("coupon not found", 404)
     }
     return res
-    .status(200)
-    .json(
-        {
-            message:"coupon obtained successfully!",
-            success:true,
-            discount:coupon.amount
-        }
-    )
+        .status(200)
+        .json(
+            {
+                message: "coupon obtained successfully!",
+                success: true,
+                discount: coupon.amount
+            }
+        )
 })

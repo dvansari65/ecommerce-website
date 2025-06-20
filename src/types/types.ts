@@ -25,7 +25,7 @@ export type searchQuery = {
     price:number,
     category:string,
     stock?:number,
-    sort?:string
+    sort?:string,
 }
 
 export interface reviewPropsType  {
@@ -39,5 +39,8 @@ export type productIdType = {
 export type invalidateProps = {
     product?:boolean,
     order?:boolean,
-    review?:boolean
+    review?:boolean,
+    user?:boolean,
+    coupon?:boolean,
+    admin?:boolean
 }
