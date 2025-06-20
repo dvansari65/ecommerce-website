@@ -9,7 +9,7 @@ import { baseQuery } from "../types/types"
 import { myCache } from "../app"
 
 
-import { invalidateCache } from "../utils/invalidateCache"
+import { addCacheKey, invalidateCache, invalidateKeys } from "../utils/invalidateCache"
 
 export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
     console.log("req.body", req.body)
@@ -51,10 +51,9 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             photo: uploadedPhoto.url
         })
         const productCount = await Product.countDocuments()
-        invalidateCache([
-            `all-products-page-limit`,
-            `products-category-${category}-1-8`
-        ])
+        invalidateKeys({product:true})
+            
+
         return res
             .status(200)
             .json({
@@ -119,12 +118,7 @@ export const updateProduct = AsyncHandler(async (req: Request, res: Response) =>
 
     // Save the updated product
     await existingProduct.save()
-    invalidateCache([
-        `all-products-page-limit`,
-        `product-${id}`,
-        `products-category-${existingProduct.category}-1-8`
-    ])
-
+    invalidateKeys({product:true})
     return res.status(200).json({
         message: "Product updated successfully",
         success: true,
@@ -178,17 +172,7 @@ export const deleteProduct = AsyncHandler(async (
         ),
         Product.countDocuments({})
     ])
-    const keysToDelete = [
-        `product-${id}`,
-        `all-products-1-8`,
-        `products-category-${existingProduct.category}-1-8`  // Category page
-    ];
-
-    keysToDelete.forEach(key => {
-        if (myCache.has(key)) {
-            myCache.del(key);
-        }
-    });
+    invalidateKeys({product:true})
     // decrease product stock
 
     return res.status(200).json({
@@ -273,7 +257,7 @@ export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Respon
     const [products, totalProducts] = await Promise.all([
         Product.find()
             .limit(limit)
-            .skip(skip),
+            .skip(skip).sort({createdAt:-1}),
         Product.countDocuments()
     ]);
     const totalPages = Math.ceil(totalProducts / limit);
@@ -283,7 +267,7 @@ export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Respon
         totalPages
     }
     myCache.set(key, JSON.stringify(cacheData))
-
+    addCacheKey(key)
     return res.status(200).json({
         message: "Products fetched successfully",
         success: true,
@@ -324,13 +308,22 @@ export const getSingleProduct = AsyncHandler(async (req: Request, res: Response,
     if (!user) {
         throw new ApiError("unAuthorised request!", 402)
     }
-    if (key) {
-        product = myCache.get(JSON.parse(key) as string)
+    if (myCache.has(key)) {
+        product = JSON.parse(myCache.get(key) as string)
+        return res
+            .status(200)
+            .json({
+                message: "product obtain successfully",
+                success: true,
+                product
+            })
     }
     product = await Product.findById(id)
     if (!product) {
         throw new ApiError(" product not found!", 404)
     }
+    myCache.set(key, JSON.stringify(product));
+    addCacheKey(key)
     return res
         .status(200)
         .json({
