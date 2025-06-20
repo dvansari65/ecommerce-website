@@ -10,10 +10,15 @@ import { Order } from "../models/order.model";
 import { Review } from "../models/review.model";
 import { myCache } from "../app"
 import { Product } from "../models/product.model";
-import { count } from "console";
+import { addCacheKey } from "../utils/invalidateCache";
 
 export const stats = AsyncHandler(async (req: Request, res: Response) => {
 
+    const key = "stats"
+    let stats;
+    if(myCache.has(key)){
+        stats = JSON.parse(myCache.get(key) as string)
+    }
     const today = new Date();
     const now = new Date()
     const thisMonth = {
@@ -156,7 +161,7 @@ export const stats = AsyncHandler(async (req: Request, res: Response) => {
         TotalRevenue,
         productsByCategory
     ])
-    const stats = {
+     stats = {
         totalUsersCountPromise,
         dailyUsersPromise,
         monthlyUsersPromise,
@@ -168,6 +173,9 @@ export const stats = AsyncHandler(async (req: Request, res: Response) => {
         TotalRevenuePromise,
         productsByCategoryPromise
     }
+    myCache.set(key,JSON.stringify(stats),3600)
+    addCacheKey(key)
+
     return res
         .status(200)
         .json({
@@ -180,61 +188,67 @@ export const stats = AsyncHandler(async (req: Request, res: Response) => {
 
 
 export const pieChart = AsyncHandler(async (req: Request, res: Response) => {
-    const orderByStatus = Order.aggregate([
-        {
-            $group: {
-                _id: "$status",
-                count: { $sum: 1 }
+    const key = `key-chart-stats`
+    let pieChartStats
+    if(myCache.has(key)){
+       pieChartStats = JSON.parse(myCache.get(key) as string)
+    }else{
+        const orderByStatus = Order.aggregate([
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    status: "$_id",
+                    count: 1
+                }
             }
-        },
-        {
-            $project: {
-                _id: 0,
-                status: "$_id",
-                count: 1
-            }
+        ])
+        const revenueByCategory = Order.aggregate([
+            {
+                $unwind: "$orderItems"
+            },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "orderItems.productId",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            {
+                $addFields: {
+                    itemRevenue: {
+                        $multiply: ["$orderItems.price", "$orderItems.quantity"]
+                    },
+                    category: "$productInfo.category"
+                }
+            },
+            {
+                $group: {
+                    _id: "$category",
+                    totalRevenue: { $sum: "$itemRevenue" }
+                }
+            },
+            { $sort: { totalRevenue: -1 } }
+        ])
+        const [
+            orderByStatusPromise,
+            revenueByCategoryPromise
+        ] = await Promise.all([
+            orderByStatus,
+            revenueByCategory
+        ])
+    
+         pieChartStats = {
+            orderByStatusPromise,
+            revenueByCategoryPromise
         }
-    ])
-    const revenueByCategory = Order.aggregate([
-        {
-            $unwind: "$orderItems"
-        },
-        {
-            $lookup: {
-                from: "products",
-                localField: "orderItems.productId",
-                foreignField: "_id",
-                as: "productInfo"
-            }
-        },
-        { $unwind: "$productInfo" },
-        {
-            $addFields: {
-                itemRevenue: {
-                    $multiply: ["$orderItems.price", "$orderItems.quantity"]
-                },
-                category: "$productInfo.category"
-            }
-        },
-        {
-            $group: {
-                _id: "$category",
-                totalRevenue: { $sum: "$itemRevenue" }
-            }
-        },
-        { $sort: { totalRevenue: -1 } }
-    ])
-    const [
-        orderByStatusPromise,
-        revenueByCategoryPromise
-    ] = await Promise.all([
-        orderByStatus,
-        revenueByCategory
-    ])
-
-    const pieChartStats = {
-        orderByStatusPromise,
-        revenueByCategoryPromise
     }
     return res
         .status(200)
@@ -243,4 +257,55 @@ export const pieChart = AsyncHandler(async (req: Request, res: Response) => {
             success: true,
             pieChartStats
         })
+})
+
+export const lineChartStats = AsyncHandler( async (req:Request,res:Response)=>{
+    const key = `line-chart-stats`
+    let lineChartStats;
+    if(myCache.has(key)){
+        lineChartStats =  JSON.parse(myCache.get(key) as string)
+    }else{
+        const now = new Date()
+        const today = new Date()
+        const thisMonth = {
+            end: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
+            start: new Date(now.getFullYear(), now.getMonth(), 1)
+        }
+    
+        const lastMonth = {
+            end: new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999),
+            start: new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        }
+        const totalRevenueInLastMonth = Order.aggregate([
+            {
+                $match:{
+                    createdAt:{
+                        $gte:lastMonth.start,
+                        $lte:lastMonth.end
+                    }
+                }
+            },
+            {
+                $group:{
+                    _id:null,
+                    totalRevenueInLastMonth:{$sum:"$total"}
+                }
+            }
+        ])
+        
+
+        const [totalRevenueInLastMonthPromise] = await Promise.all([
+            totalRevenueInLastMonth
+        ])
+        lineChartStats = {
+            totalRevenueInLastMonthPromise
+        }
+        return res
+        .status(200)
+        .json({
+            message:"line charts stats!",
+            success:true,
+            lineChartStats
+        })
+    }
 })

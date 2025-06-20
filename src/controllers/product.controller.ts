@@ -9,7 +9,7 @@ import { baseQuery } from "../types/types"
 import { myCache } from "../app"
 
 
-import { addCacheKey, invalidateCache, invalidateKeys } from "../utils/invalidateCache"
+import { addCacheKey,  invalidateKeys } from "../utils/invalidateCache"
 
 export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
     console.log("req.body", req.body)
@@ -51,7 +51,7 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             photo: uploadedPhoto.url
         })
         const productCount = await Product.countDocuments()
-        invalidateKeys({product:true})
+        invalidateKeys({product:true,admin:true})
             
 
         return res
@@ -118,7 +118,7 @@ export const updateProduct = AsyncHandler(async (req: Request, res: Response) =>
 
     // Save the updated product
     await existingProduct.save()
-    invalidateKeys({product:true})
+    invalidateKeys({product:true,admin:true})
     return res.status(200).json({
         message: "Product updated successfully",
         success: true,
@@ -172,7 +172,7 @@ export const deleteProduct = AsyncHandler(async (
         ),
         Product.countDocuments({})
     ])
-    invalidateKeys({product:true})
+    invalidateKeys({product:true,admin:true})
     // decrease product stock
 
     return res.status(200).json({
@@ -277,7 +277,7 @@ export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Respon
 });
 
 export const getAllCategories = AsyncHandler(async (req: Request, res: Response) => {
-
+    
 
     const productsByCategories = await Product.distinct("category").populate("name", "stock")
     if (productsByCategories.length === 0) {

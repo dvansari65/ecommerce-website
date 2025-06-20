@@ -28,7 +28,7 @@ export const addReview = AsyncHandler(async (req: Request<productIdType, {}, rev
         user,
         product
     });
-    invalidateKeys({review:true,product:true})
+    invalidateKeys({review:true,product:true,admin:true})
 
     return res.status(200).json({
         success: true,
@@ -46,7 +46,7 @@ export const deleteReview = AsyncHandler(async (req: Request, res: Response) => 
         Review.findByIdAndDelete(id),
         Review.countDocuments({})
     ])
-    invalidateKeys({review:true,product:true})
+    invalidateKeys({review:true,product:true,admin:true})
     return res
         .status(200)
         .json(
@@ -87,10 +87,10 @@ export const getAllReviews = AsyncHandler(async (req: Request, res: Response) =>
 })
 
 export const getRview = AsyncHandler(async (req: Request, res: Response) => {
-    const { reviewId } = req.params
-    const key = "single-review"
+    const { id } = req.params
+    const key = `single-review-${id}`
     let review
-    if (!reviewId) {
+    if (!id) {
         throw new ApiError("please provide review id ", 402)
     }
     if (myCache.has(key)) {
@@ -101,7 +101,7 @@ export const getRview = AsyncHandler(async (req: Request, res: Response) => {
             review
         })
     } else {
-        review = await Review.findById(reviewId)
+        review = await Review.findById(id)
         if (!review) {
             throw new ApiError("review not found", 404)
         }
