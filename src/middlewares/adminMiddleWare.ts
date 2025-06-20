@@ -5,11 +5,11 @@ import { User } from "../models/user.model";
 
 export const Admin = AsyncHandler( async (req:Request,res:Response,next:NextFunction)=>{
     
-    const {id} = req.query
-    if(!id){
+    const {adminId} = req.query
+    if(!adminId){
         throw new ApiError("please provide admin id",402)
     }
-    const user = await User.findById(id)
+    const user = await User.findById(adminId)
     if(!user){
        throw new ApiError("user not found!",404)
         

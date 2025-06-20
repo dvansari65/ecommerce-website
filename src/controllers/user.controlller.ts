@@ -7,8 +7,8 @@ import { User } from "../models/user.model";
 import fs from "fs"
 
 import imageKit from "../utils/imageKit";
-import { myCache } from "../app";
-import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
+
+
 
 export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, res: Response) => {
 
@@ -49,8 +49,7 @@ export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, r
 
     try {
         await newUser.save()
-        invalidateKeys({user:true,admin:true})
-        // console.log("User saved successfully:", { userName: newUser.userName })
+        
 
         return res.status(200).json({
             message: "newUser created successfully",
@@ -171,7 +170,6 @@ export const updateUserNameFromProfile = AsyncHandler(async (req: Request<{}, {}
             new: true
         }
     ).select("-password -refreshToken ")
-    invalidateKeys({user:true,admin:true})
     return res
         .status(200)
         .json({
@@ -232,7 +230,6 @@ export const updatePhoto = AsyncHandler(async (req: Request<{}, {}, newUserTypes
             new: true
         }
     ).select("-password -refreshToken")
-    invalidateKeys({user:true,admin:true})
     return res
         .status(200)
         .json({
@@ -248,7 +245,6 @@ export const deleteUser = AsyncHandler(async (req: Request, res: Response) => {
         throw new ApiError("please provide user id", 404)
     }
     await User.findByIdAndDelete(id)
-    invalidateKeys({user:true,admin:true})
     return res
         .status(200)
         .json(
@@ -281,7 +277,6 @@ export const updateUser = AsyncHandler(async (req: Request<{}, {}, updateUsertyp
             new: true
         }
     ).select("-password")
-    invalidateKeys({user:true,admin:true})
     return res
         .status(200)
         .json(
@@ -294,58 +289,46 @@ export const updateUser = AsyncHandler(async (req: Request<{}, {}, updateUsertyp
 })
 
 export const getAllUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, res: Response) => {
-
-    const page = Number(req.query.page) || 1
+    const page = Number(req.query.page) || 1;
     const limit = Number(process.env.USERS_PER_PAGE) || 12;
-    const skip = (page - 1) * limit
-    let allUsers
-    const key = `all-users-${page}-${limit}`
-    if (myCache.has(key)) {
-        allUsers = JSON.parse(myCache.get(key) as string)
-    } else {
-        allUsers = await User.find({}).select("-password -refreshToken")
-        myCache.set(key, JSON.stringify(allUsers))
-        addCacheKey(key)
-        if (allUsers.length == 0) {
-            return res.status(200).json({
-                message: "no user found !",
-                success: true,
-                allUsers
-            })
-        }
+    const skip = (page - 1) * limit;
+
+    const allUsers = await User.find({})
+        .select("-password -refreshToken")
+        .limit(limit)
+        .skip(skip);
+
+    if (allUsers.length === 0) {
+        return res.status(200).json({
+            message: "No users found!",
+            success: true,
+            allUsers,
+        });
     }
+
     return res.status(200).json({
-        message: "all users found !",
+        message: "All users found!",
         success: true,
-        allUsers
-    })
-})
+        allUsers,
+    });
+});
 
 export const getSingleUser = AsyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params
-    const key = `single-user-${id}`
-    let user
-    if (!id) {
-        throw new ApiError("please provide id", 402)
-    }
-    if (myCache.has(key)) {
-        user = JSON.parse(myCache.get(key) as string)
-    } else {
-        user = await User.findById(id)
-        if (!user) {
-            throw new ApiError("user not found", 404)
-        }
-        myCache.set(key,JSON.stringify(user))
-        addCacheKey(key)
-    }
-    return res
-        .status(200)
-        .json(
-            {
-                message: `user ${user.userName} obtain`,
-                success: true,
-                user
-            }
-        )
-})
+    const { id } = req.params;
 
+    if (!id) {
+        throw new ApiError("Please provide a user ID", 402);
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+        throw new ApiError("User not found", 404);
+    }
+
+    return res.status(200).json({
+        message: `User ${user.userName} obtained`,
+        success: true,
+        user,
+    });
+});
