@@ -1,9 +1,11 @@
+import { myCache } from "../app";
 import { Product } from "../models/product.model";
 import { Review } from "../models/review.model";
 import { productIdType, reviewPropsType } from "../types/types";
 import AsyncHandler from "../utils/asyncHandler";
 import ApiError from "../utils/errorHanlder";
-import {  Request, Response } from "express";
+import { Request, Response } from "express";
+import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
 export const addReview = AsyncHandler(async (req: Request<productIdType, {}, reviewPropsType>, res: Response) => {
     const { comment, rating } = req.body;
@@ -26,6 +28,7 @@ export const addReview = AsyncHandler(async (req: Request<productIdType, {}, rev
         user,
         product
     });
+    invalidateKeys({review:true,product:true})
 
     return res.status(200).json({
         success: true,
@@ -43,6 +46,7 @@ export const deleteReview = AsyncHandler(async (req: Request, res: Response) => 
         Review.findByIdAndDelete(id),
         Review.countDocuments({})
     ])
+    invalidateKeys({review:true,product:true})
     return res
         .status(200)
         .json(
@@ -57,34 +61,61 @@ export const deleteReview = AsyncHandler(async (req: Request, res: Response) => 
 
 
 export const getAllReviews = AsyncHandler(async (req: Request, res: Response) => {
-
-    const Reviews = await Review.find({})
-    return res
-        .status(200)
-        .json(
-            {
-                message: "all reviews fetched!",
-                success: true,
-                Reviews
-            }
-        )
+    const key = "all-reviews"
+    let allReviews
+    if (myCache.has(key)) {
+        allReviews = JSON.parse(myCache.get(key) as string)
+        return res.status(200).json({
+            message: "yours all reviews!",
+            success: true,
+            allReviews
+        })
+    } else {
+        allReviews = await Review.find({})
+        myCache.set(key, JSON.stringify(allReviews))
+        addCacheKey(key)
+        return res
+            .status(200)
+            .json(
+                {
+                    message: "all reviews fetched!",
+                    success: true,
+                    allReviews
+                }
+            )
+    }
 })
 
 export const getRview = AsyncHandler(async (req: Request, res: Response) => {
     const { reviewId } = req.params
+    const key = "single-review"
+    let review
     if (!reviewId) {
         throw new ApiError("please provide review id ", 402)
     }
-    const review = await Review.findById(reviewId)
-    if (!review) {
-        throw new ApiError("review not found", 404)
-    }
-    return res
-        .status(200)
-        .json({
-            message: "review successfully fetched!",
+    if (myCache.has(key)) {
+        review = JSON.parse(myCache.get(key) as string)
+        res.status(200).json({
+            message: "single review obtain!",
             success: true,
             review
         })
+    } else {
+        review = await Review.findById(reviewId)
+        if (!review) {
+            throw new ApiError("review not found", 404)
+        }
+        myCache.set(key, JSON.stringify(review))
+        addCacheKey(key)
+        return res
+            .status(200)
+            .json({
+                message: "review successfully fetched!",
+                success: true,
+                review
+            })
+
+    }
+
 })
 

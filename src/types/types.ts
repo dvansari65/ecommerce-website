@@ -35,3 +35,9 @@ export interface reviewPropsType  {
 export type productIdType = {
     productId:string
 }
+
+export type invalidateProps = {
+    product?:boolean,
+    order?:boolean,
+    review?:boolean
+}

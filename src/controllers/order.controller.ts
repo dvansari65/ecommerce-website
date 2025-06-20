@@ -4,7 +4,7 @@ import { requestOrderBodyType } from "../types/order";
 import { Order } from "../models/order.model";
 import ApiError from "../utils/errorHanlder";
 import { myCache } from "../app";
-import { invalidateCache } from "../utils/invalidateCache";
+import { addCacheKey, invalidateCache, invalidateKeys } from "../utils/invalidateCache";
 
 
 
@@ -59,10 +59,7 @@ export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrder
         total,
         status: "Processing"
     });
-    const key = `my-orders-${user}`;
-    if (myCache.has(key)) {
-        myCache.del(key);
-    }
+    invalidateKeys({order:true})
 
     return res.status(201).json({
         success: true,
@@ -91,9 +88,7 @@ export const processOrder = AsyncHandler( async (req:Request,res:Response)=>{
     }
     await order.save()
     // Invalidate the cache for the specific order
-    invalidateCache([
-        `order-${id}`
-    ])
+   invalidateKeys({order:true})
     return res
     .json({
         message:"order processed successfully ",
@@ -116,6 +111,7 @@ export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
         orders = await Order.find({ user });
         numberOfOrders = await Order.countDocuments({ user })
         myCache.set(key, JSON.stringify(orders));
+        addCacheKey(key)
     }
 
     return res.status(200).json({
@@ -129,8 +125,18 @@ export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
 
 
 export const getAllOrders = AsyncHandler(async (req: Request, res: Response) => {
-
+    const key = `all-orders`
+    if(myCache.has(key)){
+       const cachedOrders =  JSON.parse(myCache.get(key) as string)
+        return res.status(200).json({
+            message:"all orders!",
+            success:true,
+            cachedOrders
+        })
+    }
     const orders = await Order.find({})
+    myCache.set(key,JSON.stringify(orders))
+    addCacheKey(key)
     return res
         .status(200)
         .json({
@@ -148,6 +154,7 @@ export const deleteOrder = AsyncHandler( async (req: Request, res: Response)=>{
         throw new ApiError("please provide product id", 401);
     }
     await Order.findByIdAndDelete(id)
+    invalidateKeys({order:true})
     return res
     .status(200)
     .json({
@@ -168,6 +175,7 @@ export const getSingleOrder = AsyncHandler ( async(req: Request, res: Response)=
     }else{
         order = await Order.findById(id).populate("user","userName")
         myCache.set(key,JSON.stringify(order))
+        addCacheKey(key)
     }
    return res
    .status(200)
