@@ -47,7 +47,7 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             photo: uploadedPhoto.url,
         });
         const productCount = await Product.countDocuments();
-        await invalidateKeys({product:true}!)
+        await invalidateKeys({product:true,admin:true}!)
         return res.status(200).json({
             message: "New product created successfully",
             success: true,

@@ -16,15 +16,7 @@ export const invalidateKeys = async ({
     coupon,
     admin
 }: invalidateProps) => {
-    console.log("🚀 invalidateKeys called with:", {
-        product,
-        order,
-        review,
-        user,
-        coupon,
-        admin
-    });
-
+    
     const keysToDelete: string[] = [];
 
     // Fetch all keys from Redis set
@@ -38,7 +30,7 @@ export const invalidateKeys = async ({
                 key.startsWith("products-category")
             )) ||
             (order && (
-                key.startsWith("order") ||
+                key.startsWith("single-order") ||
                 key.startsWith("my-orders") ||
                 key.startsWith("all-orders")
             )) ||
