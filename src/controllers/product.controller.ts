@@ -6,6 +6,9 @@ import { Product } from "../models/product.model";
 import imageKit from "../utils/imageKit";
 import fs from "fs";
 import { baseQuery } from "../types/types";
+import redisClient from "../utils/redis";
+import { invalidateKeys } from "../utils/invalidateCache";
+import { addCacheKey } from "../utils/invalidateCache";
 
 export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
     const { name, stock, description, price, ratings, numberOfRating, category } = req.body;
@@ -44,7 +47,7 @@ export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTyp
             photo: uploadedPhoto.url,
         });
         const productCount = await Product.countDocuments();
-
+        await invalidateKeys({product:true}!)
         return res.status(200).json({
             message: "New product created successfully",
             success: true,
@@ -107,13 +110,15 @@ export const updateProduct = AsyncHandler(async (req: Request, res: Response) =>
     if (category) existingProduct.category = category;
 
     await existingProduct.save();
-
+    await invalidateKeys({ product: true });
     return res.status(200).json({
         message: "Product updated successfully",
         success: true,
         updatedProduct: existingProduct,
     });
 });
+
+
 
 export const deleteProduct = AsyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -143,6 +148,9 @@ export const deleteProduct = AsyncHandler(async (req: Request, res: Response) =>
     }
 
     await Product.findByIdAndDelete(id);
+
+    // Invalidate related cache keys
+    await invalidateKeys({ product: true });
 
     const stockCount = await Product.countDocuments();
 
@@ -200,17 +208,40 @@ export const filterProduct = AsyncHandler(async (req: Request, res: Response) =>
     });
 });
 
+
 export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
     const skip = (page - 1) * limit;
+    const key = `all-products-page-${page}-limit-${limit}`;
 
+    // Check if the products are cached in Redis
+    const cachedData = await redisClient.get(key);
+    if (cachedData) {
+        const { products, totalPages } = JSON.parse(cachedData);
+        return res.status(200).json({
+            message: "Products fetched successfully (from cache)",
+            success: true,
+            currentPage: page,
+            products,
+            totalPages,
+        });
+    }
+
+    // Fetch products and total count from the database if not cached
     const [products, totalProducts] = await Promise.all([
         Product.find().limit(limit).skip(skip).sort({ createdAt: -1 }),
         Product.countDocuments(),
     ]);
     const totalPages = Math.ceil(totalProducts / limit);
 
+    // Cache the fetched data in Redis
+    await redisClient.set(
+        key,
+        JSON.stringify({ products, totalPages }),
+         "EX", 3600  // Cache for 1 hour
+    );
+    await addCacheKey(key)
     return res.status(200).json({
         message: "Products fetched successfully",
         success: true,
@@ -220,7 +251,21 @@ export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Respon
     });
 });
 
+
 export const getAllCategories = AsyncHandler(async (req: Request, res: Response) => {
+    const key = "products-categories";
+
+    // Check if the categories are cached in Redis
+    const cachedCategories = await redisClient.get(key);
+    if (cachedCategories) {
+        return res.status(200).json({
+            message: "All products obtained by their categories (from cache)!",
+            success: true,
+            productsByCategories: JSON.parse(cachedCategories),
+        });
+    }
+
+    // Fetch categories from the database if not cached
     const productsByCategories = await Product.distinct("category");
 
     if (productsByCategories.length === 0) {
@@ -230,21 +275,40 @@ export const getAllCategories = AsyncHandler(async (req: Request, res: Response)
         });
     }
 
+    // Cache the categories in Redis
+    await redisClient.set(key, JSON.stringify(productsByCategories), "EX",3600); // Cache for 1 hour
+    await addCacheKey(key)
     return res.status(200).json({
         message: "All products obtained by their categories!",
         success: true,
         productsByCategories,
     });
 });
+ // Ensure redis client is properly configured
 
 export const getSingleProduct = AsyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
+    const key = `product-${id}`;
 
+    // Check if the product is cached in Redis
+    const cachedProduct = await redisClient.get(key);
+    if (cachedProduct) {
+        return res.status(200).json({
+            message: "Product obtained successfully (from cache)",
+            success: true,
+            product: JSON.parse(cachedProduct),
+        });
+    }
+
+    // Fetch product from the database if not cached
     const product = await Product.findById(id);
     if (!product) {
         throw new ApiError("Product not found!", 404);
     }
 
+    // Cache the product in Redis
+    await redisClient.set(key, JSON.stringify(product),  "EX" ,3600 ); // Cache for 1 hour
+    await addCacheKey(key)
     return res.status(200).json({
         message: "Product obtained successfully",
         success: true,
