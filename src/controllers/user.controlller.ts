@@ -3,14 +3,15 @@ import AsyncHandler from "../utils/asyncHandler";
 import { Request, Response } from "express";
 import ApiError from "../utils/errorHanlder";
 import { User } from "../models/user.model";
-
+import redis from "../utils/redis";
 import fs from "fs"
 
 import imageKit from "../utils/imageKit";
+import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
 
 
-export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, res: Response) => {
+export const newUser = AsyncHandler(async (req: Request<{},{}, newUserTypes>, res: Response) => {
 
     console.log("✅ /new-user hit with data:", req.body);
     const { userName, email, password, gender, dob } = req.body
@@ -25,7 +26,6 @@ export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, r
             { email: email }
         ]
     })
-
     if (existingUser) {
         throw new ApiError("user already exists!", 402)
     }
@@ -49,8 +49,8 @@ export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, r
 
     try {
         await newUser.save()
-        
 
+        invalidateKeys({ user: true ,admin:true})
         return res.status(200).json({
             message: "newUser created successfully",
             success: true,
@@ -170,6 +170,7 @@ export const updateUserNameFromProfile = AsyncHandler(async (req: Request<{}, {}
             new: true
         }
     ).select("-password -refreshToken ")
+    invalidateKeys({ user: true ,admin:true})
     return res
         .status(200)
         .json({
@@ -230,6 +231,7 @@ export const updatePhoto = AsyncHandler(async (req: Request<{}, {}, newUserTypes
             new: true
         }
     ).select("-password -refreshToken")
+    invalidateKeys({ user: true ,admin:true})
     return res
         .status(200)
         .json({
@@ -245,6 +247,7 @@ export const deleteUser = AsyncHandler(async (req: Request, res: Response) => {
         throw new ApiError("please provide user id", 404)
     }
     await User.findByIdAndDelete(id)
+    invalidateKeys({ user: true ,admin:true})
     return res
         .status(200)
         .json(
@@ -277,6 +280,7 @@ export const updateUser = AsyncHandler(async (req: Request<{}, {}, updateUsertyp
             new: true
         }
     ).select("-password")
+    invalidateKeys({ user: true ,admin:true})
     return res
         .status(200)
         .json(
@@ -292,7 +296,15 @@ export const getAllUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>
     const page = Number(req.query.page) || 1;
     const limit = Number(process.env.USERS_PER_PAGE) || 12;
     const skip = (page - 1) * limit;
-
+    const key = `all-users-${page}-${limit}`
+    const cachedData = await redis.get(key)
+    if (cachedData) {
+        return res.status(200).json({
+            message: "all users fetched successfully!",
+            success: true,
+            users: JSON.parse(cachedData)
+        })
+    }
     const allUsers = await User.find({})
         .select("-password -refreshToken")
         .limit(limit)
@@ -305,7 +317,8 @@ export const getAllUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>
             allUsers,
         });
     }
-
+    await redis.set(key, JSON.stringify(allUsers))
+    await addCacheKey(key)
     return res.status(200).json({
         message: "All users found!",
         success: true,
@@ -315,17 +328,25 @@ export const getAllUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>
 
 export const getSingleUser = AsyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-
     if (!id) {
         throw new ApiError("Please provide a user ID", 402);
     }
-
+    const key = `single-user-${id}`
+    const cachedData = await redis.get(key)
+    if (cachedData) {
+        return res.status(200).json({
+            message: "single user fetched successfully!",
+            success: true,
+            user: JSON.parse(cachedData)
+        })
+    }
     const user = await User.findById(id);
 
     if (!user) {
         throw new ApiError("User not found", 404);
     }
-
+    await redis.set(key, JSON.stringify(user))
+    await addCacheKey(key)
     return res.status(200).json({
         message: `User ${user.userName} obtained`,
         success: true,

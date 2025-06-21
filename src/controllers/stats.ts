@@ -8,7 +8,7 @@ import ApiError from "../utils/errorHanlder";
 import { Request, Response } from "express";
 import { Order } from "../models/order.model";
 import { Review } from "../models/review.model";
-import { myCache } from "../app"
+
 import { Product } from "../models/product.model";
 // import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
@@ -16,9 +16,7 @@ export const stats = AsyncHandler(async (req: Request, res: Response) => {
 
     const key = "stats"
     let stats;
-    if (myCache.has(key)) {
-        stats = JSON.parse(myCache.get(key) as string)
-    }
+
     const today = new Date();
     const now = new Date()
     const thisMonth = {
@@ -241,164 +239,162 @@ export const pieChart = AsyncHandler(async (req: Request, res: Response) => {
         revenueByCategory
     ])
 
-   const pieChartStats = {
+    const pieChartStats = {
         orderByStatusPromise,
         revenueByCategoryPromise
     }
     return res
-    .status(200)
-    .json({
-        message:"chart stats",
-        success:true,
-        pieChartStats
-    })
+        .status(200)
+        .json({
+            message: "chart stats",
+            success: true,
+            pieChartStats
+        })
 })
 
 export const lineChartStats = AsyncHandler(async (req: Request, res: Response) => {
     const key = `line-chart-stats`
     let lineChartStats;
-    if (myCache.has(key)) {
-        lineChartStats = JSON.parse(myCache.get(key) as string)
-    } else {
-        const now = new Date()
-        const today = new Date()
-        const thisMonth = {
-            end: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
-            start: new Date(now.getFullYear(), now.getMonth(), 1)
-        }
 
-        const lastMonth = {
-            end: new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999),
-            start: new Date(today.getFullYear(), today.getMonth() - 1, 1)
-        }
-        const totalRevenueInLastMonth = await Order.aggregate([
-            {
-                $match: {
-                    createdAt: {
-                        $gte: lastMonth.start,
-                        $lte: lastMonth.end
-                    }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalRevenueInLastMonth: { $sum: "$total" }
-                }
-            }
-        ])
-        const dailyUsers = User.find({
-            lastTimeActive: { $gte: today }
-        }).select("-password -refreshToken")
-            ;
+    const now = new Date()
+    const today = new Date()
+    const thisMonth = {
+        end: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
+        start: new Date(now.getFullYear(), now.getMonth(), 1)
+    }
 
-
-        const monthlyUsers = User.find(
-            {
-                lastTimeActive: {
+    const lastMonth = {
+        end: new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999),
+        start: new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    }
+    const totalRevenueInLastMonth = await Order.aggregate([
+        {
+            $match: {
+                createdAt: {
                     $gte: lastMonth.start,
                     $lte: lastMonth.end
                 }
             }
-        ).select("-password -refreshToken")
+        },
+        {
+            $group: {
+                _id: null,
+                totalRevenueInLastMonth: { $sum: "$total" }
+            }
+        }
+    ])
+    const dailyUsers = User.find({
+        lastTimeActive: { $gte: today }
+    }).select("-password -refreshToken")
+        ;
 
-        const totalRevenueLastMonth = totalRevenueInLastMonth[0]?.totalRevenueInLastMonth || 0
-        // ... existing code ...
-        const topBuyers = await Order.aggregate([
-            {
-                $unwind: "$orderItems"
-            },
-            {
-                $addFields: {
-                    itemRevenue: {
-                        $multiply: ["$orderItems.price", "$orderItems.quantity"]
-                    }
+
+    const monthlyUsers = User.find(
+        {
+            lastTimeActive: {
+                $gte: lastMonth.start,
+                $lte: lastMonth.end
+            }
+        }
+    ).select("-password -refreshToken")
+
+    const totalRevenueLastMonth = totalRevenueInLastMonth[0]?.totalRevenueInLastMonth || 0
+    // ... existing code ...
+    const topBuyers = await Order.aggregate([
+        {
+            $unwind: "$orderItems"
+        },
+        {
+            $addFields: {
+                itemRevenue: {
+                    $multiply: ["$orderItems.price", "$orderItems.quantity"]
                 }
-            },
-            {
-                $group: {
-                    _id: "$user",
-                    totalSpent: { $sum: "$itemRevenue" },
-                    productIds: { $addToSet: "$orderItems.productId" }
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "userInfo"
-                }
-            },
-            {
-                $unwind: "$userInfo"
-            },
-            {
-                $lookup: {
-                    from: "products",
-                    let: { prodIds: "$productIds" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $in: ["$_id", "$$prodIds"]
-                                }
+            }
+        },
+        {
+            $group: {
+                _id: "$user",
+                totalSpent: { $sum: "$itemRevenue" },
+                productIds: { $addToSet: "$orderItems.productId" }
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "_id",
+                foreignField: "_id",
+                as: "userInfo"
+            }
+        },
+        {
+            $unwind: "$userInfo"
+        },
+        {
+            $lookup: {
+                from: "products",
+                let: { prodIds: "$productIds" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $in: ["$_id", "$$prodIds"]
                             }
-                        },
-                        { $project: { name: 1 } }
-                    ],
-                    as: "productsBought"
-                }
-            },
-            {
-                $sort: { totalSpent: -1 }
-            },
-            {
-                $limit: 5
-            },
-            {
-                $project: {
-                    _id: 0,
-                    userId: "$_id",
-                    userName: "$userInfo.userName",
-                    totalSpent: 1,
-                    productsBought: {
-                        $map: {
-                            input: "$productsBought",
-                            as: "product",
-                            in: "$$product.name"
                         }
+                    },
+                    { $project: { name: 1 } }
+                ],
+                as: "productsBought"
+            }
+        },
+        {
+            $sort: { totalSpent: -1 }
+        },
+        {
+            $limit: 5
+        },
+        {
+            $project: {
+                _id: 0,
+                userId: "$_id",
+                userName: "$userInfo.userName",
+                totalSpent: 1,
+                productsBought: {
+                    $map: {
+                        input: "$productsBought",
+                        as: "product",
+                        in: "$$product.name"
                     }
                 }
             }
-        ]);
-// ... existing code ...
-       
-        const [
-            totalRevenueInLastMonthPromise,
-            dailyUsersPromise,
-            monthlyUsersPromise,
-            topBuyersPromise
-        ] = await Promise.all([
-            totalRevenueLastMonth,
-            dailyUsers,
-            monthlyUsers,
-            topBuyers
-        ])
-        lineChartStats = {
-            totalRevenueInLastMonthPromise,
-            dailyUsersPromise,
-            monthlyUsersPromise,
-            topBuyersPromise
         }
-        // myCache.set(key,JSON.stringify(lineChartStats),3600)
-        // addCacheKey(key)
-        return res
-            .status(200)
-            .json({
-                message: "line charts stats!",
-                success: true,
-                lineChartStats
-            })
+    ]);
+    // ... existing code ...
+
+    const [
+        totalRevenueInLastMonthPromise,
+        dailyUsersPromise,
+        monthlyUsersPromise,
+        topBuyersPromise
+    ] = await Promise.all([
+        totalRevenueLastMonth,
+        dailyUsers,
+        monthlyUsers,
+        topBuyers
+    ])
+    lineChartStats = {
+        totalRevenueInLastMonthPromise,
+        dailyUsersPromise,
+        monthlyUsersPromise,
+        topBuyersPromise
     }
-})
+    // myCache.set(key,JSON.stringify(lineChartStats),3600)
+    // addCacheKey(key)
+    return res
+        .status(200)
+        .json({
+            message: "line charts stats!",
+            success: true,
+            lineChartStats
+        })
+}
+)
