@@ -39,6 +39,9 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
 
     const productIds = orderItems.map(item => item.productId);
     const product = await Product.find({ _id: productIds.toString() });
+    if(product.length === 0){
+        throw new ApiError("there is not such products!",404)
+    }
 
     const subtotal = product.reduce((prev, curr) => {
         const item = orderItems.find(item => item.productId === curr._id.toString());

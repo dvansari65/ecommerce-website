@@ -9,6 +9,7 @@ import { baseQuery } from "../types/types";
 import redisClient from "../utils/redis";
 import { invalidateKeys } from "../utils/invalidateCache";
 import { addCacheKey } from "../utils/invalidateCache";
+import { Order } from "../models/order.model";
 
 export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
     const { name, stock, description, price, ratings, numberOfRating, category } = req.body;
@@ -110,7 +111,7 @@ export const updateProduct = AsyncHandler(async (req: Request, res: Response) =>
     if (category) existingProduct.category = category;
 
     await existingProduct.save();
-    await invalidateKeys({ product: true });
+    await invalidateKeys({ product: true,admin:true });
     return res.status(200).json({
         message: "Product updated successfully",
         success: true,
@@ -148,9 +149,10 @@ export const deleteProduct = AsyncHandler(async (req: Request, res: Response) =>
     }
 
     await Product.findByIdAndDelete(id);
-
+    await Order.findByIdAndDelete(id)
+    
     // Invalidate related cache keys
-    await invalidateKeys({ product: true });
+    await invalidateKeys({ product: true,admin:true,order:true });
 
     const stockCount = await Product.countDocuments();
 
@@ -315,3 +317,11 @@ export const getSingleProduct = AsyncHandler(async (req: Request, res: Response)
         product,
     });
 });
+
+export const deleteAllProducts = AsyncHandler( async (req:Request,res:Response)=>{
+   await Product.deleteMany({})
+   return res.status(200).json({
+    message:"all products deleted successfully!",
+    success:true
+   })
+})
