@@ -1,13 +1,14 @@
-import { myCache } from "../app";
+import redis from "./redis"; // Ensure redis client is properly configured
 import { invalidateProps } from "../types/types";
 
 export const cachekeys = new Set<string>();
 
-export const addCacheKey = (key: string) => {
+export const addCacheKey = async (key: string) => {
     cachekeys.add(key);
+    await redis.sadd("cachekeys", key); // Add the key to Redis set
 };
 
-export const invalidateKeys = ({
+export const invalidateKeys = async ({
     product,
     order,
     review,
@@ -15,12 +16,23 @@ export const invalidateKeys = ({
     coupon,
     admin
 }: invalidateProps) => {
+    console.log("🚀 invalidateKeys called with:", {
+        product,
+        order,
+        review,
+        user,
+        coupon,
+        admin
+    });
+
     const keysToDelete: string[] = [];
 
-    cachekeys.forEach((key) => {
+    // Fetch all keys from Redis set
+    const allKeys = await redis.smembers("cachekeys");
+    allKeys.forEach((key) => {
         if (
             (product && (
-                key.startsWith("all-products") ||
+                key.startsWith("all-products-page-") ||
                 key.startsWith("product-") ||     // for single products
                 key.startsWith("products-page-") || // paginated filtered list
                 key.startsWith("products-category")
@@ -52,10 +64,11 @@ export const invalidateKeys = ({
         }
     });
 
-    // Delete collected keys
+    // Delete collected keys from Redis
     for (const key of keysToDelete) {
-        myCache.del(key);
-        cachekeys.delete(key);
+        await redis.del(key); // Delete the key from Redis
+        await redis.srem("cachekeys", key); // Remove the key from Redis set
+        cachekeys.delete(key); // Remove the key from local set
     }
 
     console.log(`🔁 Invalidated ${keysToDelete.length} cache keys`);
