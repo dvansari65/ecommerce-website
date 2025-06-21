@@ -143,7 +143,7 @@ export const logoutUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>
         httpOnly: true,
         secure: false
     }
-
+    invalidateKeys({admin:true,user:true})
     return res
         .status(200)
         .clearCookie("refreshToken", options)
