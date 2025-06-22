@@ -191,65 +191,48 @@ export const pieChart = AsyncHandler(async (req: Request, res: Response) => {
             }
         }
     ])
-    // const revenueByCategory = await Order.aggregate([
-    //     {
-    //         $unwind: "$orderItems"
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: "products",
-    //             localField: "orderItems.productId",
-    //             foreignField: "_id",
-    //             as: "productInfo"
-    //         }
-    //     },
-    //     { $unwind: "$productInfo" },
-    //     {
-    //         $addFields: {
-    //             itemRevenue: {
-    //                 $multiply: ["$orderItems.price", "$orderItems.quantity"]
-    //             },
-    //             category: "$productInfo.category"
-    //         }
-    //     },
-    //     {
-    //         $group: {
-    //             _id: "$category",
-    //             totalRevenue: { $sum: "$itemRevenue" }
-    //         }
-    //     },
-    //     { $sort: { totalRevenue: -1 } }
-    // ])
-
-    const allOrders = await Order.find({})
-    const result = await Promise.all(
-        allOrders.map(async item => {
-            const orderItems = item.orderItems
-            const totalRevenuByProduct = orderItems.reduce((total, cur) => {
-                return total + (cur.price!) * (cur.quantity || 1)
-            }, 0)
-            const productId = orderItems.map(i => i.productId)
-            const product = await Product.find({ _id: productId })
-            const user = await User.findById(item.user).select("userName")
-            return {
-                totalRevenuByProduct,
-                product,
-                user
+    const revenueByCategory = await Order.aggregate([
+        {
+            $unwind: "$orderItems"
+        },
+        {
+            $lookup: {
+                from: "products",
+                localField: "orderItems.productId",
+                foreignField: "_id",
+                as: "productInfo"
             }
-        })
-    )
+        },
+        { $unwind: "$productInfo" },
+        {
+            $addFields: {
+                itemRevenue: {
+                    $multiply: ["$orderItems.price", "$orderItems.quantity"]
+                },
+                category: "$productInfo.category"
+            }
+        },
+        {
+            $group: {
+                _id: "$category",
+                totalRevenue: { $sum: "$itemRevenue" }
+            }
+        },
+        { $sort: { totalRevenue: -1 } }
+    ])
 
+   
     const [
         orderByStatusPromise,
-        resultPromise
+        revenueByCategoryPromise
     ] = await Promise.all([
         orderByStatus,
-        result
+        revenueByCategory
     ])
 
     const pieChartStats = {
         orderByStatusPromise,
-        resultPromise
+        revenueByCategoryPromise
     }
     return res
         .status(200)
@@ -308,75 +291,93 @@ export const lineChartStats = AsyncHandler(async (req: Request, res: Response) =
 
     const totalRevenueLastMonth = totalRevenueInLastMonth[0]?.totalRevenueInLastMonth || 0
     // ... existing code ...
-    const topBuyers = await Order.aggregate([
-        {
-            $unwind: "$orderItems"
-        },
-        {
-            $addFields: {
-                itemRevenue: {
-                    $multiply: ["$orderItems.price", "$orderItems.quantity"]
-                }
+    // const topBuyers = await Order.aggregate([
+    //     {
+    //         $unwind: "$orderItems"
+    //     },
+    //     {
+    //         $addFields: {
+    //             itemRevenue: {
+    //                 $multiply: ["$orderItems.price", "$orderItems.quantity"]
+    //             }
+    //         }
+    //     },
+    //     {
+    //         $group: {
+    //             _id: "$user",
+    //             totalSpent: { $sum: "$itemRevenue" },
+    //             productIds: { $addToSet: "$orderItems.productId" }
+    //         }
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "users",
+    //             localField: "_id",
+    //             foreignField: "_id",
+    //             as: "userInfo"
+    //         }
+    //     },
+    //     {
+    //         $unwind: "$userInfo"
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "products",
+    //             let: { prodIds: "$productIds" },
+    //             pipeline: [
+    //                 {
+    //                     $match: {
+    //                         $expr: {
+    //                             $in: ["$_id", "$$prodIds"]
+    //                         }
+    //                     }
+    //                 },
+    //                 { $project: { name: 1 } }
+    //             ],
+    //             as: "productsBought"
+    //         }
+    //     },
+    //     {
+    //         $sort: { totalSpent: -1 }
+    //     },
+    //     {
+    //         $limit: 5
+    //     },
+    //     {
+    //         $project: {
+    //             _id: 0,
+    //             userId: "$_id",
+    //             userName: "$userInfo.userName",
+    //             totalSpent: 1,
+    //             productsBought: {
+    //                 $map: {
+    //                     input: "$productsBought",
+    //                     as: "product",
+    //                     in: "$$product.name"
+    //                 }
+    //             }
+    //         }
+    //     }
+    // ]);
+    // // ... existing code ...
+    const allOrders = await Order.find({})
+    const topBuyers = await Promise.all(
+        allOrders.map(async item => {
+            const orderItems = item.orderItems
+            const totalRevenuByProduct = orderItems.reduce((total, cur) => {
+                return total + (cur.price!) * (cur.quantity || 1)
+            }, 0)
+            const productIds = orderItems.map(i => i.productId)
+            const products = await Product.find({ _id: { $in: productIds } }).select("category name");
+            const user = await User.findById(item.user).select("userName")
+            return {
+                totalRevenuByProduct,
+                products,
+                user
             }
-        },
-        {
-            $group: {
-                _id: "$user",
-                totalSpent: { $sum: "$itemRevenue" },
-                productIds: { $addToSet: "$orderItems.productId" }
-            }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "_id",
-                foreignField: "_id",
-                as: "userInfo"
-            }
-        },
-        {
-            $unwind: "$userInfo"
-        },
-        {
-            $lookup: {
-                from: "products",
-                let: { prodIds: "$productIds" },
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: {
-                                $in: ["$_id", "$$prodIds"]
-                            }
-                        }
-                    },
-                    { $project: { name: 1 } }
-                ],
-                as: "productsBought"
-            }
-        },
-        {
-            $sort: { totalSpent: -1 }
-        },
-        {
-            $limit: 5
-        },
-        {
-            $project: {
-                _id: 0,
-                userId: "$_id",
-                userName: "$userInfo.userName",
-                totalSpent: 1,
-                productsBought: {
-                    $map: {
-                        input: "$productsBought",
-                        as: "product",
-                        in: "$$product.name"
-                    }
-                }
-            }
-        }
-    ]);
-    // ... existing code ...
+        })
+    )
+
 
     const [
         totalRevenueInLastMonthPromise,
@@ -397,6 +398,8 @@ export const lineChartStats = AsyncHandler(async (req: Request, res: Response) =
     }
     // myCache.set(key,JSON.stringify(lineChartStats),3600)
     // addCacheKey(key)
+    await redis.set(key,JSON.stringify(lineChartStats))
+    await addCacheKey(key)
     return res
         .status(200)
         .json({
