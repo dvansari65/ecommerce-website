@@ -13,13 +13,17 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.10",
     "@tanstack/react-query": "^5.81.0",
+    "class-variance-authority": "^0.7.1",
     "firebase": "^11.9.1",
+    "framer-motion": "^12.18.1",
+    "lucide-react": "^0.522.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.30.1",
+    "tailwind-variants": "^1.0.0",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
