@@ -1,10 +1,16 @@
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { useLatestProductsQuery } from '../redux/api/productApi';
+import ProductCard from '../components/features/ProductCard';
+import { LoaderIcon } from 'react-hot-toast';
+import { useEffect } from 'react';
 
-const Home: React.FC = () => {
+const Home = () => {
   // const products = new Array(6).fill(0); // placeholder array for demo
-  const {data,isLoading,isSuccess} = useLatestProductsQuery("")
+  const { data, isLoading } = useLatestProductsQuery()
+  useEffect(()=>{
+    console.log("data",data)
+  },[])
   return (
     <div className="w-full">
       {/* Hero Featured Product */}
@@ -43,28 +49,25 @@ const Home: React.FC = () => {
       </section>
 
       {/* Product Grid */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Popular Products</h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {data?.products.map((_, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 rounded shadow hover:shadow-md transition group"
-            >
-              <div className="h-48 w-full flex items-center justify-center overflow-hidden mb-4">
-                <img
-                  src={`https://via.placeholder.com/150.png?text=Product+${index + 1}`}
-                  alt={`Product ${index + 1}`}
-                  className="object-contain group-hover:scale-105 transition-transform duration-300"
+      {
+        isLoading ? <LoaderIcon /> : (
+          <section className="max-w-7xl mx-auto px-4 py-12">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Popular Products</h2>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {data?.products.map(product => (
+                <ProductCard 
+                name={product.name} 
+                category={product.category} 
+                price={product.price} 
+                ratings={product.ratings || 0} 
+                photo={product.photo} 
+
                 />
-              </div>
-              <h3 className="text-gray-700 font-medium text-sm">Product Title {index + 1}</h3>
-              <p className="text-gray-500 text-xs mt-1">Category</p>
-              <p className="text-green-600 font-semibold mt-2">$49.99</p>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+        )
+      }
     </div>
   );
 };
