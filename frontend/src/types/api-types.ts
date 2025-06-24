@@ -1,4 +1,4 @@
-import type { User } from "./types"
+import type { Product, User } from "./types"
 
 export type messageResponse = {
     message:string,
@@ -6,6 +6,8 @@ export type messageResponse = {
     user:User,
     accessToken:string
 }
-export type GetProductResponseById = {
-    
+export type productResponse = {
+    success:boolean,
+    message:string,
+    products:Product[]
 }
