@@ -6,3 +6,14 @@ export interface User {
     gender?:"male" | "femal" | "transgender",
     photo?:string,
 }
+
+export interface Product { 
+    name:string,
+    price:number,
+    stock:number,
+    category:string,
+    description?:string,
+    ratings?:number,
+    photo:string,
+    numberOfRatings?:number
+}
