@@ -27,7 +27,8 @@ export const invalidateKeys = async ({
                 key.startsWith("all-products-page-") ||
                 key.startsWith("product-") ||     // for single products
                 key.startsWith("products-page-") || // paginated filtered list
-                key.startsWith("products-category")
+                key.startsWith("products-category")||
+                key.startsWith("latest-product")
             )) ||
             (order && (
                 key.startsWith("single-order") ||

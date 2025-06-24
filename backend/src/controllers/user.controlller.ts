@@ -121,6 +121,7 @@ export const loginUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>,
             success: true,
             message: `welcome ${userName}!`,
             accessToken,
+            refreshToken,
             user:loggedInUser
         })
 })
