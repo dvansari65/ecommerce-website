@@ -9,11 +9,14 @@ export interface User {
 
 export interface Product { 
     name:string,
+    _id:string,
     price:number,
     stock:number,
     category:string,
     description?:string,
     ratings?:number,
     photo:string,
-    numberOfRatings?:number
+    numberOfRatings?:number,
+    onClick?: () => void;
+  onWishlistClick?: () => void;
 }

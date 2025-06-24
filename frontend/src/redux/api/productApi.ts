@@ -7,11 +7,14 @@ export const productApi = createApi({
     reducerPath:"productApi",
     baseQuery:fetchBaseQuery({baseUrl:`${server}/api/v1/product`}),
     endpoints:(builder)=>({
-        latestProducts : builder.query<productResponse,string>({
-            query:()=>"/latest"
+        latestProducts : builder.query<productResponse,void>({
+            query:()=>{
+                console.log("/latest")
+                return "/latest"
+            }
         }),
         getProductsByCategories : builder.query<productResponse,string>({
-            query:()=>"/get-all-categories"
+            query:()=>("/get-all-categories")
         })
     })
 })

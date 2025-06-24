@@ -1,26 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import { Menu } from 'lucide-react';
 const Header: React.FC = () => {
   return (
-    <header className="w-full bg-white shadow-sm sticky top-0 z-50 animate-fade-down">
+    <header className="w-full bg-orange-100 shadow-sm sticky top-0 z-50 animate-fade-down">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between transition-all duration-300">
+        <div className='flex justify-around flex-row items-center'>
+        <button ><Menu className="absolute left-0 ml-10 top-1/2 -translate-y-1/2"/></button>
         {/* Logo */}
         <div className="text-2xl font-bold text-black tracking-wide hover:scale-105 transition-transform duration-300">
           <Link to="/">SHOPIT</Link>
         </div>
+        </div>
 
         {/* Center Nav Links */}
         <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
-          {["Home", "Catalogue", "About Us", "Stores"].map((text, i) => (
-            <Link
-              key={i}
-              to={`/${text.toLowerCase().replace(/\s/g, '')}`}
-              className="relative transition-colors duration-300 hover:text-black"
-            >
-              <span className="hover-underline">{text}</span>
-            </Link>
-          ))}
+          <Link  to="/">Home</Link>
+          <Link to="/">about us</Link>
+          <Link to="/">catalogue</Link>
         </nav>
 
         {/* Login/Signup */}
