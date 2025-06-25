@@ -1,22 +1,22 @@
 import { Box } from "@chakra-ui/react";
-import { Outlet } from "react-router-dom";
-import Sidebar from "./components/common/Sidebar";
-import Header from "./components/common/Header";
+import { Outlet, useLocation } from "react-router-dom";
 
+import Header from "./components/common/Header";
+import Sidebar from "./components/common/Sidebar";
 const Layout = () => {
-  return (
-    <Box>
-      <Sidebar />
-      <Box ml="60">
-        <Header /> {/* Optional: Can be removed */}
-        <Box p="6">
-          <main className="pt-6">
-          <Outlet />
-          </main>
+    const location  = useLocation()
+    const isHomePage  = location.pathname === "/"
+    return (
+        <Box>
+           {!isHomePage &&  <Sidebar />}
+            <Header /> {/* Optional: Can be removed */}
+            <main className="pt-6">
+                <Outlet />
+            </main>
         </Box>
-      </Box>
-    </Box>
-  );
+
+
+    );
 };
 
 export default Layout;

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useLoginMutation } from '../redux/api/userApi';
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import type { messageResponse } from '../types/api-types';
 import { useDispatch } from 'react-redux';
 import { userExist, userNotExist } from '../redux/reducer/userReducer';
 import { useNavigate } from 'react-router-dom';
@@ -27,11 +26,24 @@ const Login: React.FC = () => {
         if (token) localStorage.setItem("token", token!);
       } else {
         const error = res.error as FetchBaseQueryError;
-        const message = error.data as messageResponse;
-        toast.error(message.message);
-        dispatch(userNotExist())
-        localStorage.removeItem("user")
-        localStorage.removeItem("token")
+
+        let message = "Something went wrong";
+
+        if (error?.data) {
+          if (typeof error.data === "object" && "message" in error.data) {
+            message = (error.data as any).message;
+          }
+          if (typeof error.data === "string") {
+            const match = error.data.match(/<pre>(.*?)<\/pre>/);
+            if (match) {
+              message = match[1].split("<br>")[0]; // Extract just the main error line
+            }
+          }
+        }
+        toast.error(message);
+        dispatch(userNotExist());
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
       }
     } catch (error) {
       toast.error("sign-in fail!");
