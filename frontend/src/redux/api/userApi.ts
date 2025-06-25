@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { server } from "../../config/constants";
-import type { messageResponse } from "../../types/api-types";
+import type { logoutResponse, messageResponse } from "../../types/api-types";
 import type { User } from "../../types/types";
 import toast from "react-hot-toast";
 
@@ -27,16 +27,17 @@ export const userApi = createApi({
         getMyProfile: builder.query<messageResponse, void>({
             query: () => "/me",
         }),
+        logout : builder.mutation<logoutResponse,void>({
+            query:()=>(
+                {
+                    url:"/logout",
+                    method:"POST",
+                }
+            )
+        })
     })
 })
 
-export const useLogOut = async () => {
-    try {
-        localStorage.removeItem("user")
-        localStorage.removeItem("token")
-    } catch (error) {
-        toast.error("failed to logout!")
-    }
-}
-export const { useLoginMutation,useGetMyProfileQuery } = userApi;
+
+export const { useLoginMutation,useGetMyProfileQuery ,useLogoutMutation} = userApi;
 

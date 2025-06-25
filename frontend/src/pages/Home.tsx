@@ -14,48 +14,55 @@ const Home = () => {
   return (
     <div className="w-full">
       {/* Hero Featured Product */}
-      <section className="bg-gray-50 py-10">
-        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
-          {/* Text */}
-          <div className="space-y-4 animate-fade-down">
-            <h3 className="text-blue-600 text-xl font-semibold">Season Sale</h3>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800">MEN'S FASHION</h1>
-            <p className="text-gray-600 text-lg">Min. 35–70% Off</p>
-            <div className="space-x-4">
-              <Link
-                to="/shop"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition"
-              >
-                Shop Now
-              </Link>
-              <Link
-                to="/read-more"
-                className="inline-block border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-2 rounded transition"
-              >
-                Read More
-              </Link>
-            </div>
-          </div>
+      <section className="bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-16 md:py-20 transition-all duration-300 ease-in-out">
+  <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+    {/* Text */}
+    <div className="space-y-6 animate-fade-up">
+      <h3 className="text-pink-600 text-lg font-semibold tracking-wide animate-pulse">
+        ✨ Limited Time Offer
+      </h3>
+      <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+        Elevate Your Style with <span className="text-blue-600">MEN'S FASHION</span>
+      </h1>
+      <p className="text-gray-700 text-lg">
+        Flat <span className="text-purple-600 font-bold">35% – 70% Off</span> on all trending collections. Hurry!
+      </p>
+      <div className="space-x-4 mt-6">
+        <Link
+          to="/shop"
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-md hover:scale-105 transition"
+        >
+          🛒 Shop Now
+        </Link>
+        <Link
+          to="/read-more"
+          className="inline-block border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-full hover:scale-105 transition"
+        >
+          📘 Read More
+        </Link>
+      </div>
+    </div>
 
-          {/* Image */}
-          <div className="w-full flex justify-center">
-            <img
-              src="https://via.placeholder.com/400x450.png?text=Model"
-              alt="Hero Product"
-              className="rounded-lg shadow-lg max-h-[450px] w-auto object-cover animate-fade-in"
-            />
-          </div>
-        </div>
-      </section>
+    {/* Image */}
+    <div className="w-full flex justify-center animate-fade-in">
+      <img
+        src="https://via.placeholder.com/400x450.png?text=Model"
+        alt="Hero Product"
+        className="rounded-2xl shadow-xl max-h-[450px] w-auto object-cover"
+      />
+    </div>
+  </div>
+</section>
 
       {/* Product Grid */}
       {
         isLoading ? <LoaderIcon /> : (
-          <section className="max-w-7xl mx-auto px-4 py-12">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Popular Products</h2>
+          <section className="max-w-7xl  mx-auto px-4 py-12">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Latest Products</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {data?.products.map(product => (
                 <ProductCard 
+                key={product._id}
                 name={product.name} 
                 category={product.category} 
                 price={product.price} 

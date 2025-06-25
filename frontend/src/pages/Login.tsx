@@ -4,7 +4,7 @@ import { useLoginMutation } from '../redux/api/userApi';
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import type { messageResponse } from '../types/api-types';
 import { useDispatch } from 'react-redux';
-import { userExist } from '../redux/reducer/userReducer';
+import { userExist, userNotExist } from '../redux/reducer/userReducer';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
@@ -29,6 +29,9 @@ const Login: React.FC = () => {
         const error = res.error as FetchBaseQueryError;
         const message = error.data as messageResponse;
         toast.error(message.message);
+        dispatch(userNotExist())
+        localStorage.removeItem("user")
+        localStorage.removeItem("token")
       }
     } catch (error) {
       toast.error("sign-in fail!");
