@@ -1,29 +1,46 @@
-// src/components/layout/Sidebar.tsx
-
-import { Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Box, Flex, IconButton, VStack, Text } from "@chakra-ui/react";
+import { Home } from "lucide-react";
+import { FiHome, FiUser, FiSettings } from "react-icons/fi";
 
 const Sidebar = () => {
   return (
-    <Sheet>
-      <SheetTrigger className="md:hidden p-2">
-        <Menu className="w-6 h-6" />
-      </SheetTrigger>
-
-      <SheetContent side="left" className="w-[250px] bg-white p-6">
-        <nav className="space-y-4">
-          <Link to="/" className="block text-lg font-semibold text-gray-700 hover:text-blue-600">
-            Home
-          </Link>
-          <Link to="/" className="block text-lg font-semibold text-gray-700 hover:text-blue-600">
-            About Us
-          </Link>
-          <Link to="/" className="block text-lg font-semibold text-gray-700 hover:text-blue-600">
-            Catalogue
-          </Link>
-        </nav>
-      </SheetContent>
-    </Sheet>
+    <Box
+      as="nav"
+      pos="fixed"
+      left="0"
+      top="0"
+      w="60"
+      h="100vh"
+      bg="gray.800"
+      color="white"
+      p="5"
+      shadow="lg"
+    >
+      <VStack spacing="6" align="flex-start">
+        <Text fontSize="2xl" fontWeight="bold">Dashboard</Text>
+        <Flex direction="column" gap={4}>
+          <IconButton
+            icon={<FiHome />}
+            aria-label="Home"
+            variant="ghost"
+            colorScheme="whiteAlpha"
+            _placeholder="home"
+          />
+          <IconButton
+            icon={<FiUser />}
+            aria-label="Profile"
+            variant="ghost"
+            colorScheme="whiteAlpha"
+          />
+          <IconButton
+            icon={<FiSettings />}
+            aria-label="Settings"
+            variant="ghost"
+            colorScheme="whiteAlpha"
+          />
+        </Flex>
+      </VStack>
+    </Box>
   );
 };
 
