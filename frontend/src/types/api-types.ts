@@ -11,3 +11,8 @@ export type productResponse = {
     message:string,
     products:Product[]
 }
+
+export type logoutResponse = {
+    message:string,
+    success:boolean
+}
