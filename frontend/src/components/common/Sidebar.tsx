@@ -5,14 +5,15 @@ const Sidebar: React.FC = () => {
   const [openCategory, setOpenCategory] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
   const [openRating, setOpenRating] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(5000);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
   return (
-    <aside className="w-64 bg-white p-4 border-r h-screen overflow-y-auto shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Filters</h2>
+    <aside
+      className="fixed top-[64px] left-0 w-64 h-[calc(100vh-64px)] bg-white border-r shadow-md p-4 overflow-y-auto z-40 flex flex-col"
+    >
+      <h2 className="text-xl font-semibold mb-4 text-center">Filters</h2>
 
       {/* Category Filter */}
       <div className="mb-4">
@@ -24,7 +25,7 @@ const Sidebar: React.FC = () => {
         </button>
         {openCategory && (
           <ul className="mt-2 ml-2 space-y-1 text-sm">
-            <li><input type="checkbox" /> <span className="ml-1">Men's Fashion</span></li>
+            <li><input  type="checkbox" /> <span className="ml-1">Men's Fashion</span></li>
             <li><input type="checkbox" /> <span className="ml-1">Electronics</span></li>
             <li><input type="checkbox" /> <span className="ml-1">Footwear</span></li>
             <li><input type="checkbox" /> <span className="ml-1">Accessories</span></li>
