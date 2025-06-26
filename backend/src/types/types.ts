@@ -10,7 +10,7 @@ export type controllerType = (
 
 
 export interface baseQuery {
-    search?:{
+    name?:{
         $regex:string,
         $options:string
     },
@@ -26,6 +26,7 @@ export type searchQuery = {
     category:string,
     stock?:number,
     sort?:string,
+    page:number
 }
 
 export interface reviewPropsType  {

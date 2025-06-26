@@ -16,3 +16,14 @@ export type logoutResponse = {
     message:string,
     success:boolean
 }
+export type categoriesType = logoutResponse & {
+    products:string[]
+}
+
+export type searchProductInputType = {
+    page:number,
+    search:string,
+    category:string,
+    price:number,
+    sort:string
+}
