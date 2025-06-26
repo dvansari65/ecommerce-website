@@ -10,4 +10,10 @@ export interface newProductTypes  {
    numberOfRating:number
    }
 
-   
+   export interface updateProductProps { 
+    name : string,
+     stock:number, 
+     description:string,
+     price:number,
+     category:string 
+    }

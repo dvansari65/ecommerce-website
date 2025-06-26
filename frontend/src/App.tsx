@@ -11,6 +11,7 @@ import Layout from "./Layout"
 import type { User } from "./types/types"
 import type { RootState } from "./redux/reducer/store"
 import Signup from "./pages/Sign-up"
+import Shop from "./pages/Shop"
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
         <Route path="/" element={<Home/>} />
+        <Route path="/shop" element={<Shop/>} />
         </Route>
           <Route path="/login" element={<Login/>} />
       </Routes>

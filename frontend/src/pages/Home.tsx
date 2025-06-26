@@ -12,7 +12,7 @@ const Home = () => {
   }, [])
   return (
     <div >
-      <main className='w-full bg-purple-100 h-screen pt-20  overflow-y-hidden'>
+      <main className='w-full bg-purple-100 h-screen pt-2  overflow-y-hidden'>
       <section className="relative w-full h-[400px]">
         <img
           src={canonImage}
