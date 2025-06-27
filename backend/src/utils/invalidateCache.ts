@@ -38,7 +38,8 @@ export const invalidateKeys = async ({
             )) ||
             (review && (
                 key.startsWith("single-review") ||
-                key.startsWith("all-reviews")
+                key.startsWith("all-reviews")||
+                key.startsWith(`single-product-review`)
             )) ||
             (user && (
                 key.startsWith("single-user") ||

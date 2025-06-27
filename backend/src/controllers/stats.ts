@@ -11,7 +11,7 @@ import { Review } from "../models/review.model";
 
 import { Product } from "../models/product.model";
 import redis from "../utils/redis";
-import { addCacheKey } from "../utils/invalidateCache";
+import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 // import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
 export const stats = AsyncHandler(async (req: Request, res: Response) => {
@@ -410,3 +410,11 @@ export const lineChartStats = AsyncHandler(async (req: Request, res: Response) =
 }
 )
 
+
+export const invaliddateAll = AsyncHandler( async (req:Request,res:Response)=>{
+    await invalidateKeys({admin:true,product:true,review:true,order:true,coupon:true})
+    return res.status(200).json({
+        message:"invalidated all schema successfully!",
+        success:true,
+    })
+})

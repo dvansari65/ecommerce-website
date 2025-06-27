@@ -29,11 +29,11 @@ export type searchQuery = {
     page:number
 }
 
-export interface reviewPropsType  {
-    comment?:string,
-    rating?:number,
+export type reviewPropsType =   {
+    comment:string,
+    rating:number,
 }
-export type productIdType = {
+export type productIdType ={
     productId:string
 }
 
