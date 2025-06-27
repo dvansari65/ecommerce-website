@@ -4,8 +4,7 @@ import ApiError from "../utils/errorHanlder";
 import { User } from "../models/user.model";
 
 export const Admin = AsyncHandler( async (req:Request,res:Response,next:NextFunction)=>{
-    
-    const id = req.user?._id
+    const {id} = req.query
     if(!id){
         throw new ApiError("please provide admin id",402)
     }

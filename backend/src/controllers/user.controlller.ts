@@ -97,13 +97,13 @@ export const loginUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>,
     if (!user) {
         throw new ApiError("unAuthorized request", 401)
     }
-    console.log("Found user:", { userName: user.userName, hasPassword: !!user.password });
+    // console.log("Found user:", { userName: user.userName, hasPassword: !!user.password });
     const isPasswordCorrect = await user.isPasswordCorrect(String(password))
-    console.log("Password comparison result:", isPasswordCorrect);
+    // console.log("Password comparison result:", isPasswordCorrect);
     if (isPasswordCorrect === false) {
         throw new ApiError("password is incorrect", 404)
     }
-    console.log("isPasswordCorrect", isPasswordCorrect)
+    // console.log("isPasswordCorrect", isPasswordCorrect)
     const { refreshToken, accessToken } = await generateAccessAndRefreshToken(user?._id as string)
     const loggedInUser = await User.findById(user?._id).select("-password")
 

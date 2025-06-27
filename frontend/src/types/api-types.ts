@@ -4,11 +4,13 @@ export type messageResponse = {
     message:string,
     success:boolean,
     user:User,
-    accessToken:string
+    accessToken?:string,
+    refreshToken? : string
 }
 export type productResponse = {
     success:boolean,
     message:string,
+    totalPage:number,
     products:Product[]
 }
 
@@ -26,4 +28,7 @@ export type searchProductInputType = {
     category:string,
     price:number,
     sort:string
+}
+export type singleProductResponse = logoutResponse & { 
+    product:Product
 }

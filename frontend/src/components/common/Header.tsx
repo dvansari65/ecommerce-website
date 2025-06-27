@@ -36,7 +36,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="w-full fixed top-0 z-50 bg-white shadow border-b">
+    <header className="w-full fixed  top-0 z-50 bg-white shadow border-b">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <div className="text-xl font-bold text-black">
           <Logo />
