@@ -1,4 +1,4 @@
-import type { Product, User } from "./types"
+import type { Product, Review, User } from "./types"
 
 export type messageResponse = {
     message:string,
@@ -31,4 +31,16 @@ export type searchProductInputType = {
 }
 export type singleProductResponse = logoutResponse & { 
     product:Product
+}
+
+export type productReviewInputType = {
+    id:string,
+    page:number
+}
+
+export type productReviews = {
+    reviews:Review[],
+    message:string,
+    success:boolean,
+    totalPage:number
 }

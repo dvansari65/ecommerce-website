@@ -11,7 +11,7 @@ function Shop() {
   const [category, setCategory] = useState(searchQuery.get('category') || "")
   const [sort, setSort] = useState("")
   const [page, setPage] = useState(1)
-  const [price, setPrice] = useState(10000)
+  const [price, setPrice] = useState(100000)
 
   const handleNavigate = (id:string):void=>{
     navigate(`/product/${id}`)
@@ -36,7 +36,7 @@ function Shop() {
           <span className='text-black text-[14px] mb-2'>CATEGORY</span>
           <select
             name="category"
-            className='text-black w-[200px] hover:bg-gray-400 border border-black'
+            className='text-black w-[200px] h-[30px] border-none hover:bg-gray-400 border border-black'
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -61,7 +61,7 @@ function Shop() {
             </div>
           </div>
           <h2 className='text-black'>SORT </h2>
-          <select className='text-black'  value={sort} onChange={(e) => setSort((e.target.value))}>
+          <select className='text-black w-[200px] h-[30px]'  value={sort} onChange={(e) => setSort((e.target.value))}>
             <option className='text-black'  value="">None</option>
             <option className='text-black' value="asc">price (low to high)</option>
             <option className='text-black'  value="dsc">price (high to low)</option>
