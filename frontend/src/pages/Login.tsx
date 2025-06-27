@@ -21,9 +21,10 @@ const Login: React.FC = () => {
       if ("data" in res && res.data?.success) {
         toast.success(res.data?.message!);
         navigate("/")
-        dispatch(userExist(user));
         localStorage.setItem("user", JSON.stringify(user));
-        if (token) localStorage.setItem("token", token!);
+        localStorage.setItem("token", token as string)
+        dispatch(userExist(user));
+        // localStorage.setItem("access")
       } else {
         const error = res.error as FetchBaseQueryError;
 

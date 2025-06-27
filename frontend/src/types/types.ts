@@ -7,16 +7,20 @@ export interface User {
     photo?:string,
 }
 
-export interface Product { 
-    name:string,
-    _id:string,
-    price:number,
-    stock:number,
-    category:string,
-    description?:string,
-    ratings?:number,
-    photo:string,
-    numberOfRatings?:number,
-    onClick?: () => void;
+export interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  stock: number;
+  category: string;
+  description?: string;
+  ratings?: number;
+  photo: string;
+  numberOfRatings?: number;
+  discount?: number;
+  discountedPrice?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  onClick?: () => void;
   onWishlistClick?: () => void;
 }

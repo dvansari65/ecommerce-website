@@ -2,7 +2,6 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { server } from "../../config/constants";
 import type { logoutResponse, messageResponse } from "../../types/api-types";
 import type { User } from "../../types/types";
-import toast from "react-hot-toast";
 
 
 export const userApi = createApi({
@@ -21,7 +20,8 @@ export const userApi = createApi({
             query: (user) => ({
                 url: "/login",
                 method: "POST",
-                body: user
+                body: user,
+                
             })
         }),
         getMyProfile: builder.query<messageResponse, void>({

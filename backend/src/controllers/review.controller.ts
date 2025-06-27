@@ -57,7 +57,7 @@ export const deleteReview = AsyncHandler(async (req: Request, res: Response) => 
 
 export const getAllReviews = AsyncHandler(async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1
-    const limit = Number(process.env.REVIEW_PER_PAGE) || 18
+    const limit = Number(process.env.REVIEW_PER_PAGE) || 4
     const skip = (page - 1) * limit
     const key = `all-reviews-${page}-${limit}`
     const cachedData = await redis.get(key)

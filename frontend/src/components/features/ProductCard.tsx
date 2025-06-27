@@ -2,13 +2,14 @@ import React from 'react';
 import { FaHeart, FaStar } from 'react-icons/fa';
 
 interface ProductCardProps {
-  name: string;
-  category: string;
-  price: number;
-  ratings: number; // 0 to 5
-  photo: string;
+  name?: string | "";
+  category?: string | "";
+  price?: number | 100;
+  ratings?: number | 0; // 0 to 5
+  photo?: string | "";
   onClick?: () => void;
   onWishlistClick?: () => void;
+  className?:string
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -18,7 +19,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   ratings,
   photo,
   onClick,
-  onWishlistClick
+  onWishlistClick,
+  
 }) => {
   return (
     <div
@@ -36,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         >
           <FaHeart size={16} />
         </button>
-        <span className="text-sm font-semibold text-gray-800">${price.toFixed(2)}</span>
+        <span className="text-sm font-semibold text-gray-800">Rs.{price?.toFixed(2)}</span>
       </div>
 
       {/* Image */}
@@ -59,7 +61,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {[...Array(5)].map((_, i) => (
           <FaStar
             key={i}
-            className={i < ratings ? 'text-yellow-400' : 'text-gray-300'}
+            className={ratings && i < ratings ? 'text-yellow-400' : 'text-gray-300'}
           />
         ))}
       </div>

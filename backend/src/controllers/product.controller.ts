@@ -198,15 +198,18 @@ export const filterProduct = AsyncHandler(async (req: Request<{},{},{},searchQue
     let sortOptions: any = {};
     if (sort === "asc") {
         sortOptions.price = 1;
-    } else {
+    } else if(sort === "dsc") {
         sortOptions.price = -1;
     }
 
-    const sortedProducts = await Product.find(basequery)
+    const query =  Product.find(basequery)
         .sort(sortOptions)
         .limit(limit)
         .skip(skip);
-
+    if(Object.keys(sortOptions).length > 0){
+        query.sort(sortOptions)
+    }
+    const sortedProducts = await query
     const filteredOnlyProducts = await Product.find(basequery);
     const totalPage = Math.ceil(filteredOnlyProducts.length / limit);
     await redisClient.set(key,JSON.stringify(sortedProducts))
@@ -214,8 +217,9 @@ export const filterProduct = AsyncHandler(async (req: Request<{},{},{},searchQue
     return res.status(200).json({
         message: "Filtered successfully",
         success: true,
-        products: sortedProducts,
         totalPage,
+        products: sortedProducts
+        
     });
 });
 
