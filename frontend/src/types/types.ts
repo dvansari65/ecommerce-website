@@ -1,3 +1,5 @@
+import type { messageResponse } from "./api-types";
+
 export interface User {
     userName?:string,
     password?:string,
@@ -23,4 +25,12 @@ export interface Product {
   updatedAt?: string;
   onClick?: () => void;
   onWishlistClick?: () => void;
+}
+
+export interface Review { 
+  _id:string,
+  comment:string,
+  user:User,
+  product:Product,
+  createdAt:string,
 }
