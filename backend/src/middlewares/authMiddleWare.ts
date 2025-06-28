@@ -6,8 +6,9 @@ import { User } from "../models/user.model"
 export const verifyJwt = async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const token = req.cookies?.accessToken || req.headers["authorization"]?.replace("Bearer ","")
+        console.log("Token received:", token);
         if(!token){
-            throw new ApiError("user is not login",402)
+            throw new ApiError("user is not login",401)
         }
         const secret = process.env.ACCESS_TOKEN_SECRET as string
        const decodedToken  = jwt.verify(token,secret) as JwtPayload
@@ -22,8 +23,13 @@ export const verifyJwt = async(req:Request,res:Response,next:NextFunction)=>{
     
        req.user = user
        next()
-    } catch (error) {
-        console.error("failed to jwt verification",500)
-        throw error;
+    } catch (error:any) {
+        if(error.name === "TokenExpiredError"){
+             res.status(401).json({message:"access token expired!"})
+             return;
+        }
+        console.log("failed to jwt verification",error)
+         res.status(401).json({message: "Invalid or missing token"})
+         return;
     }
 }
