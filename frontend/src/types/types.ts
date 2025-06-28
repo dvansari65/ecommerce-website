@@ -34,3 +34,9 @@ export interface Review {
   product:Product,
   createdAt:string,
 }
+
+export type refreshDataResponse = {
+  success:boolean,
+  message:string,
+  newAccessToken:string
+}

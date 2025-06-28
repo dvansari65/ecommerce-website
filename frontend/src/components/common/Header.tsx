@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/api/userApi";
@@ -6,6 +6,7 @@ import { userNotExist } from "@/redux/reducer/userReducer";
 import type { RootState } from "../../redux/reducer/store";
 import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
+import LogoutConfirm from "../ui/LogoutConfirm";
 
 const navItems = [
   { name: "home", path: "/" },
@@ -14,7 +15,8 @@ const navItems = [
 ];
 
 const Header: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.userReducer);
+  const [showModal, setShowModal] = useState(false)
+  const { user, loading } = useSelector((state: RootState) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
@@ -48,8 +50,7 @@ const Header: React.FC = () => {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `capitalize text-lg transition hover:underline ${
-                  isActive ? "text-black underline" : "text-gray-500"
+                `capitalize text-lg transition hover:underline ${isActive ? "text-black underline" : "text-gray-500"
                 }`
               }
             >
@@ -59,29 +60,27 @@ const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-3">
-          {user ? (
-            <button
-              onClick={handleLogout}
-              className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
-            >
-              Logout
-            </button>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
+
+         
+          { (!loading && user) ? <button
+            onClick={() => setShowModal(true)}
+            className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
+          >
+            Logout
+          </button>:(<Link
+            to="/login"
+            className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
+          >
+            Login
+          </Link>)}
+          {showModal && <LogoutConfirm onConfirm={handleLogout} onCancel={() => setShowModal(false)} />}
+          
+          <Link
+            to="/signup"
+            className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
+          >
+            Sign Up
+          </Link>
         </div>
       </div>
     </header>

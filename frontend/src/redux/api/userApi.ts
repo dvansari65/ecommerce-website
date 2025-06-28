@@ -1,27 +1,18 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { server } from "../../config/constants";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import type { logoutResponse, messageResponse } from "../../types/api-types";
 import type { User } from "../../types/types";
+import { customBaseQuery } from "../customBaseQuery/customeBaseQuery";
 
 
 export const userApi = createApi({
     reducerPath: "userApi",
-    baseQuery: fetchBaseQuery({
-        baseUrl: `${server}/api/v1/user`,
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem("token")
-            if (token) {
-                headers.set("authorization", `bearer ${token}`)
-            }
-        }
-    }),
+    baseQuery: customBaseQuery,
     endpoints: (builder) => ({
         login: builder.mutation<messageResponse, User>({
             query: (user) => ({
                 url: "/login",
                 method: "POST",
                 body: user,
-                
             })
         }),
         getMyProfile: builder.query<messageResponse, void>({

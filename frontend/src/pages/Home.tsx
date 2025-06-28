@@ -5,11 +5,12 @@ import canonImage from "../assets/canon2.png"
 import { useEffect } from 'react';
 import { motion } from "framer-motion";
 import { Link } from 'react-router-dom';
+
+
 const Home = () => {
   const { data } = useLatestProductsQuery()
-  useEffect(() => {
-    console.log("data", data)
-  }, [])
+  
+  
   return (
     <div >
       <main className='w-full bg-purple-100 h-screen pt-2  overflow-y-hidden'>

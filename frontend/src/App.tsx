@@ -26,6 +26,7 @@ const dispatch = useDispatch()
     } else {
       dispatch(userNotExist());
     }
+   
   }, []);
   
   return loading ? <div>loading..</div> : (
