@@ -20,7 +20,7 @@ productRouter.route("/update-product").get(Admin,updateProduct);
 productRouter.route("/new-product").post(Admin,upload.single("photo"),newProduct);
 productRouter.route("/update-product/:id").patch(upload.single("photo"), Admin, updateProduct);
 productRouter.route("/delete-product/:id").delete(Admin, deleteProduct);
-productRouter.route("/get-all-product").get(Admin, getAllAdminProducts);
+productRouter.route("/get-all-product").get( getAllAdminProducts);
 productRouter.route("/get-all-categories").get( getAllCategories);
 productRouter.route("/get-single-product/:id").get(verifyJwt, getSingleProduct);
 productRouter.route("/latest").get(getAllLatestProduct);
