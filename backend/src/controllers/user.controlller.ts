@@ -5,15 +5,18 @@ import ApiError from "../utils/errorHanlder";
 import { User } from "../models/user.model";
 import redis from "../utils/redis";
 import fs from "fs"
+import * as jwt from "jsonwebtoken"
 
 import imageKit from "../utils/imageKit";
 import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
 
 
-export const newUser = AsyncHandler(async (req: Request<{},{}, newUserTypes>, res: Response) => {
 
-    console.log("✅ /new-user hit with data:", req.body);
+
+
+export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, res: Response) => {
+    // console.log("✅ /new-user hit with data:", req.body);
     const { userName, email, password, gender, dob } = req.body
     const photo = req.file
     if (!userName || !email || !password || !gender || !dob || !photo) {
@@ -50,11 +53,11 @@ export const newUser = AsyncHandler(async (req: Request<{},{}, newUserTypes>, re
     try {
         await newUser.save()
 
-        invalidateKeys({ user: true ,admin:true})
+        invalidateKeys({ user: true, admin: true })
         return res.status(200).json({
             message: `welcome ${newUser.userName}`,
             success: true,
-           
+
         })
     } catch (error) {
         console.error("Error saving user:", error)
@@ -111,36 +114,38 @@ export const loginUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>,
         .status(200)
         .cookie("refreshToken", refreshToken as string, {
             httpOnly: true,
-            secure: false,
+            secure:false, // true only in production
+            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
+            path: "/"
         })
         .cookie("accessToken", accessToken as string, {
             httpOnly: true,
-            secure: false,
+            secure: false, // true only in production
+            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
+            path: "/"
         })
         .json({
             success: true,
             message: `welcome ${userName}!`,
-            accessToken,
-            refreshToken,
-            user:loggedInUser
+            user: loggedInUser
         })
 })
-export const myProfile = AsyncHandler( async (req:Request,res:Response)=>{
+export const myProfile = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id
-    if(!userId){
-        throw new ApiError("user id not provided!",402)
+    if (!userId) {
+        throw new ApiError("user id not provided!", 402)
     }
     const user = await User.findById(userId).select("-password")
-    if(!user){
-        throw new ApiError("user not found!",404)
+    if (!user) {
+        throw new ApiError("user not found!", 404)
     }
     return res
-    .status(200)
-    .json({
-        message:`hey ${user.userName}`,
-        success:true,
-        user
-    })
+        .status(200)
+        .json({
+            message: `hey ${user.userName}`,
+            success: true,
+            user
+        })
 
 })
 export const logoutUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, res: Response) => {
@@ -158,15 +163,22 @@ export const logoutUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>
             new: true
         }
     )
-    const options = {
-        httpOnly: true,
-        secure: false
-    }
-    invalidateKeys({admin:true,user:true})
+
+    invalidateKeys({ admin: true, user: true })
     return res
         .status(200)
-        .clearCookie("refreshToken", options)
-        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: false, // true only in production
+            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
+            path: "/"
+        })
+        .clearCookie("accessToken", {
+            httpOnly: true,
+            secure: false, // true only in production
+            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
+            path: "/"
+        })
         .json({
             message: "user successfully logout",
             success: true,
@@ -189,7 +201,7 @@ export const updateUserNameFromProfile = AsyncHandler(async (req: Request<{}, {}
             new: true
         }
     ).select("-password -refreshToken ")
-    invalidateKeys({ user: true ,admin:true})
+    invalidateKeys({ user: true, admin: true })
     return res
         .status(200)
         .json({
@@ -250,7 +262,7 @@ export const updatePhoto = AsyncHandler(async (req: Request<{}, {}, newUserTypes
             new: true
         }
     ).select("-password -refreshToken")
-    invalidateKeys({ user: true ,admin:true})
+    invalidateKeys({ user: true, admin: true })
     return res
         .status(200)
         .json({
@@ -266,7 +278,7 @@ export const deleteUser = AsyncHandler(async (req: Request, res: Response) => {
         throw new ApiError("please provide user id", 404)
     }
     await User.findByIdAndDelete(id)
-    invalidateKeys({ user: true ,admin:true})
+    invalidateKeys({ user: true, admin: true })
     return res
         .status(200)
         .json(
@@ -299,7 +311,7 @@ export const updateUser = AsyncHandler(async (req: Request<{}, {}, updateUsertyp
             new: true
         }
     ).select("-password")
-    invalidateKeys({ user: true ,admin:true})
+    invalidateKeys({ user: true, admin: true })
     return res
         .status(200)
         .json(
@@ -371,4 +383,47 @@ export const getSingleUser = AsyncHandler(async (req: Request, res: Response) =>
         success: true,
         user,
     });
+});
+
+export const generateNewAccessToken = AsyncHandler(async (req: Request, res: Response) => {
+    const refreshtoken = req.cookies?.refreshToken;
+
+    if (!refreshtoken) {
+        return res.status(401).json({ message: "No refresh token" });
+    }
+
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET!;
+
+    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET!;
+
+    // ✅ Type narrowing before use
+    if (!accessTokenSecret || !refreshTokenSecret) {
+        throw new Error("JWT secrets or expiry time are not defined in .env");
+    }
+
+    let decodedToken: jwt.JwtPayload;
+    try {
+        decodedToken = jwt.verify(refreshtoken, refreshTokenSecret) as jwt.JwtPayload;
+    } catch (error) {
+        return res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+
+    if (typeof decodedToken !== "object" || !("_id" in decodedToken)) {
+        return res.status(403).json({ message: "Invalid token payload" });
+    }
+
+    const newAccessToken = jwt.sign(
+        { _id: decodedToken._id },
+        accessTokenSecret,
+        {
+            expiresIn: "1d"
+        }
+    );
+
+    return res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: true,
+    })
+        .status(200)
+        .json({ success: true, message: "token generated successfully!" });
 });

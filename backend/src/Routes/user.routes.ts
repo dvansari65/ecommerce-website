@@ -10,7 +10,8 @@ import { newUser,
     updateUser,
     getSingleUser,
     deleteUser,
-    myProfile
+    myProfile,
+    generateNewAccessToken
 } from "../controllers/user.controlller";
 import { verifyJwt } from "../middlewares/authMiddleWare";
 import { updateLastActive } from "../middlewares/updateLastActiveMiddleWare";
@@ -23,7 +24,7 @@ userRouter.route("/logout").post(verifyJwt,updateLastActive,logoutUser);
 userRouter.route("/update-username").post(verifyJwt,updateLastActive,updateUserNameFromProfile);
 userRouter.route("/update-photo").post(verifyJwt,upload.single("photo"),updateLastActive,updatePhoto);
 userRouter.route("/update-user").patch(verifyJwt,updateLastActive,updateUser);
-
+userRouter.route("/refreshToken").get(generateNewAccessToken);
 //  admin only actvities ____
 
 userRouter.route("/get-all-users").get(Admin,getAllUser);

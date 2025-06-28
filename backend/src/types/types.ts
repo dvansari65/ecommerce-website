@@ -45,3 +45,12 @@ export type invalidateProps = {
     coupon?:boolean,
     admin?:boolean
 }
+
+export type JWTtype = {
+    _id:string
+}
+export type  optionsType = {
+    httpOnly: boolean,
+    secure: boolean,
+    sameSite:string
+}
