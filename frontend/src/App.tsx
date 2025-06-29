@@ -13,6 +13,7 @@ import type { RootState } from "./redux/reducer/store"
 // import Signup from "./pages/Sign-up"
 import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
+import Cart from "./components/common/Cart"
 
 function App() {
 const dispatch = useDispatch()
@@ -36,6 +37,7 @@ const dispatch = useDispatch()
         <Route path="/" element={<Home/>} />
         <Route path="/shop" element={<Shop/>} />
         <Route path="/product/:id" element={user ? <ProductDetail/> : <Navigate to={"/login"}/>} />
+        <Route path="/cart" element={user ? <Cart/> : <Navigate to={"/login"}/>} />
         </Route>
           <Route path="/login" element={<Login/>} />
       </Routes>

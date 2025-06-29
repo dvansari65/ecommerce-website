@@ -7,7 +7,7 @@ import type { RootState } from "../../redux/reducer/store";
 import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
 import LogoutConfirm from "../ui/LogoutConfirm";
-
+import {ShoppingCartIcon} from "lucide-react"
 const navItems = [
   { name: "home", path: "/" },
   { name: "shop", path: "/shop" },
@@ -59,8 +59,8 @@ const Header: React.FC = () => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-
+        <div className="flex items-center gap-5">
+          <Link to="/cart" className="mr-2 "><ShoppingCartIcon className="hover:text-gray-500 text-blue-400  "/></Link>
          
           { (!loading && user) ? <button
             onClick={() => setShowModal(true)}
