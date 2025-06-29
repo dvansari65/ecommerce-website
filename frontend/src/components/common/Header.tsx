@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/api/userApi";
@@ -21,7 +21,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async()=>{
     try {
       const res = await logout();
       const message = res?.data?.message || "Logged out successfully!";
@@ -35,7 +35,7 @@ const Header: React.FC = () => {
       dispatch(userNotExist());
       navigate("/");
     }
-  };
+  },[logout,dispatch])
 
   return (
     <header className="w-full fixed  top-0 z-50 bg-white shadow border-b">
