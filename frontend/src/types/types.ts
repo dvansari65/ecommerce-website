@@ -40,3 +40,9 @@ export type refreshDataResponse = {
   message:string,
   newAccessToken:string
 }
+
+
+export type error = {
+  message:string,
+  statusCode :number
+}
