@@ -96,10 +96,11 @@ function ProductDetail() {
 
           {/* Tabs (Static for now) */}
           <div className="pt-6 border-t border-gray-200 text-sm text-gray-500 flex gap-6">
-            <button className="font-medium text-blue-600 border-b-2 border-blue-600 pb-1">Detail</button>
-            <button>Features</button>
-            <button>Shipping</button>
-            <button>Care Instructions</button>
+            <button className="font-bold pb-1">Detail {":"}
+            </button>
+            <div>
+            {product.description}
+            </div>
           </div>
         </div>
       </div>

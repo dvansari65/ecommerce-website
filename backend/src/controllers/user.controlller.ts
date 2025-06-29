@@ -422,7 +422,9 @@ export const generateNewAccessToken = AsyncHandler(async (req: Request, res: Res
 
     return res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
-        secure: true,
+        secure: false,
+        sameSite: "lax", // recommended for most cases
+        path: "/"
     })
         .status(200)
         .json({ success: true, message: "token generated successfully!" });

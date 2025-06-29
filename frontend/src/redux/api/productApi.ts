@@ -5,15 +5,10 @@ import type {  categoriesType, productResponse, searchProductInputType, singlePr
 
 export const productApi = createApi({
     reducerPath:"productApi",
+    
     baseQuery:fetchBaseQuery({
         baseUrl:`${server}/api/v1/product`,
-        prepareHeaders : (headers)=>{
-            const token = localStorage.getItem("token")
-            if(token){
-                headers.set('Authorization', `Bearer ${token}`);
-            }
-            return headers;
-        }
+        credentials:"include"
     }),
     endpoints:(builder)=>({
         latestProducts : builder.query<productResponse,void>({
