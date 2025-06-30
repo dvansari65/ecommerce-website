@@ -12,7 +12,7 @@ import type { refreshDataResponse } from "@/types/types";
 console.log("danish:")
 const baseQuery = fetchBaseQuery({
     baseUrl:`${server}/api/v1/user`,
-    credentials:"include"
+    credentials:"include",
 })
 
 export const customBaseQuery:BaseQueryFn<
@@ -20,7 +20,7 @@ string | FetchArgs,
 unknown,
 FetchBaseQueryError
 > = async (args,api,extraOptions)=>{
-    // console.log("customBaseQuery called with args:", args);
+    console.log("customBaseQuery called with args:", args);
     let result = await baseQuery(args,api,extraOptions)
 
 

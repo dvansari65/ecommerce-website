@@ -115,14 +115,14 @@ export const loginUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>,
         .cookie("refreshToken", refreshToken as string, {
             httpOnly: true,
             secure:false, // true only in production
-            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
-            path: "/"
+           sameSite:"lax", // or "none" if you need cross-site, but then secure:true is required
+          
         })
         .cookie("accessToken", accessToken as string, {
             httpOnly: true,
             secure: false, // true only in production
             sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
-            path: "/"
+           
         })
         .json({
             success: true,
@@ -424,7 +424,6 @@ export const generateNewAccessToken = AsyncHandler(async (req: Request, res: Res
         httpOnly: true,
         secure: false,
         sameSite: "lax", // recommended for most cases
-        path: "/"
     })
         .status(200)
         .json({ success: true, message: "token generated successfully!" });

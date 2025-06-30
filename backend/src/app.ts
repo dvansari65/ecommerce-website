@@ -27,10 +27,11 @@ import { productRouter } from "./Routes/product.route";
 import { orderRouter } from "./Routes/order.route";
 import couponRouter from "./Routes/coupon.route";
 import { adminRouter } from "./Routes/admin.route";
+import {cartRouter} from "./Routes/cart.routes"
 app.use("/api/v1/user",userRouter)
 app.use("/api/v1/product",productRouter)
 app.use("/api/v1/order",orderRouter)
 app.use("/api/v1/coupon",couponRouter)
 app.use("/api/v1/review",reviewtRouter)
-app.use("/api/v1/admin",adminRouter)
+app.use("/api/v1/cart",cartRouter)
 export default app
