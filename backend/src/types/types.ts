@@ -54,3 +54,7 @@ export type  optionsType = {
     secure: boolean,
     sameSite:string
 }
+
+export type addCartType = {
+    quantity:number
+}

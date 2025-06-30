@@ -60,7 +60,7 @@ const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-5">
-          <Link to="/cart" className="mr-2 "><ShoppingCartIcon className="hover:text-gray-500 text-blue-400  "/></Link>
+          <Link to="/cart" className="mr-2 "><ShoppingCartIcon className="hover:text-blue-500 text-gray-500  "/></Link>
          
           { (!loading && user) ? <button
             onClick={() => setShowModal(true)}
