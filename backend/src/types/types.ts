@@ -58,3 +58,7 @@ export type  optionsType = {
 export type addCartType = {
     quantity:number
 }
+export type ReqUser = {
+    userId : string
+}
+
