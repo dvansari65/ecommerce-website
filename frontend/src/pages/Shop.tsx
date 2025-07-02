@@ -1,6 +1,6 @@
 import ProductCard from '@/components/features/ProductCard'
 import { useGetProductsByCategoriesQuery, useSearchProductsQuery } from '@/redux/api/productApi'
-import  { useEffect, useState } from 'react'
+import  {  useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 function Shop() {
@@ -22,10 +22,10 @@ function Shop() {
   const isPrevPage = page > 1
   const isNextPage = page < (data?.totalPage || 1);
 
-  useEffect(() => {
-    console.log("data:", data)
-    console.log("category", categoryData)
-  }, [data])
+  // useEffect(() => {
+  //   console.log("data:", data)
+  //   console.log("category", categoryData)
+  // }, [data])
 
   if(isError) <div>loading....</div>
   return isLoading ? <div>loading...</div> : (

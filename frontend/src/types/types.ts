@@ -40,9 +40,26 @@ export type refreshDataResponse = {
   message:string,
   newAccessToken:string
 }
-
+ export type messageAndSuccessProps = {
+  message?:string,
+  success?:string
+ }
 
 export type error = {
   message:string,
   statusCode :number
+}
+export type eachItemType = {
+  productId : Product,
+  quantity:number
+}
+
+export type createCartType = {
+  items:eachItemType[]
+}
+
+export interface CartProps {
+  message:messageAndSuccessProps,
+  success:messageAndSuccessProps,
+  cart:createCartType
 }
