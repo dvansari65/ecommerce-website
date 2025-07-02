@@ -43,7 +43,8 @@ export type invalidateProps = {
     review?:boolean,
     user?:boolean,
     coupon?:boolean,
-    admin?:boolean
+    admin?:boolean,
+    cart?:boolean
 }
 
 export type JWTtype = {
@@ -62,3 +63,13 @@ export type ReqUser = {
     userId : string
 }
 
+export type item = {
+    quantity:number,
+    productId:productIdType
+}
+export type CartType = {
+    user:string,
+    items:[
+        item
+    ]
+}
