@@ -1,12 +1,14 @@
 import { useGetSingleProductsQuery } from '@/redux/api/productApi';
-import type { RootState } from "../redux/reducer/store";
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import Reviews from '@/components/features/Reviews'; // adjust import path if different
+import  { useCreateCartMutation } from '@/redux/api/cartApi';
+import toast from 'react-hot-toast';
 
 function ProductDetail() {
+  const [createCart] = useCreateCartMutation()
+  
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useGetSingleProductsQuery(
     { id: id as string },
@@ -86,7 +88,7 @@ function ProductDetail() {
 
           {/* Action Buttons */}
           <div className="flex gap-4 mt-4">
-            <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+            <button onClick={handleAddTocart} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
               Add to Cart
             </button>
             <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 transition">
