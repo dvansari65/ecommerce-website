@@ -14,7 +14,8 @@ export const invalidateKeys = async ({
     review,
     user,
     coupon,
-    admin
+    admin,
+    cart
 }: invalidateProps) => {
     
     const keysToDelete: string[] = [];
@@ -53,7 +54,12 @@ export const invalidateKeys = async ({
                 key.startsWith("stats") ||
                 key.startsWith("line-chart") ||
                 key.startsWith("key-chart")
-            ))
+            ))|| 
+            (
+                cart && (
+                    key.startsWith("all-cart-products")
+                )
+            )
         ) {
             keysToDelete.push(key);
         }
