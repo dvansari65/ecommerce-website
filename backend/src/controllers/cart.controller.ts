@@ -10,48 +10,49 @@ import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 // while creatign the cart default qauntity should be 1 and there will be two funcitons will increase and decrease
 // the quantity of the product
 export const createCart = AsyncHandler(async (req: Request<productIdType, {}, {}>, res: Response) => {
-    const { productId } = req.params
-    const userId = req.user?._id
-    if (!productId || productId === "undefined") {
-        throw new ApiError("please enter id !", 402)
-    }
-
-    const cart = await Cart.findOne({ user: userId }).populate("items.productId")
+   const {productId} = req.params
+   if(!productId){
+    throw new ApiError("please provide product ID ",400)
+   }
+   const userId = req.user?._id
+   console.log("userId",userId)
+   const cart = await Cart.findOne({user:userId})
    
-    console.log("cart:", cart)
-    if (cart) {
-        console.log("cart@:", cart)
-        let item = cart.items.find(i => i.productId?.toString() == productId)
-        
-        if (item?.productId) {
-            item.quantity
-        } else {
-            cart?.items?.push({, productId })
-        }
-        await cart.save()
-        invalidateKeys({ cart: true })
+   console.log("first cart:",cart)
+   if(cart){
+       const oneItem =  cart.items.find(i=>i.productId?.toString() === productId)
+       console.log("one item:",oneItem)
+       if(oneItem){
         return res.status(200).json({
-            message: "cart created successfully!",
-            success: true,
-            cart
+            message:"product already added to the cart!",
+            success:true
         })
-    } else {
-        let cart = await Cart.create({
-            user: userId,
-            items: [{ productId, quantity }],
-        });
-
-        const populatedCart = await Cart.findById(cart._id).populate("items.productId");
-        if (!populatedCart) {
-            throw new ApiError("cart not found", 400)
-        }
-        invalidateKeys({ cart: true })
+       }
+       cart.items.push({
+        productId
+       })
+       await cart.save()
+       console.log("cart:",cart)
+       return res.status(200).json({
+        message:"product successfully added to the cart!",
+        success:true
+       })
+   }else{
+       const cart =  await Cart.create({
+            user:userId,
+            items:[
+                {
+                productId:productId,
+            }
+        ]
+        })
+        console.log("new cart:",cart)
         return res.status(200).json({
-            message: "cart created successfully!",
-            success: true,
-            cart: populatedCart
+            message:"cart successfully created !",
+            success:true
         })
-    }
+   }
+   
 })
 
 export const deleteCart = AsyncHandler(async (req: Request, res: Response) => {
@@ -68,7 +69,7 @@ export const deleteCart = AsyncHandler(async (req: Request, res: Response) => {
         throw new ApiError("cart not found!", 400)
     }
     await Cart.findByIdAndDelete(existingCart._id)
-    invalidateKeys({ cart: true })
+    await invalidateKeys({ cart: true })
     return res.status(200).json({
         message: "cart successfully deleted!",
         success: true
@@ -124,7 +125,7 @@ export const getAllCartProducts = AsyncHandler(async (req: Request, res: Respons
     if (!userId) {
         throw new ApiError("please provide user ID! ", 400)
     }
-    const key = `all-cart-products`
+    const key = `all-cart-products-${userId}`
     const cachedData = await redis.get(key)
     if (cachedData) {
         return res.status(200).json({
@@ -157,4 +158,13 @@ export const getAllCartProducts = AsyncHandler(async (req: Request, res: Respons
         product
     })
 
+})
+
+export const getAllCarts = AsyncHandler( async (req:Request,res:Response)=>{
+    const carts = await Cart.find({})
+    return res.status(200).json({
+        message:"all cart successfully fetched!",
+        success:true,
+        carts
+    })
 })
