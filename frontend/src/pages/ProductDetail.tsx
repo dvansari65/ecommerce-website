@@ -7,19 +7,27 @@ import  { useCreateCartMutation } from '@/redux/api/cartApi';
 import toast from 'react-hot-toast';
 
 function ProductDetail() {
-  const [createCart] = useCreateCartMutation()
+  const [createCart,isLoading] = useCreateCartMutation()
   
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading, isError } = useGetSingleProductsQuery(
+  const { data, isLoading:productLoading, isError:productError } = useGetSingleProductsQuery(
     { id: id as string },
     { skip: !id }
   );
-  useEffect(()=>{
-    console.log("id:",id)
-  },[])
-
+  const handleAddTocart = async ()=>{
+    let message = ""
+    try {
+      const res = await createCart({id:id!}).unwrap()
+      message = res.data?.message || "cart successfully created!"
+      toast.success(message)
+    } catch (error:any) {
+      message = error.response?.data?.message || "something went wrong while adding to the cart"
+     toast.error(message)
+    }
+  }
   if (isLoading) return <div className="text-center mt-10">Loading...</div>;
-  if (isError || !data?.product) return <div className="text-center mt-10">Error loading product.</div>;
+  if (productLoading) return <div className="text-center mt-10">Loading...</div>;
+  if (productError || !data?.product) return <div className="text-center mt-10">Error loading product.</div>;
 
   const product = data.product;
 

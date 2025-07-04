@@ -11,19 +11,14 @@ export const cartApi = createApi({
         credentials:"include"
     }),
     endpoints : (builder)=>({
-        createCart : builder.mutation<CartProps,{id:string,quantity:number}>({
-            query:({id,quantity})=>({
+        createCart : builder.mutation<CartProps,{id:string}>({
+            query:({id})=>({
                 url:`/create-cart/${id}`,
                 method:"POST",
-                body:{quantity}
             }),
 
         }),
-        getCart :builder.query<>(
-            {
-                
-            }
-        )
+        
     })
 })
 
