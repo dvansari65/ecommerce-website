@@ -5,6 +5,7 @@ import AsyncHandler from "../utils/asyncHandler";
 import ApiError from "../utils/errorHanlder";
 import redis from "../utils/redis";
 import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
+import { Product } from "../models/product.model";
 
 
 // while creatign the cart default qauntity should be 1 and there will be two funcitons will increase and decrease
@@ -78,7 +79,7 @@ export const deleteCart = AsyncHandler(async (req: Request, res: Response) => {
 })
 export const decreaseProductQuantity = AsyncHandler(async (req: Request<productIdType>, res: Response) => {
     const userId = req.user?._id as string
-    const productId = req.params.productId
+    const {productId} = req.params
 
     if (!userId || !productId || productId === "undefined") {
         throw new ApiError("Please provide a valid user ID and product ID!", 400)
@@ -101,7 +102,12 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
             success: false
         })
     }
-
+    if(item.quantity === 1){
+        return res.status(200).json({
+            message:"can not decrease the quantity less than 1!",
+            success:false
+        })
+    }
     if (item.quantity > 1) {
         item.quantity -= 1
     } else {
@@ -116,8 +122,47 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
     return res.status(200).json({
         message: "Product quantity updated!",
         success: true,
-        cart
+        quantity:item.quantity
     })
+})
+
+export const increaseQuantity = AsyncHandler(async (req:Request,res:Response)=>{
+    const {productId} = req.params
+    const userId = req.user?._id
+    if(!productId){
+        throw new ApiError('please provide product ID',400)
+    }
+    const product = await Product.findById(productId)
+    if(!product){
+        throw new ApiError("product not found!",404)
+    }
+    const cart = await Cart.findOne({user:userId})
+    if(!cart){
+        return res.status(404).json({
+            message:"cart not found!",
+            success:true
+        })
+    }
+    const item = cart.items.find(i=>i.productId?.toString() === productId)
+    if(!item){
+        throw new ApiError("item not found!",404)
+    }
+    if(item.quantity >= 1 && item.quantity <= product.stock){
+        item.quantity =+ 1
+        await cart.save()
+        return res.status(200).json({
+            message:"quantity increased!",
+            success:true,
+            quantity:item.quantity
+        })
+    }else{
+        return res.status(200).json({
+            message:"product out of stock, please decrease the quantity",
+            success:false
+        })
+    }
+    
+
 })
 
 export const getAllCartProducts = AsyncHandler(async (req: Request, res: Response) => {
