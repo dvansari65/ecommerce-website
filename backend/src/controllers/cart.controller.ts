@@ -11,49 +11,52 @@ import { Product } from "../models/product.model";
 // while creatign the cart default qauntity should be 1 and there will be two funcitons will increase and decrease
 // the quantity of the product
 export const createCart = AsyncHandler(async (req: Request<productIdType, {}, {}>, res: Response) => {
-   const {productId} = req.params
-   if(!productId){
-    throw new ApiError("please provide product ID ",400)
-   }
-   const userId = req.user?._id
-   console.log("userId",userId)
-   const cart = await Cart.findOne({user:userId})
-   
-   console.log("first cart:",cart)
-   if(cart){
-       const oneItem =  cart.items.find(i=>i.productId?.toString() === productId)
-       console.log("one item:",oneItem)
-       if(oneItem){
-        return res.status(200).json({
-            message:"product already added to the cart!",
-            success:true
-        })
-       }
-       cart.items.push({
-        productId
-       })
-       await cart.save()
-       console.log("cart:",cart)
-       return res.status(200).json({
-        message:"product successfully added to the cart!",
-        success:true
-       })
-   }else{
-       const cart =  await Cart.create({
-            user:userId,
-            items:[
+    const { productId } = req.params
+    if (!productId) {
+        throw new ApiError("please provide product ID ", 400)
+    }
+    const userId = req.user?._id
+    console.log("userId", userId)
+    const cart = await Cart.findOne({ user: userId })
+
+    console.log("first cart:", cart)
+    if (cart) {
+        const oneItem = cart?.items?.find(i => i.productId?.toString() === productId)
+        console.log("one item:", oneItem)
+        if (oneItem) {
+            return res.status(200).json({
+                message: "product already added to the cart!",
+                success: true
+            })
+        } else {
+            cart.items.push({
+                productId
+            })
+            await cart.save()
+            invalidateKeys({cart:true})
+            console.log("cart:", cart)
+            return res.status(200).json({
+                message: "product successfully added to the cart!",
+                success: true
+            })
+        }
+    } else {
+        const cart = await Cart.create({
+            user: userId,
+            items: [
                 {
-                productId:productId,
-            }
-        ]
+                    productId: productId,
+                }
+            ]
         })
-        console.log("new cart:",cart)
+        invalidateKeys({cart:true})
+        console.log("new cart:", cart)
         return res.status(200).json({
-            message:"cart successfully created !",
-            success:true
+            message: "cart successfully created !",
+            success: true
         })
-   }
-   
+    }
+
 })
 
 export const deleteCart = AsyncHandler(async (req: Request, res: Response) => {
@@ -79,7 +82,7 @@ export const deleteCart = AsyncHandler(async (req: Request, res: Response) => {
 })
 export const decreaseProductQuantity = AsyncHandler(async (req: Request<productIdType>, res: Response) => {
     const userId = req.user?._id as string
-    const {productId} = req.params
+    const { productId } = req.params
 
     if (!userId || !productId || productId === "undefined") {
         throw new ApiError("Please provide a valid user ID and product ID!", 400)
@@ -102,10 +105,10 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
             success: false
         })
     }
-    if(item.quantity === 1){
+    if (item.quantity === 1) {
         return res.status(200).json({
-            message:"can not decrease the quantity less than 1!",
-            success:false
+            message: "can not decrease the quantity less than 1!",
+            success: false
         })
     }
     if (item.quantity > 1) {
@@ -122,47 +125,60 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
     return res.status(200).json({
         message: "Product quantity updated!",
         success: true,
-        quantity:item.quantity
+        quantity: item.quantity
     })
 })
 
-export const increaseQuantity = AsyncHandler(async (req:Request,res:Response)=>{
-    const {productId} = req.params
+export const increaseQuantity = AsyncHandler(async (req: Request, res: Response) => {
+    const { productId } = req.params
     const userId = req.user?._id
-    if(!productId){
-        throw new ApiError('please provide product ID',400)
+    if (!productId) {
+        throw new ApiError('please provide product ID', 400)
     }
     const product = await Product.findById(productId)
-    if(!product){
-        throw new ApiError("product not found!",404)
+    if (!product) {
+        throw new ApiError("product not found!", 404)
     }
-    const cart = await Cart.findOne({user:userId})
-    if(!cart){
+    const cart = await Cart.findOne({ user: userId })
+    if (!cart) {
         return res.status(404).json({
-            message:"cart not found!",
-            success:true
+            message: "cart not found!",
+            success: true
         })
     }
-    const item = cart.items.find(i=>i.productId?.toString() === productId)
-    if(!item){
-        throw new ApiError("item not found!",404)
+    const item = cart.items.find(i => i.productId?.toString() === productId)
+    if (!item) {
+        throw new ApiError("item not found!", 404)
     }
-    if(item.quantity >= 1 && item.quantity <= product.stock){
-        item.quantity =+ 1
-        await cart.save()
+    if (item.quantity >= product.stock) {
         return res.status(200).json({
-            message:"quantity increased!",
-            success:true,
-            quantity:item.quantity
-        })
-    }else{
-        return res.status(200).json({
-            message:"product out of stock, please decrease the quantity",
-            success:false
+            message: "product is out of stock!",
+            success: false
         })
     }
-    
-
+    const updatedCart = await Cart.findOneAndUpdate(
+        {
+            user: userId,
+            "items.productId": productId
+        },
+        {
+            $inc: {
+                "items.$.quantity": 1
+            }
+        },
+        {
+            new: true
+        }
+    )
+    if (!updatedCart) {
+        throw new ApiError("cart can not be update", 500)
+    }
+    const updatedItem = updatedCart.items.find(i => i.productId?.toString() === productId);
+    return res.status(200).json({
+        message: "quantity increased!",
+        success: true,
+        quantity: updatedItem?.quantity
+    })
 })
 
 export const getAllCartProducts = AsyncHandler(async (req: Request, res: Response) => {
@@ -187,6 +203,7 @@ export const getAllCartProducts = AsyncHandler(async (req: Request, res: Respons
         })
     }
     const product = cart.items.map(i => i)
+    console.log('product:', product)
     if (product.length === 0) {
         return res.status(200).json({
             message: "your product cart is empty !",
@@ -205,11 +222,22 @@ export const getAllCartProducts = AsyncHandler(async (req: Request, res: Respons
 
 })
 
-export const getAllCarts = AsyncHandler( async (req:Request,res:Response)=>{
+export const getAllCarts = AsyncHandler(async (req: Request, res: Response) => {
+    const key = `all-carts`
+    const cachedData = await redis.get(key)
+    if (cachedData) {
+        return res.status(200).json({
+            message: "all carts fetched successfully!",
+            success: true,
+            carts: JSON.parse(cachedData)
+        })
+    }
     const carts = await Cart.find({})
+    await redis.set(key, JSON.stringify(carts))
+    await addCacheKey(key)
     return res.status(200).json({
-        message:"all cart successfully fetched!",
-        success:true,
+        message: "all cart successfully fetched!",
+        success: true,
         carts
     })
 })
