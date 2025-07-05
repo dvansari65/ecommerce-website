@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/api/userApi";
@@ -7,7 +7,9 @@ import type { RootState } from "../../redux/reducer/store";
 import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
 import LogoutConfirm from "../ui/LogoutConfirm";
-import {ShoppingCartIcon} from "lucide-react"
+import { ShoppingCartIcon } from "lucide-react"
+import MenuBar from "../features/MenuBar";
+
 const navItems = [
   { name: "home", path: "/" },
   { name: "shop", path: "/shop" },
@@ -15,13 +17,14 @@ const navItems = [
 ];
 
 const Header: React.FC = () => {
-  const [showModal, setShowModal] = useState(false)
+  const [showLogOutModal, setShowLogOutModal] = useState(false)
+  const [showMenuModal, setShowMenuModal] = useState(false)
   const { user, loading } = useSelector((state: RootState) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
 
-  const handleLogout = useCallback(async()=>{
+  const handleLogout = useCallback(async () => {
     try {
       const res = await logout();
       const message = res?.data?.message || "Logged out successfully!";
@@ -35,8 +38,10 @@ const Header: React.FC = () => {
       dispatch(userNotExist());
       navigate("/");
     }
-  },[logout,dispatch])
-
+  }, [logout, dispatch])
+  
+ 
+  
   return (
     <header className="w-full fixed  top-0 z-50 bg-white shadow border-b">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -60,21 +65,32 @@ const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-5">
-          <Link to="/cart" className="mr-2 "><ShoppingCartIcon className="hover:text-blue-500 text-gray-500  "/></Link>
-         
-          { (!loading && user) ? <button
-            onClick={() => setShowModal(true)}
+          <div>
+            <button onClick={() => setShowMenuModal(prev => !prev)}>
+              <ShoppingCartIcon />
+            </button>
+            {
+              showMenuModal && <div 
+              className="absolute right-0 mt-2 z-50"
+            >
+              <MenuBar  />
+            </div>
+            }
+          </div>
+
+          {(!loading && user) ? <button
+            onClick={() => setShowLogOutModal(true)}
             className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
           >
             Logout
-          </button>:(<Link
+          </button> : (<Link
             to="/login"
             className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
           >
             Login
           </Link>)}
-          {showModal && <LogoutConfirm onConfirm={handleLogout} onCancel={() => setShowModal(false)} />}
-          
+          {showLogOutModal && <LogoutConfirm onConfirm={handleLogout} onCancel={() => setShowLogOutModal(false)} />}
+
           <Link
             to="/signup"
             className="bg-gray-200 px-3 py-1 rounded-md hover:underline"

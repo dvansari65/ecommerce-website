@@ -49,24 +49,24 @@ export type error = {
   message:string,
   statusCode :number
 }
-export type eachItemType = {
+export type cartItem = {
   _id: string;
   productId: string;
   quantity: number;
 }
 
-export type createCartType = {
+export type Cart = {
   _id: string;
   user: string;
-  items: eachItemType[];
+  items: cartItem[];
   createdAt: string;
   updatedAt: string;
   __v: number;
 }
 
 export interface CartProps {
-  message:messageAndSuccessProps,
-  success:messageAndSuccessProps,
-  cart:createCartType,
+  message:string,
+  success:boolean,
+  cart:Cart,
   data:messageAndSuccessProps
 }
