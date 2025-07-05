@@ -57,7 +57,8 @@ export const invalidateKeys = async ({
             ))|| 
             (
                 cart && (
-                    key.startsWith("all-cart-products")
+                    key.startsWith("all-cart-products") || 
+                    key.startsWith("single-cart-product")
                 )
             )
         ) {
