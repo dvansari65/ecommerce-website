@@ -8,7 +8,7 @@ type modalProps = {
 }
 export default function Modal({ title, children, onClose }:modalProps) {
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+    <div className="position absolute   inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded shadow-xl relative animate-fade-in p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">{title}</h2>
