@@ -1,31 +1,40 @@
 import { useGetSingleProductsQuery } from '@/redux/api/productApi';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import Reviews from '@/components/features/Reviews'; // adjust import path if different
-import  { useCreateCartMutation } from '@/redux/api/cartApi';
+import { useCreateCartMutation } from '@/redux/api/cartApi';
 import toast from 'react-hot-toast';
 
 function ProductDetail() {
-  const [createCart,isLoading] = useCreateCartMutation()
-  
+  const [iCartCreated,setIsCartCreated] = useState<boolean>(false)
+  const [createCart] = useCreateCartMutation()
+
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading:productLoading, isError:productError } = useGetSingleProductsQuery(
+  const { data, isLoading: productLoading, isError: productError } = useGetSingleProductsQuery(
     { id: id as string },
     { skip: !id }
   );
-  const handleAddTocart = async ()=>{
+  useEffect(()=>{
+    console.log("id:",id)
+  },[])
+  const handleAddTocart = async () => {
     let message = ""
     try {
-      const res = await createCart({id:id!}).unwrap()
-      message = res.data?.message || "cart successfully created!"
-      toast.success(message)
-    } catch (error:any) {
+      const res = await createCart({ id: id! }).unwrap()
+      if (res.success) {
+        message = res.message || "cart successfully created!"
+        toast.success(message)
+        setIsCartCreated(res.success)
+      }else{
+        toast.error("cart can not be created!")
+      }
+    } catch (error: any) {
       message = error.response?.data?.message || "something went wrong while adding to the cart"
-     toast.error(message)
+      toast.error(message)
     }
   }
-  if (isLoading) return <div className="text-center mt-10">Loading...</div>;
+  
   if (productLoading) return <div className="text-center mt-10">Loading...</div>;
   if (productError || !data?.product) return <div className="text-center mt-10">Error loading product.</div>;
 
@@ -96,8 +105,10 @@ function ProductDetail() {
 
           {/* Action Buttons */}
           <div className="flex gap-4 mt-4">
-            <button onClick={handleAddTocart} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
-              Add to Cart
+            <button onClick={handleAddTocart} className="px-6 py-2 p-3 rounded ">
+              { iCartCreated === true  ?
+               (<div className='bg-slate-100 text-gray-700 hover:bg-white p-3 rounded-2xl'>Added...</div>):
+               (<div className='bg-blue-500 hover:bg-blue-400 text-white p-3 rounded-2xl'>Adde To Cart</div>) }
             </button>
             <button className="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 transition">
               Add to Wishlist
@@ -109,7 +120,7 @@ function ProductDetail() {
             <button className="font-bold pb-1">Detail {":"}
             </button>
             <div>
-            {product.description}
+              {product.description}
             </div>
           </div>
         </div>
