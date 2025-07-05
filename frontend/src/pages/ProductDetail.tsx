@@ -69,7 +69,7 @@ function ProductDetail() {
             )}
           </div>
 
-          {/* Ratings */}
+          
           <div className="flex items-center gap-1 text-yellow-400">
             <Star size={18} />
             <p className="text-sm text-gray-700">
@@ -105,6 +105,7 @@ function ProductDetail() {
 
           {/* Action Buttons */}
           <div className="flex gap-4 mt-4">
+          {/* //  TODO:fixing the state of the product */}
             <button onClick={handleAddTocart} className="px-6 py-2 p-3 rounded ">
               { iCartCreated === true  ?
                (<div className='bg-slate-100 text-gray-700 hover:bg-white p-3 rounded-2xl'>Added...</div>):

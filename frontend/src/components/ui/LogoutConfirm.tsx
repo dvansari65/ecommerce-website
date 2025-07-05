@@ -1,33 +1,34 @@
-import React from 'react'
-import Modal from '../features/Modal'
-type logoutConfirmType = {
-    onConfirm :  ()=>void
-    onCancel : ()=>void
-}
-function LogoutConfirm({onCancel,onConfirm}:logoutConfirmType) {
-    
+import React from 'react';
 
+type LogoutConfirmType = {
+  onClose: () => void;
+  proceedAction: () => void;
+};
+
+function LogoutConfirm({ onClose, proceedAction }: LogoutConfirmType) {
   return (
-    <Modal title="Confirm" onClose={onCancel}>
-   <div className='h-full w-fit'>
-   <p className="mb-6 text-center text-gray-700">Are you sure you want to continue?</p>
-    <div className="flex justify-center gap-4">
-      <button
-        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded font-semibold"
-        onClick={onConfirm}
-      >
-        ✓
-      </button>
-      <button
-        className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded font-semibold"
-        onClick={onCancel}
-      >
-        ✕
-      </button>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-[rgb(135,106,137)] text-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+        <h2 className="text-lg font-semibold text-center mb-4">
+          ARE YOU SURE YOU WANT TO LOGOUT?
+        </h2>
+        <div className="flex justify-between gap-4 mt-6">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 transition"
+          >
+            CANCEL
+          </button>
+          <button
+            onClick={proceedAction}
+            className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition"
+          >
+            LOGOUT
+          </button>
+        </div>
+      </div>
     </div>
-   </div>
-  </Modal>
-  )
+  );
 }
 
-export default LogoutConfirm
+export default LogoutConfirm;

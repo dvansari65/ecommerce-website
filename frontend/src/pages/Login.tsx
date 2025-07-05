@@ -16,7 +16,9 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       const res = await login({ userName, password });
+      // console.log("res.data?.refreshToken:",res)
       const user = res.data?.user!;
+      const token = user?.refreshToken
       if ("data" in res && res.data?.success) {
 
         toast.success(res.data?.message!);
@@ -24,10 +26,9 @@ const Login: React.FC = () => {
         navigate("/");
 
         localStorage.setItem("user", JSON.stringify(user));
-        if(res.data?.accessToken){
-          localStorage.setItem("token",res.data?.accessToken)
+        if(token){
+          localStorage.setItem("token",token)
         }
-        
         dispatch(userExist(user));
       } else {
         const error = res.error as FetchBaseQueryError;

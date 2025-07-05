@@ -44,3 +44,14 @@ export type productReviews = {
     success:boolean,
     totalPage:number
 }
+export type cartProduct = {
+    productId : Product,
+    quantity:number,
+    _id:string
+}
+
+export type getCartProductsType = {
+    message:string,
+    success:boolean,
+    products:cartProduct[]
+}
