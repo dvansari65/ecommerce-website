@@ -7,6 +7,9 @@ export interface User {
     dob?:string,
     gender?:"male" | "femal" | "transgender",
     photo?:string,
+    refreshToken ?  : string,
+    accessToken ?  : string,
+    
 }
 
 export interface Product {
@@ -70,3 +73,5 @@ export interface CartProps {
   cart:Cart,
   data:messageAndSuccessProps
 }
+
+

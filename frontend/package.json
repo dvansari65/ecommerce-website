@@ -10,15 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.21.1",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.10",
     "@tanstack/react-query": "^5.81.0",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "firebase": "^11.9.1",
-    "framer-motion": "^12.19.1",
+    "framer-motion": "^12.23.0",
     "lucide-react": "^0.522.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

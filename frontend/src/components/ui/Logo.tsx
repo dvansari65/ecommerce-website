@@ -7,7 +7,7 @@ const Logo: React.FC = () => {
       to="/"
       className="inline-block font-[Rubik] text-3xl font-extrabold text-black relative group"
     >
-      <span className="lowercase tracking-wide text-black">sho</span>
+      <span className="lowercase tracking-wide text-white">sho</span>
       <span className="relative">
         <span className="lowercase tracking-wide text-blue-400">p</span>
         {/* Arc under the "p" */}
@@ -21,7 +21,7 @@ const Logo: React.FC = () => {
           <path d="M2 12s3.5 5 10 5 10-5 10-5" />
         </svg>
       </span>
-      <span className="lowercase tracking-wide text-black">it</span>
+      <span className="lowercase tracking-wide text-white">it</span>
       <sup className="text-xs ml-1 text-blue-400 group-hover:text-blue-500">®</sup>
     </Link>
   );

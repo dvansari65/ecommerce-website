@@ -25,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className="bg-white border border-gray-200 rounded-lg shadow hover:shadow-md transition cursor-pointer p-4 flex flex-col justify-between"
+      className=" border-[1px] hover:border-blue-500  border-gray-400 bg-[rgb(135,106,137)] rounded-lg shadow hover:shadow-md transition cursor-pointer p-4 flex flex-col justify-between"
     >
       {/* Wishlist Icon + Price */}
       <div className="flex justify-between items-start mb-2">

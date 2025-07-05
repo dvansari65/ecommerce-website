@@ -19,15 +19,15 @@ function App() {
 const dispatch = useDispatch()
   const { user, loading } = useSelector((state: RootState) => state.userReducer)
   useEffect(() => {
-    const localUser = localStorage.getItem("user");
+    const userFromStorage = localStorage.getItem("user");
     const token = localStorage.getItem("token");
   
-    if (localUser && token) {
-      dispatch(userExist(JSON.parse(localUser)));
+    if (userFromStorage && token) {
+      const user = JSON.parse(userFromStorage); 
+      dispatch(userExist(user));
     } else {
       dispatch(userNotExist());
     }
-   
   }, []);
   
   return loading ? <div>loading..</div> : (

@@ -30,46 +30,46 @@ function Shop() {
   if(isError) <div>loading....</div>
   return isLoading ? <div>loading...</div> : (
     (
-      <div className='min-h-screen flex bg-white pt-20 px-4 text-white'>
-        <aside className='w-[250px] flex-shrink-0 flex flex-col items-center bg-white shadow-2xl h-[700px]'>
+      <div className='min-h-screen flex  pt-20 px-4 text-white'>
+        <aside className='w-[250px] flex-shrink-0 flex flex-col items-center rounded-xl bg-[rgb(135,106,137)] shadow-2xl h-[700px] border-[1px] border-gray-400 hover:border-blue-400'>
           <h1 className='mt-2 mb-10 text-3xl text-blue-400'>FILTERS</h1>
-          <span className='text-black text-[14px] mb-2'>CATEGORY</span>
+          <span className='text-white text-[14px] mb-2'>CATEGORY</span>
           <select
             name="category"
-            className='text-black w-[200px] h-[30px] border-none hover:bg-gray-400 border border-black'
+            className='text-white w-[200px] h-[30px] border-[1px]   border-white'
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            <option value="">all</option>
+            <option className='border-gray-400'  value="">all</option>
             {categoryData?.products.map(i => (
-              <option value={i} key={i}>{i}</option>
+              <option className='text-white ' value={i} key={i}>{i}</option>
             ))}
           </select>
   
           <div className='w-full mt-5 p-2 flex flex-col justify-center items-center'>
-            <h3 className='text-black mb-2'>max-price {price}</h3>
+            <h3 className='text-white mb-2'>max-price {price}</h3>
             <input
               type="range"
               value={price}
               min={100}
               max={100000}
-              className="w-full h-2 text-black bg-gray-200 rounded-lg appearance-none cursor-pointer range-sm accent-blue-500"
+              className="w-full h-2 text-white bg-gray-200 rounded-lg appearance-none cursor-pointer range-sm accent-blue-500"
               onChange={(e) => setPrice(Number(e.target.value))}
             />
             <div className='flex justify-between my-2'>
               <span>{ }</span>
             </div>
           </div>
-          <h2 className='text-black'>SORT </h2>
-          <select className='text-black w-[200px] h-[30px]'  value={sort} onChange={(e) => setSort((e.target.value))}>
-            <option className='text-black'  value="">None</option>
-            <option className='text-black' value="asc">price (low to high)</option>
-            <option className='text-black'  value="dsc">price (high to low)</option>
+          <h2 className='text-white'>SORT </h2>
+          <select className='text-white w-[200px] h-[30px]'  value={sort} onChange={(e) => setSort((e.target.value))}>
+            <option className='text-white'  value="">None</option>
+            <option className='text-white' value="asc">price (low to high)</option>
+            <option className='text-white'  value="dsc">price (high to low)</option>
           </select>
         </aside>
   
         <div className='flex-1 flex  items-center flex-col px-2'>
-          <div className='w-full ml-5 mb-3'><input type="text" value={search} onChange={(e) => setSearch(String(e.target.value))} placeholder='search by name..' className='text-gray-500' /></div>
+          <div className='w-full ml-5 mb-3'><input type="text" value={search} onChange={(e) => setSearch(String(e.target.value))} placeholder='search by name..' className='text-white' /></div>
           <main className='grid grid-cols-4 gap-3 w-full'>
             {!isLoading ? data?.products.map(i => (
               < ProductCard onClick={()=>handleNavigate(i._id)} name={i.name} category={i.category} price={i.price} ratings={i.ratings || 0} photo={i.photo} />
