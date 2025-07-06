@@ -15,7 +15,8 @@ function CartItem({ cancelAddToCart, increaseQuantity, decreaseQuantity }: CartM
     }, [data])
     if (isLoading) return <Spinner />
     if (isError) return <div className='text-red-500 flex justify-center items-center'>FAILED TO FETCH CART PRODUCTS!</div>
-
+    if(data?.success === false) return <div className='text-3xl text-red-400 w-full  text-center'>cart not found!</div>
+       
     return (
         <div>
             {
@@ -28,19 +29,19 @@ function CartItem({ cancelAddToCart, increaseQuantity, decreaseQuantity }: CartM
                                 )
                             }
                         </div>
-                        <div className='flex flex-col items-start justify-start col-span-6 text-white p-2 '>
-                            <span className=' text-gray-300 p-[2px] text-[10px] '>@discription:</span>
-                            <span>{product?.productId?.description}</span>
+                        <div className='flex flex-col items-start justify-start col-span-6 text-white p-2 mt-2'>
+                            
+                            <span>{product?.productId?.name}</span>
                         </div>
                         <div className='col-span-3 flex flex-row justify-start  items-start p-3 '>
-                            <div onClick={cancelAddToCart} className=' p-2 rounded-xl text-gray-200 hover:bg-[rgb(135,106,137)]'>
+                            <div onClick={cancelAddToCart} className=' p-2 rounded-xl  text-gray-200 hover:bg-[rgb(135,106,137)]'>
                                 <button> cancel </button>
                             </div>
                             <div className='flex flex-row justify-start gap-2 items-center mt-2 ml-6'>
                                 <div className='flex justify-center gap-2 text-white'>
                                     <button onClick={decreaseQuantity}><ArrowDown /></button>
                                     <span >
-                                        .{product.quantity}.
+                                        {product.quantity}
                                     </span>
                                     <button onClick={increaseQuantity}><ArrowUp /></button>
                                 </div>

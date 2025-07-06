@@ -3,39 +3,41 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import Reviews from '@/components/features/Reviews'; // adjust import path if different
-import { useCreateCartMutation } from '@/redux/api/cartApi';
+import { useCreateCartMutation, useGetCartProductsQuery } from '@/redux/api/cartApi';
 import toast from 'react-hot-toast';
 
 function ProductDetail() {
-  const [iCartCreated,setIsCartCreated] = useState<boolean>(false)
   const [createCart] = useCreateCartMutation()
-
   const { id } = useParams<{ id: string }>();
   const { data, isLoading: productLoading, isError: productError } = useGetSingleProductsQuery(
     { id: id as string },
     { skip: !id }
   );
-  useEffect(()=>{
-    console.log("id:",id)
-    console.log("data:",data)
-    
-  },[])
+  const {data:cartProducts} = useGetCartProductsQuery()
+  
   const handleAddTocart = async () => {
     let message = ""
     try {
       const res = await createCart({ id: id! }).unwrap()
+      console.log("res:",res)
       if (res.success) {
-        message = res.message || "cart successfully created!"
+        message = res.message || "product added to the cart!"
         toast.success(message)
-        setIsCartCreated(res.success)
+       
       }else{
-        toast.error("cart can not be created!")
+        message = res.message || "product is already added to the cart!"
+        toast.success(res.message)
+       
       }
     } catch (error: any) {
       message = error.response?.data?.message || "something went wrong while adding to the cart"
       toast.error(message)
     }
   }
+
+  const isCartIn  = cartProducts?.products?.some(
+        (item)=> item.productId._id === id
+   )
   
   if (productLoading) return <div className="text-center mt-10">Loading...</div>;
   if (productError || !data?.product) return <div className="text-center mt-10">Error loading product.</div>;
@@ -109,7 +111,7 @@ function ProductDetail() {
           <div className="flex gap-4 mt-4">
           {/* //  TODO:fixing the state of the product */}
             <button onClick={handleAddTocart} className="px-6 py-2 p-3 rounded ">
-              { iCartCreated === true  ?
+              { isCartIn   ?
                (<div className='bg-slate-100 text-gray-700 hover:bg-white p-3 rounded-2xl'>Added...</div>):
                (<div className='bg-blue-500 hover:bg-blue-400 text-white p-3 rounded-2xl'>Adde To Cart</div>) }
             </button>

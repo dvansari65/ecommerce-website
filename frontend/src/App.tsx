@@ -13,7 +13,7 @@ import type { RootState } from "./redux/reducer/store"
 // import Signup from "./pages/Sign-up"
 import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
-import Cart from "./components/common/Cart"
+import Cart from "./pages/Cart"
 
 function App() {
 const dispatch = useDispatch()

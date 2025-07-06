@@ -11,18 +11,21 @@ export const cartApi = createApi({
         baseUrl:`${server}/api/v1/cart`,
         credentials:"include"
     }),
+    tagTypes: ["Cart"],
     endpoints : (builder)=>({
         createCart : builder.mutation<CartProps,{id:string}>({
             query:({id})=>({
                 url:`/create-cart/${id}`,
                 method:"POST",
             }),
+            invalidatesTags:["Cart"]
 
         }),
         getCartProducts : builder.query <getCartProductsType,void>({
             query : ()=>({
                 url:"/get-cart-products"
-            })
+            }),
+            providesTags:["Cart"]
         })
         
     })
