@@ -192,7 +192,7 @@ export const getAllCartProducts = AsyncHandler(async (req: Request, res: Respons
         return res.status(200).json({
             message: "all cart products fetched successfully!",
             success: true,
-            product: JSON.parse(cachedData)
+            products: JSON.parse(cachedData)
         })
     }
     const cart = await Cart.findOne({
@@ -264,7 +264,7 @@ export const getSingleProduct = AsyncHandler(async (req: Request, res: Response)
     if (!cart) {
         throw new ApiError("cart not found!", 404)
     }
-    const existingProduct = cart.items.map(i => i.productId?.toString() === productId)
+    const existingProduct = cart.items.find(i => i.productId?.toString() === productId)
     if (!existingProduct) {
         return res.status(500).json({
             message: "product not found!",

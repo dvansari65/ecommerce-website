@@ -299,7 +299,7 @@ export const getAllCategories = AsyncHandler(async (req: Request, res: Response)
         products:productsByCategories,
     });
 });
-// Ensure redis client is properly configured
+
 
 export const getSingleProduct = AsyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;

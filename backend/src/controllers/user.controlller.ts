@@ -114,19 +114,14 @@ export const loginUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>,
         .status(200)
         .cookie("refreshToken", refreshToken as string, {
             httpOnly: true,
-            secure:false, // true only in production
-           sameSite:"lax", // or "none" if you need cross-site, but then secure:true is required
-          
-        })
-        .cookie("accessToken", accessToken as string, {
-            httpOnly: true,
             secure: false, // true only in production
             sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
-           
+
         })
         .json({
             success: true,
             message: `welcome ${userName}!`,
+            accessToken,
             user: loggedInUser
         })
 })
@@ -404,6 +399,10 @@ export const generateNewAccessToken = AsyncHandler(async (req: Request, res: Res
     let decodedToken: jwt.JwtPayload;
     try {
         decodedToken = jwt.verify(refreshtoken, refreshTokenSecret) as jwt.JwtPayload;
+        const user = await User.findById(decodedToken._id);
+        if (!user || user.refreshToken !== refreshtoken) {
+            return res.status(403).json({ message: "Invalid refresh token (mismatch)" });
+        }
     } catch (error) {
         return res.status(403).json({ message: "Invalid or expired refresh token" });
     }
@@ -420,11 +419,7 @@ export const generateNewAccessToken = AsyncHandler(async (req: Request, res: Res
         }
     );
 
-    return res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax", // recommended for most cases
-    })
+    return res
         .status(200)
-        .json({ success: true, message: "token generated successfully!" });
+        .json({ success: true, message: "token generated successfully!", accessToken: newAccessToken });
 });

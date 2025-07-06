@@ -19,6 +19,7 @@ const Login: React.FC = () => {
       // console.log("res.data?.refreshToken:",res)
       const user = res.data?.user!;
       const token = user?.refreshToken
+      console.log("user",res)
       if ("data" in res && res.data?.success) {
 
         toast.success(res.data?.message!);

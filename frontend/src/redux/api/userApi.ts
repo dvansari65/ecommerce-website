@@ -7,6 +7,7 @@ import { customBaseQuery } from "../customBaseQuery/customeBaseQuery";
 export const userApi = createApi({
     reducerPath: "userApi",
     baseQuery: customBaseQuery,
+    
     endpoints: (builder) => ({
         login: builder.mutation<messageResponse, User>({
             query: (user) => ({

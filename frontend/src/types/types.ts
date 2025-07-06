@@ -41,7 +41,7 @@ export interface Review {
 export type refreshDataResponse = {
   success:boolean,
   message:string,
-  newAccessToken:string
+  accessToken:string
 }
  export type messageAndSuccessProps = {
   message:string ,
