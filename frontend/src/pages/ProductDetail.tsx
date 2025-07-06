@@ -17,6 +17,8 @@ function ProductDetail() {
   );
   useEffect(()=>{
     console.log("id:",id)
+    console.log("data:",data)
+    
   },[])
   const handleAddTocart = async () => {
     let message = ""

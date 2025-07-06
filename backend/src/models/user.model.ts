@@ -116,9 +116,7 @@ userSchema.methods.generateAccessToken = function() {
 
     return jwt.sign(
         {
-            _id: this._id,
-            userName: this.userName,
-            email: this.email,
+            _id: this._id
         },
         secret,
         { expiresIn: "1d" }  // Use a literal string instead of variable
@@ -126,7 +124,7 @@ userSchema.methods.generateAccessToken = function() {
 }
 userSchema.methods.generateRefreshToken = function() {
     const secret = process.env.REFRESH_TOKEN_SECRET;
-    if (!secret) throw new Error("ACCESS_TOKEN_SECRET is not defined");
+    if (!secret) throw new Error("REFRESH_TOKEN_SECRET is not defined");
 
     return jwt.sign(
         {

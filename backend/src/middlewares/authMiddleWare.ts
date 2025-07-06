@@ -5,7 +5,7 @@ import { User } from "../models/user.model"
 
 export const verifyJwt = async(req:Request,res:Response,next:NextFunction)=>{
     try {
-        const token = req.cookies?.accessToken || req.headers["authorization"]?.replace("Bearer ","")
+        const token =  req.headers["authorization"]?.replace("Bearer ","") || req.cookies?.accessToken
     
         if(!token){
             throw new ApiError("user is not login",401)
