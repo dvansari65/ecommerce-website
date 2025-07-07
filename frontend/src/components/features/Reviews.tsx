@@ -36,19 +36,19 @@ const Reviews: React.FC<ReviewsProps> = ({ id, className }) => {
   }
 
   return (
-    <div className={clsx("w-full p-5 bg-white shadow rounded", className)}>
-      <h2 className="text-xl font-semibold mb-3">Product Reviews</h2>
+    <div className={clsx("w-full p-5 bg-[rgb(103,78,105)] shadow rounded", className)}>
+      <h2 className="text-xl font-semibold text-gray-300 mb-3">Product Reviews:</h2>
 
       {/* Scrollable container */}
       <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
         {memoizedReviews.length === 0 ? (
-          <p className="text-gray-500">No reviews yet.</p>
+          <p className="text-white">No reviews yet.</p>
         ) : (
           memoizedReviews.map((review: any) => (
             <div key={review._id} className="border-b pb-4">
               <div className="flex justify-between items-center">
                 <span className="font-semibold">{review.user?.userName || "Anonymous"}</span>
-                <span className="text-xs text-gray-500">{review.formattedDate}</span>
+                <span className="text-xs text-white">{review.formattedDate}</span>
               </div>
               <div className="flex items-center my-1">
                 {[...Array(review.rating)].map((_, i) => (

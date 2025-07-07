@@ -64,16 +64,7 @@ const Header: React.FC = () => {
 
         <div className="flex items-center gap-4 relative">
           {/* Cart Icon & Menu */}
-          <div className="relative ">
-            <button onClick={() => setShowMenu((prev) => !prev)}>
-              <ShoppingCartIcon className="text-white hover:cursor-pointer" />
-            </button>
-            {showMenu && (
-              <div className="absolute mt-3 right-0 z-50">
-                <MenuBar />
-              </div>
-            )}
-          </div>
+         <MenuBar/>
 
           {/* Auth Actions */}
           {!loading && (

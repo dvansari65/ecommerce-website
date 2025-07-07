@@ -25,9 +25,12 @@ const dispatch = useDispatch()
     if (userFromStorage && token) {
       const user = JSON.parse(userFromStorage); 
       dispatch(userExist(user));
+      console.log("user  exist:",user)
     } else {
       dispatch(userNotExist());
+      console.log("user not exist:",user)
     }
+    
   }, []);
   
   return loading ? <div>loading..</div> : (
@@ -36,8 +39,8 @@ const dispatch = useDispatch()
         <Route element={<Layout />}>
         <Route path="/" element={<Home/>} />
         <Route path="/shop" element={<Shop/>} />
-        <Route path="/product/:id" element={user ? <ProductDetail/> : <Navigate to={"/login"}/>} />
-        <Route path="/cart" element={user ? <Cart/> : <Navigate to={"/login"}/>} />
+        <Route path="/product/:id" element={user ? <ProductDetail/> : <Login/>} />
+        <Route path="/cart" element={user ? <Cart/> : <Navigate to='/login'/>} />
         </Route>
           <Route path="/login" element={<Login/>} />
       </Routes>

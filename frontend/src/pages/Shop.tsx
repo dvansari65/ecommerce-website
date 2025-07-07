@@ -2,7 +2,7 @@ import ProductCard from '@/components/features/ProductCard'
 import { useGetProductsByCategoriesQuery, useSearchProductsQuery } from '@/redux/api/productApi'
 import  {  useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-
+import Skeleton from '@/components/features/Skeleton'
 function Shop() {
   const navigate = useNavigate()
   const searchQuery = useSearchParams()[0]
@@ -27,11 +27,11 @@ function Shop() {
   //   console.log("category", categoryData)
   // }, [data])
 
-  if(isError) <div>loading....</div>
-  return isLoading ? <div>loading...</div> : (
+  if(isError)return  <div className='text-3xl text-gray-500 text-center'> failed to fetched data!</div>
+  return isLoading ?<Skeleton/> : (
     (
       <div className='min-h-screen flex  pt-20 px-4 text-white'>
-        <aside className='w-[250px] flex-shrink-0 flex flex-col items-center rounded-xl bg-[rgb(135,106,137)] shadow-2xl h-[700px] border-[1px] border-gray-400 hover:border-blue-400'>
+        <aside className='w-[250px] flex-shrink-0 flex flex-col items-center rounded-xl bg-[rgb(103,78,105)] shadow-2xl h-[700px] border-[1px] border-gray-400 hover:border-blue-400'>
           <h1 className='mt-2 mb-10 text-3xl text-blue-400'>FILTERS</h1>
           <span className='text-white text-[14px] mb-2'>CATEGORY</span>
           <select
@@ -75,10 +75,10 @@ function Shop() {
               < ProductCard onClick={()=>handleNavigate(i._id)} name={i.name} category={i.category} price={i.price} ratings={i.ratings || 0} photo={i.photo} />
             )) : <div>loading...</div>}
           </main>
-          <article className='bg-gray-100 p-5  rounded-2xl fixed   bottom-0 mb-15  mr flex flex-row gap-5 justify-center items-center'>
-            <button className='text-black hover:text-blue-400 hover:underline' disabled={!isPrevPage} onClick={() => setPage(prev => prev - 1)}>prev</button>
-            <span className='text-black'>{page} of {data?.totalPage || 1}</span>
-            <button className='text-black hover:text-blue-400 hover:underline' disabled={!isNextPage} onClick={() => setPage(prev => prev + 1)}>next</button>
+          <article className='bg-[rgb(103,78,105)] p-5  rounded-2xl fixed   bottom-0 mb-15  mr flex flex-row gap-5 justify-center items-center'>
+            <button className='text-white hover:text-blue-400 hover:underline' disabled={!isPrevPage} onClick={() => setPage(prev => prev - 1)}>prev</button>
+            <span className='text-white'>{page} of {data?.totalPage || 1}</span>
+            <button className='text-white hover:text-blue-400 hover:underline' disabled={!isNextPage} onClick={() => setPage(prev => prev + 1)}>next</button>
           </article>
         </div>
       </div>
