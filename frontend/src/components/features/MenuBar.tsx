@@ -1,21 +1,42 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function MenuBar() {
+    const [showMenu,setShoMenu] = useState(false)
+
     return (
-        <div className="bg-[rgb(135,106,137)] shadow-lg rounded-2xl w-48 p-3 grid grid-cols-1 grid-rows-2 gap-2">
-            <Link
-                to="/cart"
-                className="w-full px-4 py-2 text-sm text-white hover:border-gray-400 hover:border-[1px] rounded-xl transition"
+        <div>
+            <button
+            onClick={()=>setShoMenu(prev=>!prev)}
+                data-popover-target="menu"
+                className="  rounded-md bg-gray-100 p-2 border border-transparent text-center text-sm text-black transition-all shadow-md  active:bg-slate-700  active:shadow-none hover:underline hover:cursor-pointer ml-2" type="button">
+                Open Menu
+            </button>
+            {
+                showMenu ? (
+                <ul
+                role="menu"
+                data-popover="menu"
+                data-popover-placement="bottom"
+                className=" absolute z-10 min-w-[180px] overflow-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg shadow-sm focus:outline-none mt-2"
             >
-                My Cart
-            </Link>
-            <Link
-                to="/orders"
-                className="w-full px-4 py-2 text-sm text-white  hover:border-gray-400 hover:border-[1px] rounded-xl transition"
-            >
-                My Orders
-            </Link>
+                <li
+                    role="menuitem"
+                    className="cursor-pointer text-slate-800 flex w-full text-sm items-center rounded-md p-3 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100"
+                >
+                    <Link to="/cart">CART</Link>
+                </li>
+                <li
+                    role="menuitem"
+                    className="cursor-pointer text-slate-800 flex w-full text-sm items-center rounded-md p-3 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100"
+                >
+                    <Link to="/order">ORDER</Link>
+                </li>
+                
+            </ul>
+                ):null
+            }
+
         </div>
     )
 }

@@ -1,22 +1,60 @@
 import React, { useEffect } from 'react'
 import { ArrowDown, ArrowUp } from "lucide-react"
 import Spinner from '@/components/features/LoaderIcon';
-import { useGetCartProductsQuery } from '@/redux/api/cartApi';
-type CartMethodType = {
-    cancelAddToCart: () => void,
-    increaseQuantity: () => void,
-    decreaseQuantity: () => void
-}
+import { useDecreaseQuantityMutation, useDeleteCartProductMutation, useGetCartProductsQuery, useIncreaseProductQuantityMutation } from '@/redux/api/cartApi';
+import toast from 'react-hot-toast';
 
-function CartItem({ cancelAddToCart, increaseQuantity, decreaseQuantity }: CartMethodType) {
+
+function CartItem() {
     const { data, isError, isLoading } = useGetCartProductsQuery()
-    useEffect(() => {
-        console.log("product data", data)
-    }, [data])
+    const [deleteCartProduct] = useDeleteCartProductMutation()
+    const [increaseProductQuantity] = useIncreaseProductQuantityMutation()
+    const [decreaseQuantity ] = useDecreaseQuantityMutation()
+    // useEffect(() => {
+    //     console.log("product data", data)
+    // }, [data])
+    const decreaseProductQuantity = async(productId:string)=>{
+        try {
+            const res = await decreaseQuantity({productId})
+            if(res.data?.success){
+                toast.success(res.data?.message)
+            }else{
+                toast.error(res.data?.message || "response not obtain from backend!")
+            }
+        } catch (error) {
+            toast.error("failed to decrease the quantity!")
+        }
+    }
+    const increaseQuantity = async (productId:string)=>{
+        try {
+            const res = await increaseProductQuantity({productId})
+            if(res.data?.success){
+                toast.success(res.data?.message)
+            }
+        } catch (error) {
+            toast.error("failed to increase the quantity!")
+            console.log("error:",error)
+        }
+    }
+
+    const deleteProductFromCart = async (productId: string) => {
+        try {
+            const response = await deleteCartProduct({ productId })
+            console.log("response:", response)
+            if (response.data?.success) {
+                toast.success(response.data?.message)
+            }
+        } catch (error) {
+            console.error("failed to delete the product!")
+            toast.error("failed to delete the product!")
+        }
+    }
+
+
     if (isLoading) return <Spinner />
     if (isError) return <div className='text-red-500 flex justify-center items-center'>FAILED TO FETCH CART PRODUCTS!</div>
-    if(data?.success === false) return <div className='text-3xl text-red-400 w-full  text-center'>cart not found!</div>
-       
+    if (data?.success === false) return <div className='text-3xl text-gray-500 w-full  text-center'>cart is empty!</div>
+
     return (
         <div>
             {
@@ -30,20 +68,20 @@ function CartItem({ cancelAddToCart, increaseQuantity, decreaseQuantity }: CartM
                             }
                         </div>
                         <div className='flex flex-col items-start justify-start col-span-6 text-white p-2 mt-2'>
-                            
+
                             <span>{product?.productId?.name}</span>
                         </div>
                         <div className='col-span-3 flex flex-row justify-start  items-start p-3 '>
-                            <div onClick={cancelAddToCart} className=' p-2 rounded-xl  text-gray-200 hover:bg-[rgb(135,106,137)]'>
+                            <div onClick={() => deleteProductFromCart(product.productId._id)} className=' p-2 rounded-xl  text-gray-200 hover:bg-[rgb(135,106,137)]'>
                                 <button> cancel </button>
                             </div>
                             <div className='flex flex-row justify-start gap-2 items-center mt-2 ml-6'>
                                 <div className='flex justify-center gap-2 text-white'>
-                                    <button onClick={decreaseQuantity}><ArrowDown /></button>
+                                    <button onClick={()=>decreaseProductQuantity(product.productId._id)}  ><ArrowDown /></button>
                                     <span >
                                         {product.quantity}
                                     </span>
-                                    <button onClick={increaseQuantity}><ArrowUp /></button>
+                                    <button onClick={()=>increaseQuantity(product.productId._id)} ><ArrowUp /></button>
                                 </div>
                             </div>
                         </div>

@@ -45,7 +45,7 @@ export type refreshDataResponse = {
 }
  export type messageAndSuccessProps = {
   message:string ,
-  success?:boolean
+  success:boolean
  }
 
 export type error = {

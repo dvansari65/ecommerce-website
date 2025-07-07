@@ -1,1 +1,16 @@
 @import "tailwindcss";
+@keyframes colorChange {
+    0% { background-color: #b1b5b7; }   /* red-400 */
+    25% { background-color: #9a9fa4; }  /* blue-400 */
+    40% { background-color: #b9bcc0; }  /* green-400 */
+    50% { background-color: #8a8d90 }  /* yellow-400 */
+    70% { background-color: #a3a6a7 }  /* yellow-400 */
+    80% { background-color: #adb0b3 }  /* yellow-400 */
+    90% { background-color: #8c9092 }  /* yellow-400 */
+    100% { background-color: #a4a7a9 }  /* yellow-400 */
+     /* back to red-400 */
+  }
+  
+  .color-cycle {
+    animation: colorChange 6s linear infinite;
+  }
