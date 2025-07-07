@@ -121,7 +121,7 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
     }
 
     await cart.save()
-    invalidateKeys({ cart: true })
+    await invalidateKeys({cart:true})
     return res.status(200).json({
         message: "Product quantity updated!",
         success: true,
@@ -174,6 +174,7 @@ export const increaseQuantity = AsyncHandler(async (req: Request, res: Response)
         throw new ApiError("cart can not be update", 500)
     }
     const updatedItem = updatedCart.items.find(i => i.productId?.toString() === productId);
+    await invalidateKeys({cart:true})
     return res.status(200).json({
         message: "quantity increased!",
         success: true,
@@ -278,6 +279,39 @@ export const getSingleProductFromCart = AsyncHandler(async (req: Request, res: R
         message: "product  found!",
         success: true,
         product: existingProduct
+    })
+
+})
+
+
+export const deleteProductFromCart = AsyncHandler( async( req:Request,res:Response)=>{
+    const {productId} = req.params
+    const userId = req.user?._id
+    if(!productId){
+        throw new ApiError("please provide product ID!",400)
+    }
+    const cart = await Cart.findOne({user:userId})
+    if(!cart){
+       return res.status(404).json({
+            message:"cart not found!",
+            success:false
+       })
+    }
+    const product = cart.items.find(i=> i.productId?.toString() === productId)
+    console.log("product:",product)
+    if(!product){
+        return res.status(200).json({
+            message:"product not found!",
+            success:false
+        })
+    }
+    cart.items.pull(product?._id)
+    console.log("product:",product._id)
+    await cart.save()
+    await invalidateKeys({cart:true})
+    return res.status(200).json({
+        message:"product deleted !",
+        success:true
     })
 
 })
