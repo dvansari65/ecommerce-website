@@ -17,7 +17,7 @@ export const invalidateKeys = async ({
     admin,
     cart
 }: invalidateProps) => {
-    
+
     const keysToDelete: string[] = [];
 
     // Fetch all keys from Redis set
@@ -28,8 +28,8 @@ export const invalidateKeys = async ({
                 key.startsWith("all-products-page-") ||
                 key.startsWith("product-") ||     // for single products
                 key.startsWith("products-page-") || // paginated filtered list
-                key.startsWith("products-category")||
-                key.startsWith("latest-product")||
+                key.startsWith("products-category") ||
+                key.startsWith("latest-product") ||
                 key.startsWith("filter-product")
             )) ||
             (order && (
@@ -39,7 +39,7 @@ export const invalidateKeys = async ({
             )) ||
             (review && (
                 key.startsWith("single-review") ||
-                key.startsWith("all-reviews")||
+                key.startsWith("all-reviews") ||
                 key.startsWith(`single-product-review`)
             )) ||
             (user && (
@@ -54,11 +54,12 @@ export const invalidateKeys = async ({
                 key.startsWith("stats") ||
                 key.startsWith("line-chart") ||
                 key.startsWith("key-chart")
-            ))|| 
+            )) ||
             (
                 cart && (
-                    key.startsWith("all-cart-products") || 
-                    key.startsWith("single-cart-product")
+                    key.startsWith("all-carts") ||
+                    key.startsWith("single-cart-product")||
+                    key.startsWith("all-cart-products")
                 )
             )
         ) {

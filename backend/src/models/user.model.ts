@@ -112,6 +112,8 @@ userSchema.methods.isPasswordCorrect = async function(password: string) {
 // }
 userSchema.methods.generateAccessToken = function() {
     const secret = process.env.ACCESS_TOKEN_SECRET;
+    console.log("Access Token Secret:", secret);
+
     if (!secret) throw new Error("ACCESS_TOKEN_SECRET is not defined");
 
     return jwt.sign(
