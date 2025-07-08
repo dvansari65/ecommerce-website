@@ -7,13 +7,11 @@ import { useDispatch, useSelector } from "react-redux"
 import { userExist, userNotExist } from "./redux/reducer/userReducer"
 import Home from "./pages/Home"
 import Layout from "./Layout"
-// import { useLogOut } from "./redux/api/userApi"
-import type { User } from "./types/types"
 import type { RootState } from "./redux/reducer/store"
-// import Signup from "./pages/Sign-up"
 import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
 import Cart from "./pages/Cart"
+import PrivateRoute from "./components/features/PrivateRoute"
 
 function App() {
 const dispatch = useDispatch()
@@ -22,13 +20,13 @@ const dispatch = useDispatch()
     const userFromStorage = localStorage.getItem("user");
     const token = localStorage.getItem("token");
   
+
     if (userFromStorage && token) {
       const user = JSON.parse(userFromStorage); 
       dispatch(userExist(user));
-      console.log("user  exist:",user)
+      console.log("user:",user)
     } else {
       dispatch(userNotExist());
-      console.log("user not exist:",user)
     }
     
   }, []);
@@ -39,8 +37,8 @@ const dispatch = useDispatch()
         <Route element={<Layout />}>
         <Route path="/" element={<Home/>} />
         <Route path="/shop" element={<Shop/>} />
-        <Route path="/product/:id" element={user ? <ProductDetail/> : <Login/>} />
-        <Route path="/cart" element={user ? <Cart/> : <Navigate to='/login'/>} />
+        <Route path="/product/:id" element={user  ? <ProductDetail/> : <Navigate to='/login'/>} />
+        <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
         </Route>
           <Route path="/login" element={<Login/>} />
       </Routes>

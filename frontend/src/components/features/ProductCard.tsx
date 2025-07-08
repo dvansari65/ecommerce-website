@@ -5,40 +5,41 @@ interface ProductCardProps {
   name?: string | "";
   category?: string | "";
   price?: number | 100;
-  ratings?: number | 0; // 0 to 5
+  ratings?: number | 0;
   photo?: string | "";
   onClick?: () => void;
   onWishlistClick?: () => void;
-  className?:string
+  className?: string;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
-    name,
+  name,
   category,
   price,
   ratings,
   photo,
   onClick,
   onWishlistClick,
-  
 }) => {
   return (
     <div
       onClick={onClick}
-      className=" border-[1px] hover:border-blue-500  border-gray-400 bg-[rgb(103,78,105)] rounded-lg shadow hover:shadow-md transition cursor-pointer p-4 flex flex-col justify-between"
+      className="bg-[#1b1321] hover:border-[#b075f5] border border-[#3f2e40] rounded-2xl shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer p-4 flex flex-col justify-between"
     >
-      {/* Wishlist Icon + Price */}
+      {/* Wishlist & Price */}
       <div className="flex justify-between items-start mb-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onWishlistClick && onWishlistClick();
           }}
-          className="text-gray-400 hover:text-red-500 transition"
+          className="text-white/50 hover:text-pink-400 transition"
         >
           <FaHeart size={16} />
         </button>
-        <span className="text-sm font-semibold text-gray-800">Rs.{price?.toFixed(2)}</span>
+        <span className="text-sm font-semibold text-purple-300">
+          ₹{price?.toFixed(2)}
+        </span>
       </div>
 
       {/* Image */}
@@ -46,22 +47,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={photo}
           alt={name}
-          className="max-h-full object-contain"
+          className="max-h-full object-contain rounded-md"
         />
       </div>
 
-      {/* Info */}
+      {/* Product Info */}
       <div className="text-center mt-2">
         <p className="text-xs text-gray-400">{category}</p>
-        <h3 className="text-sm font-semibold text-gray-800 truncate">{name}</h3>
+        <h3 className="text-sm font-semibold text-white truncate">{name}</h3>
       </div>
 
-      {/* Rating */}
+      {/* Ratings */}
       <div className="flex justify-center mt-2 text-yellow-500 text-xs">
         {[...Array(5)].map((_, i) => (
           <FaStar
             key={i}
-            className={ratings && i < ratings ? 'text-yellow-400' : 'text-gray-300'}
+            className={ratings && i < ratings ? 'text-yellow-400' : 'text-gray-600'}
           />
         ))}
       </div>

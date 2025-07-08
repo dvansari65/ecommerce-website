@@ -7,7 +7,6 @@ import type { RootState } from "@/redux/reducer/store";
 import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
 import LogoutConfirm from "../ui/LogoutConfirm";
-import { ShoppingCartIcon } from "lucide-react";
 import MenuBar from "../features/MenuBar";
 
 const navItems = [
@@ -27,7 +26,7 @@ const Header: React.FC = () => {
   const handleLogout = useCallback(async () => {
     try {
       const res = await logout();
-      setShowLogoutModal(false)
+      setShowLogoutModal(false);
       const message = res?.data?.message || "Logged out successfully!";
       toast.success(message);
     } catch (error) {
@@ -42,7 +41,7 @@ const Header: React.FC = () => {
   }, [dispatch, logout, navigate]);
 
   return (
-    <header className="fixed top-0 z-50 w-full bg-[rgb(63,46,64)] shadow ">
+    <header className="fixed top-0 z-50 w-full bg-[#0f0c29] bg-opacity-90 shadow-lg backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <Logo />
 
@@ -53,7 +52,7 @@ const Header: React.FC = () => {
               to={path}
               className={({ isActive }) =>
                 `capitalize text-lg transition hover:underline ${
-                  isActive ? "text-white underline" : "text-gray-300"
+                  isActive ? "text-white underline" : "text-gray-300 hover:text-white"
                 }`
               }
             >
@@ -63,30 +62,28 @@ const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-4 relative">
-          {/* Cart Icon & Menu */}
-         <MenuBar/>
+          <MenuBar />
 
-          {/* Auth Actions */}
           {!loading && (
             <>
               {user ? (
                 <button
                   onClick={() => setShowLogoutModal(true)}
-                  className="bg-gray-200 px-3 py-1 rounded-md hover:underline hover:cursor-pointer"
+                  className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
                 >
                   Logout
                 </button>
               ) : (
                 <Link
                   to="/login"
-                  className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
+                  className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
                 >
                   Login
                 </Link>
               )}
               <Link
                 to="/signup"
-                className="bg-gray-200 px-3 py-1 rounded-md hover:underline"
+                className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
               >
                 Sign Up
               </Link>

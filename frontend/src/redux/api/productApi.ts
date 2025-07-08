@@ -9,18 +9,6 @@ export const productApi = createApi({
     baseQuery:fetchBaseQuery({
         baseUrl:`${server}/api/v1/product`,
         credentials:"include",
-        prepareHeaders:(headers)=>{
-            try {
-                const token = localStorage.getItem("token")
-                // console.log("📦 Sending token:", token); // 🧠 LOG THIS
-                if(token){
-                    headers.set("authorization", `Bearer ${token}`);
-                }
-            } catch (error) {
-                console.log("failed to set header:",error)
-            }
-            return headers
-        }
     }),
     endpoints:(builder)=>({
         latestProducts : builder.query<productResponse,void>({

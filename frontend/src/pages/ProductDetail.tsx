@@ -1,145 +1,110 @@
-import { useGetSingleProductsQuery } from '@/redux/api/productApi';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Star } from 'lucide-react';
-import Reviews from '@/components/features/Reviews'; // adjust import path if different
-import { useCreateCartMutation, useGetCartProductsQuery } from '@/redux/api/cartApi';
-import toast from 'react-hot-toast';
-
+import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { useGetSingleProductsQuery } from '@/redux/api/productApi'
+import { FaStar, FaHeart } from 'react-icons/fa'
+import Spinner from '@/components/features/LoaderIcon'
+import Reviews from '@/components/features/Reviews'
+import { useCreateCartMutation, useGetCartProductsQuery } from '@/redux/api/cartApi'
+import toast from 'react-hot-toast'
 function ProductDetail() {
-  const [createCart] = useCreateCartMutation()
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams() as { id: string }
   const { data, isLoading: productLoading, isError: productError } = useGetSingleProductsQuery(
     { id: id as string },
-    { skip: !id }
-  );
-  const {data:cartProducts} = useGetCartProductsQuery()
-  
-  const handleAddTocart = async () => {
-    let message = ""
+    { skip: !id })
+  const { data: productsDataFromCart } = useGetCartProductsQuery()
+  const [createCart] = useCreateCartMutation()
+  const addToCart = async (id: string) => {
+    // console.log("product added to the cart!")
     try {
-      const res = await createCart({ id: id! }).unwrap()
-      console.log("res:",res)
-      if (res.success) {
-        message = res.message || "product added to the cart!"
-        toast.success(message)
-       
-      }else{
-        message = res.message || "product is already added to the cart!"
-        toast.success(res.message)
-       
+      const res = await createCart({ id })
+      console.log("es.data?.success", res.data?.success)
+      if (res.data?.success) {
+        toast.success(res.data.message)
+        // console.log("product added to the cart!")
+      } else {
+        toast.error("product already added to the cart!")
+
       }
-    } catch (error: any) {
-      message = error.response?.data?.message || "something went wrong while adding to the cart"
-      toast.error(message)
+    } catch (error) {
+      console.error("failed to add cart")
+      toast.error("failed to create cart")
     }
   }
-
-  const isCartIn  = cartProducts?.products?.some(
-        (item)=> item.productId._id === id
-   )
-   useEffect(()=>{
-    console.log("data:",data)
-   },[])
   
-  if (productLoading) return <div className="text-center mt-10">Loading...</div>;
-  if (productError || !data?.product) return <div className="text-center mt-10">Error loading product.</div>;
-   
-  const product = data.product;
-
+  if (productLoading) return <Spinner />
+  if (productError) return <div className="text-red-500 text-center mt-10">Failed to load product details!</div>
+  const product = data?.product
+  
+  const isProductExistInCart = productsDataFromCart?.products.some(i => i.productId._id === id as string)
   return (
-    <div className="min-h-screen w-full bg-[rgb(63,46,64)] py-8 px-4 flex flex-col items-center overflow-y-auto">
-      {/* Product Card */}
-      <div className="bg-[rgb(103,78,105)] rounded-xl shadow-lg w-full max-w-6xl flex flex-col md:flex-row overflow-hidden mb-8">
-        {/* Image Section */}
-        <div className="md:w-1/2 p-6 flex justify-center items-center bg-[rgb(103,78,105)] border-r border-gray-700">
+    <div className="min-h-screen px-6 py-16 bg-[#0f0c29] text-white ">
+      <div className="max-w-5xl mx-auto bg-[#1b1321] border border-[#3f2e40] hover:border-[#b075f5] hover:shadow-purple-500/20 shadow-lg transition-all rounded-2xl p-6 md:flex gap-10">
+
+        {/* Product Image */}
+        <div className="flex-shrink-0 w-full md:w-1/2 h-72 flex items-center justify-center bg-[#2a1e30] rounded-xl border border-[#3f2e40] p-4">
           <img
-            src={product.photo}
-            alt={product.name}
-            className="object-contain h-80 w-full max-w-sm"
+            src={product?.photo}
+            alt={product?.photo}
+            className="max-h-full object-contain rounded"
           />
         </div>
 
-        {/* Info Section */}
-        <div className="md:w-1/2 p-6 space-y-4">
-          <h2 className="text-sm text-gray-100">Category: {product.category}</h2>
-          <h1 className="text-2xl font-semibold text-gray-100">{product.name}</h1>
-
-          {/* Pricing */}
-          <div className="flex items-center gap-4">
-            <p className="text-xl font-bold text-blue-300">₹{product.discountedPrice}</p>
-            {Number(product.discount) > 0 && (
-              <>
-                <p className="line-through text-gray-100">₹{product.price}</p>
-                <span className="text-sm text-red-400 bg-red-100 px-2 py-1 rounded">Discount</span>
-              </>
-            )}
+        {/* Product Info */}
+        <div className="flex-1 mt-6 md:mt-0">
+          <div className="flex items-start justify-between mb-4">
+            <h2 className="text-2xl font-semibold text-white">{product?.name}</h2>
+            <button className="text-white/50 hover:text-pink-400 transition">
+              <FaHeart size={18} />
+            </button>
           </div>
 
-          
-          <div className="flex items-center gap-1 text-yellow-400">
-            <Star size={18} />
-            <p className="text-sm text-gray-100">
-              {product.ratings} ({product.numberOfRatings} Reviews)
-            </p>
+          <p className="text-sm text-gray-400 mb-1">Category: {product?.category}</p>
+          <p className="text-lg text-purple-300 font-bold mb-4">₹{product?.price.toFixed(2)}</p>
+
+          {/* Ratings */}
+          <div className="flex items-center gap-1 text-yellow-400 mb-4">
+            {[...Array(5)].map((_, i) => (
+              <FaStar key={i} className={i < (product?.ratings || 0) ? 'text-yellow-400' : 'text-gray-600'} />
+            ))}
+            <span className="ml-2 text-sm text-gray-400">({product?.ratings})</span>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-100">{product.description}</p>
+          <p className="text-sm text-gray-300 leading-relaxed">
+            {product?.description || 'No description available for this product.'}
+          </p>
 
-          {/* Color Select */}
-          <div>
-            <p className="text-sm text-gray-100 mb-1">Color</p>
-            <div className="flex gap-2">
-              <span className="w-6 h-6 rounded-full bg-blue-600 border-2 border-black" />
-              <span className="w-6 h-6 rounded-full bg-orange-400" />
-              <span className="w-6 h-6 rounded-full bg-red-400" />
-              <span className="w-6 h-6 rounded-full bg-gray-700" />
-            </div>
-          </div>
-
-          {/* Quantity */}
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-100">Quantity:</p>
-            <input
-              type="number"
-              defaultValue={1}
-              min={1}
-              max={product.stock}
-              className="w-16 border text-gray-100 border-gray-100 rounded px-2 py-1"
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4 mt-4">
-          {/* //  TODO:fixing the state of the product */}
-            <button onClick={handleAddTocart} className="px-6 py-2 p-3 rounded ">
-              { isCartIn   ?
-               (<div className='bg-slate-100 text-gray-700 hover:bg-white p-3 rounded-2xl'>Added...</div>):
-               (<div className='bg-blue-500 hover:bg-blue-400 text-white p-3 rounded-2xl'>Adde To Cart</div>) }
+          {/* Actions */}
+          <div className="mt-6 flex gap-4">
+            {
+              isProductExistInCart ?
+                (
+                  <button onClick={() => addToCart(product?._id as string)} className="bg-white text-black px-5 py-2 rounded-full hover:bg-gray-200 transition font-semibold">
+                    Added..
+                  </button>
+                ) :
+                (<button onClick={() => addToCart(product?._id as string)} className="bg-white text-black px-5 py-2 rounded-full hover:bg-gray-200 transition font-semibold">
+                  Add to Cart
+                </button>)
+            }
+            <button className="bg-[#2a1e30] text-white px-5 py-2 rounded-full hover:bg-[#3a2a40] transition font-semibold">
+              Buy Now
             </button>
-            <button className="bg-gray-200 text-gray-800 px-6 h-[50px] mt-2 rounded-2xl hover:bg-gray-300 transition">
-             Buy
-            </button>
-          </div>
-
-          {/* Tabs (Static for now) */}
-          <div className="pt-6 border-t border-gray-200 text-sm text-gray-100 flex gap-6">
-            <button className="font-bold pb-1">Detail {":"}
-            </button>
-            <div>
-              {product.description}
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Reviews Section */}
-      <div className="w-full max-w-6xl">
-        <Reviews id={id!} />
-      </div>
+      <Reviews className='mt-3' id={id as string} />
     </div>
-  );
+  )
 }
 
-export default ProductDetail;
+export default ProductDetail
+
+
+
+// const { id } = useParams<{ id: string }>();
+// const { data, isLoading: productLoading, isError: productError } = useGetSingleProductsQuery(
+//   { id: id as string },
+//   { skip: !id }
+// );
+// const {data:cartProducts} = useGetCartProductsQuery()
