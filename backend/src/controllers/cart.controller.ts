@@ -315,3 +315,7 @@ export const deleteProductFromCart = AsyncHandler( async( req:Request,res:Respon
     })
 
 })
+
+export const calculateTotal = AsyncHandler(async (req:Request,res:Response)=>{
+    
+})

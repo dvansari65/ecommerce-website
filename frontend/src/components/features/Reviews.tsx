@@ -28,7 +28,7 @@ const Reviews: React.FC<ReviewsProps> = ({ id, className }) => {
   }, [])
 
   if (isLoading) {
-    return <div className="text-center py-10 text-gray-500">Loading reviews...</div>
+    return <div className="text-center py-10 text-gray-400">Loading reviews...</div>
   }
 
   if (isError) {
@@ -36,26 +36,26 @@ const Reviews: React.FC<ReviewsProps> = ({ id, className }) => {
   }
 
   return (
-    <div className={clsx("w-full p-5 bg-[rgb(103,78,105)] shadow rounded", className)}>
-      <h2 className="text-xl font-semibold text-gray-300 mb-3">Product Reviews:</h2>
+    <div className={clsx("w-full p-5 bg-[#1b1321] border border-[#3f2e40] rounded-2xl shadow-lg hover:shadow-purple-500/20 transition-all", className)}>
+      <h2 className="text-xl font-semibold text-purple-300 mb-3">Product Reviews:</h2>
 
       {/* Scrollable container */}
       <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4">
         {memoizedReviews.length === 0 ? (
-          <p className="text-white">No reviews yet.</p>
+          <p className="text-white text-sm">No reviews yet.</p>
         ) : (
           memoizedReviews.map((review: any) => (
-            <div key={review._id} className="border-b pb-4">
+            <div key={review._id} className="border-b border-[#3f2e40] pb-4">
               <div className="flex justify-between items-center">
-                <span className="font-semibold">{review.user?.userName || "Anonymous"}</span>
-                <span className="text-xs text-white">{review.formattedDate}</span>
+                <span className="font-semibold text-white">{review.user?.userName || "Anonymous"}</span>
+                <span className="text-xs text-gray-400">{review.formattedDate}</span>
               </div>
               <div className="flex items-center my-1">
                 {[...Array(review.rating)].map((_, i) => (
                   <Star key={i} className="h-4 w-4 text-yellow-500 fill-yellow-400" />
                 ))}
               </div>
-              <p className="text-gray-700 text-sm">{review.comment}</p>
+              <p className="text-sm text-gray-300">{review.comment}</p>
             </div>
           ))
         )}
@@ -69,10 +69,10 @@ const Reviews: React.FC<ReviewsProps> = ({ id, className }) => {
               key={i}
               onClick={() => handlePageChange(i + 1)}
               className={clsx(
-                "px-3 py-1 rounded border text-sm",
+                "px-3 py-1 rounded border text-sm transition",
                 page === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
+                  ? "bg-purple-600 text-white border-purple-600"
+                  : "bg-[#2a1e30] text-purple-300 border-[#3f2e40] hover:bg-[#3a2a40]"
               )}
             >
               {i + 1}

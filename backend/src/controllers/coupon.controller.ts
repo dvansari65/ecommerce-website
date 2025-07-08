@@ -29,7 +29,6 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
     if (!shoppingInfo) {
         throw new ApiError("Please enter shopping info", 404);
     }
-
     let discountAmount = 0;
     const coupon = await Coupon.findOne({ code: code });
     if (!coupon) {

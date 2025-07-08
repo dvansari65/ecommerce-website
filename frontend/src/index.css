@@ -1,16 +1,18 @@
 @import "tailwindcss";
-@keyframes colorChange {
-    0% { background-color: #b1b5b7; }   /* red-400 */
-    25% { background-color: #9a9fa4; }  /* blue-400 */
-    40% { background-color: #b9bcc0; }  /* green-400 */
-    50% { background-color: #8a8d90 }  /* yellow-400 */
-    70% { background-color: #a3a6a7 }  /* yellow-400 */
-    80% { background-color: #adb0b3 }  /* yellow-400 */
-    90% { background-color: #8c9092 }  /* yellow-400 */
-    100% { background-color: #a4a7a9 }  /* yellow-400 */
-     /* back to red-400 */
+:root {
+    --primary: #6b65e1;
+    --bg: #f7f3f7;
+    --dark: #1b1321;
+    --accent1: #ca4ef8;
+    --accent2: #ee90f9;
+    --text-dark: #2e2e2e;
+    --text-light: #ffffff;
   }
-  
-  .color-cycle {
-    animation: colorChange 6s linear infinite;
+
+/* .container-color{
+    background: radial-gradient(circle at 50% 100%, #f7f3f7 5% ,#ee90f9 , #ca4ef8 40%, #6b65e1 100%);
+    background-color: linear-gradient();
+} */
+.universal {
+    @apply bg-[#0f0c29] text-white min-h-screen;
   }
