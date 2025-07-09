@@ -31,10 +31,9 @@ function ProductDetail() {
     }
   }
   
+  const product = data?.product
   if (productLoading) return <Spinner />
   if (productError) return <div className="text-red-500 text-center mt-10">Failed to load product details!</div>
-  const product = data?.product
-  
   const isProductExistInCart = productsDataFromCart?.products.some(i => i.productId._id === id as string)
   return (
     <div className="min-h-screen px-6 py-16 bg-[#0f0c29] text-white ">
