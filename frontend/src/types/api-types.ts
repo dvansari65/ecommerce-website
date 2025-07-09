@@ -5,7 +5,6 @@ export type messageResponse = {
     success:boolean,
     user:User,
     accessToken?:string,
-    refreshToken? : string
 }
 export type productResponse = {
     success:boolean,

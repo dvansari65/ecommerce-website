@@ -18,7 +18,7 @@ const Login: React.FC = () => {
     try {
       const res = await login({ userName, password });
       const user = res.data?.user!;
-      const token = user?.refreshToken;
+      const token = res.data?.accessToken
 
       if ("data" in res && res.data?.success) {
         toast.success(res.data?.message!);

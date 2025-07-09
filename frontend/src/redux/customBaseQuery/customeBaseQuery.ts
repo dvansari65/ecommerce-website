@@ -7,6 +7,7 @@ import {
     type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
 import type { refreshDataResponse } from "@/types/types";
+import {  userNotExist } from "../reducer/userReducer";
 
 
 console.log("danish:")
@@ -35,7 +36,7 @@ export const customBaseQuery: BaseQueryFn<
         const refreshResult = await baseQuery("/refreshToken", api, extraOptions)
 
         const refreshData = refreshResult.data as refreshDataResponse
-        console.log("refreshData?.success",refreshData?.success)
+        // console.log("refreshData?.success",refreshData?.success)
         if (refreshData?.success && refreshData.accessToken) {
             console.log("refreshData?.success",refreshData?.success)
             localStorage.setItem("token", refreshData.accessToken);
@@ -44,6 +45,7 @@ export const customBaseQuery: BaseQueryFn<
             localStorage.removeItem("token")
             localStorage.removeItem("user")
             window.location.href = "/login";
+            api.dispatch(userNotExist())
         }
     }
     return result

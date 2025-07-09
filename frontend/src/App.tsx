@@ -14,33 +14,31 @@ import Cart from "./pages/Cart"
 import PrivateRoute from "./components/features/PrivateRoute"
 
 function App() {
-const dispatch = useDispatch()
+  const dispatch = useDispatch()
   const { user, loading } = useSelector((state: RootState) => state.userReducer)
   useEffect(() => {
     const userFromStorage = localStorage.getItem("user");
     const token = localStorage.getItem("token");
-  
-
     if (userFromStorage && token) {
-      const user = JSON.parse(userFromStorage); 
+      const user = JSON.parse(userFromStorage);
       dispatch(userExist(user));
-      console.log("user:",user)
+      console.log("user:", user)
     } else {
       dispatch(userNotExist());
     }
-    
+
   }, []);
-  
+
   return loading ? <div>loading..</div> : (
     <Router>
       <Routes>
         <Route element={<Layout />}>
-        <Route path="/" element={<Home/>} />
-        <Route path="/shop" element={<Shop/>} />
-        <Route path="/product/:id" element={user  ? <ProductDetail/> : <Navigate to='/login'/>} />
-        <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={user ? <ProductDetail /> : <Navigate to='/login' />} />
+          <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
         </Route>
-          <Route path="/login" element={<Login/>} />
+        <Route path="/login" element={<Login />} />
       </Routes>
       <Toaster position="bottom-right" />
     </Router>

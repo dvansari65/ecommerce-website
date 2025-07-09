@@ -1,4 +1,4 @@
-import type { messageResponse } from "./api-types";
+
 
 export interface User {
     userName?:string,
@@ -8,7 +8,7 @@ export interface User {
     gender?:"male" | "femal" | "transgender",
     photo?:string,
     refreshToken ?  : string,
-    accessToken ?  : string,
+
     
 }
 
@@ -41,7 +41,7 @@ export interface Review {
 export type refreshDataResponse = {
   success:boolean,
   message:string,
-  accessToken:string
+  accessToken:string,
 }
  export type messageAndSuccessProps = {
   message:string ,
