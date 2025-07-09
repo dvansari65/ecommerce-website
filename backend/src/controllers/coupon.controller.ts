@@ -6,13 +6,19 @@ import { User } from "../models/user.model";
 import { Coupon } from "../models/coupon.model";
 import { Product } from "../models/product.model";
 import { stripe } from "../app";
+import { Cart } from "../models/addToCart";
+import { cartItem, cartResponse } from "../types/product";
 
 export const createPaymentIntent = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
     if (!userId) {
         throw new ApiError("Please login~", 402);
     }
+    const cart = await Cart.findOne({ user: userId })
+        .populate("items.productId") as unknown as cartResponse;
+
     const user = await User.findById(userId);
+    
     const {
         shoppingInfo,
         orderItems,
@@ -35,19 +41,12 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
         throw new ApiError("Invalid coupon code", 404);
     }
     discountAmount = coupon.amount;
-
-    const productIds = orderItems.map(item => item.productId);
-    const product = await Product.find({ _id: productIds.toString() });
-    if(product.length === 0){
-        throw new ApiError("there is not such products!",404)
-    }
-
-    const subtotal = product.reduce((prev, curr) => {
-        const item = orderItems.find(item => item.productId === curr._id.toString());
-        if (!item) return prev;
-        return curr.price * item.quantity + prev;
+    const subtotal = cart?.items.reduce((total, curr) => {
+        const price = curr.productId.price || 100
+        const quantity = curr.quantity
+        return total += price * quantity 
     }, 0);
-
+    console.log("subtotal:",subtotal)
     const tax = subtotal * 0.18;
     const shippingCharges = subtotal > 1000 ? 0 : 200;
     const total = subtotal + tax + shippingCharges - discountAmount;
@@ -67,9 +66,10 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
             }
         }
     });
-
+    const productId = cart.items.find(i=>i?.productId)
+    console.log("productId:",productId)
     await Product.findByIdAndUpdate(
-        productIds,
+        productId,
         {
             $inc: {
                 stock: -1
