@@ -9,29 +9,26 @@ import { stripe } from "../app";
 import { Cart } from "../models/addToCart";
 import { cartItem, cartResponse } from "../types/product";
 
-export const createPaymentIntent = AsyncHandler(async (req: Request, res: Response) => {
+export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
     if (!userId) {
         throw new ApiError("Please login~", 402);
     }
+
     const cart = await Cart.findOne({ user: userId })
         .populate("items.productId") as unknown as cartResponse;
 
+    const inCartProductIds = cart.items.map(i => i.productId)
     const user = await User.findById(userId);
-    
+    const product = await Product.find({ _id: { $in: inCartProductIds } })
     const {
         shoppingInfo,
-        orderItems,
         code
     }: {
         shoppingInfo: shippingInfoType;
-        orderItems: OrderItemType[];
         code: string;
     } = req.body;
 
-    if (!orderItems) {
-        throw new ApiError("Please enter items", 404);
-    }
     if (!shoppingInfo) {
         throw new ApiError("Please enter shopping info", 404);
     }
@@ -42,11 +39,16 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
     }
     discountAmount = coupon.amount;
     const subtotal = cart?.items.reduce((total, curr) => {
-        const price = curr.productId.price || 100
+        const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id)
+        if (!productToBeBuy) throw new ApiError("Product mismatch", 500);
+        const price = curr.productId.discount && curr.productId.discount > 0
+            ? curr.productId.price - (curr.productId.price * curr.productId.discount) / 100
+            : curr.productId.price;
         const quantity = curr.quantity
-        return total += price * quantity 
+        return total += price * quantity
     }, 0);
-    console.log("subtotal:",subtotal)
+
+    console.log("subtotal:", subtotal)
     const tax = subtotal * 0.18;
     const shippingCharges = subtotal > 1000 ? 0 : 200;
     const total = subtotal + tax + shippingCharges - discountAmount;
@@ -66,18 +68,15 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
             }
         }
     });
-    const productId = cart.items.find(i=>i?.productId)
-    console.log("productId:",productId)
-    await Product.findByIdAndUpdate(
-        productId,
-        {
-            $inc: {
-                stock: -1
-            }
-        },
-        {
-            new: true
-        }
+
+    await Promise.all(
+        cart.items.map(i =>
+            Product.findByIdAndUpdate(
+                i.productId._id,
+                { $inc: { stock: -i.quantity } },
+                { new: true }
+            )
+        )
     );
 
     return res.status(200).json({
@@ -86,6 +85,74 @@ export const createPaymentIntent = AsyncHandler(async (req: Request, res: Respon
         clientSecret: paymentIntent.client_secret
     });
 });
+
+export const createPaymentIntentDirectly = AsyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?._id
+
+    const user = await User.findById(userId)
+    if (!user) {
+        throw new ApiError("user not found!", 404)
+    }
+    const {
+        shoppingInfo,
+        orderItems,
+        code
+    }:
+        {
+            shoppingInfo: shippingInfoType,
+            orderItems: OrderItemType[],
+            code: string
+        } = req.body
+
+    const productId = orderItems.map(i => i.productId)
+    const products = await Product.find({ _id: { $in: productId } })
+    const subtotal = products.reduce((total, cur) => {
+        const item = orderItems.find(i => i.productId.toString() === cur._id.toString())
+        if (!item) return total
+        const price = cur.discount && cur.discount > 0
+            ? cur.price - (cur.price * cur.discount) / 100
+            : cur.price;
+        return total + price * item.quantity;
+    }, 0)
+
+    let discount = 0;
+    if (code) {
+        const coupon = await Coupon.findOne({ code: code })
+        if (!coupon) {
+            return res.status(404).json({
+                message: "coupon not found!",
+                success: false
+            })
+        }
+        discount = coupon.amount
+    }
+    const tax = subtotal * 0.18
+    const shippingCharge = subtotal > 1000 ? 0 : 200
+    const rawTotal = subtotal + tax + shippingCharge - discount;
+
+    const amount = Math.round(rawTotal * 100); // Stripe expects paise
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: "inr",
+        description: "MERN-Ecommerce",
+        shipping: {
+            name: user.userName as string,
+            address: {
+                line1: shoppingInfo.address,
+                postal_code: shoppingInfo.pinCode.toString(),
+                city: shoppingInfo.city,
+                state: shoppingInfo.state,
+                country: shoppingInfo.country,
+            },
+        },
+    });
+    return res.status(200).json({
+        message: "payment created successfully!",
+        success: true,
+        paymentIntent
+    })
+})
 
 export const createCoupon = AsyncHandler(async (req: Request, res: Response) => {
     const { code, amount } = req.body;
