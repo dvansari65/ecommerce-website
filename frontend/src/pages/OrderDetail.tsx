@@ -1,3 +1,4 @@
+import GenerateCouponBtn from '@/components/features/GenerateCouponBtn'
 import React from 'react'
 interface orderDetailType  {
     subTotal:number,
@@ -24,7 +25,7 @@ function OrderDetail({subTotal,shippingCharges,tax,discount,total,onGenerate}:or
         </div>
         <div className="flex justify-between text-sm text-gray-300 mb-3">
           <span>tax:</span>
-          <span>{tax || "₹XX"}</span>
+          <span> {tax || "₹XX"}</span>
         </div>
         <div className="flex justify-between text-sm text-green-300 mb-3">
           <span>Discount</span>
@@ -36,14 +37,8 @@ function OrderDetail({subTotal,shippingCharges,tax,discount,total,onGenerate}:or
         </div>
       </div>
     </div>
-
-    <div className='flex flex-col gap-2 '>
-      <span className='text-[rgb(227,62,62)] border-b border-[rgb(74,73,74)]'>checking code is right or wrong!</span>
-      <input type="text" placeholder='generate code..' className='w-full hover:border-[#b075f5] border-[#3f2e40] h-9 border-[0.5px] rounded-[3px] pl-3 pb-1' />
-      <button onClick={onGenerate} className="mt-6 w-full bg-[#6b65e1] hover:bg-[#7a74f2] text-white py-3 rounded-full transition font-semibold shadow-xl hover:shadow-[#6b65e1]/50">
-       Generate coupon
-      </button>
-    </div>
+<GenerateCouponBtn/>
+    
   </div>
   )
 }

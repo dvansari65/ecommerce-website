@@ -4,6 +4,7 @@ import { userReducer } from "./userReducer";
 import { productApi } from "../api/productApi";
 import { reviewApi } from "../api/ReviewApi";
 import { cartApi } from "../api/cartApi";
+import { couponApi } from "../api/couponApi";
 
 
 
@@ -13,7 +14,8 @@ export const store = configureStore({
         [userReducer.name] : userReducer.reducer,
         [productApi.reducerPath] : productApi.reducer,
         [reviewApi.reducerPath] : reviewApi.reducer,
-        [cartApi.reducerPath] : cartApi.reducer
+        [cartApi.reducerPath] : cartApi.reducer,
+        [couponApi.reducerPath] : couponApi.reducer
     },
     middleware: (mid) =>
         mid()
@@ -21,6 +23,7 @@ export const store = configureStore({
             .concat(productApi.middleware)
             .concat(reviewApi.middleware)
             .concat(cartApi.middleware)
+            .concat(couponApi.middleware)
 })
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

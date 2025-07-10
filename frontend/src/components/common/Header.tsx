@@ -6,7 +6,7 @@ import { userNotExist } from "@/redux/reducer/userReducer";
 import type { RootState } from "@/redux/reducer/store";
 import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
-import LogoutConfirm from "../ui/LogoutConfirm";
+import LogoutConfirm from "../features/LogoutConfirm";
 import MenuBar from "../features/MenuBar";
 
 const navItems = [
@@ -17,7 +17,6 @@ const navItems = [
 
 const Header: React.FC = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const { user, loading } = useSelector((state: RootState) => state.userReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
