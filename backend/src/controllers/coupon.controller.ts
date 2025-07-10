@@ -23,11 +23,11 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
     const product = await Product.find({ _id: { $in: inCartProductIds } })
     const {
         shoppingInfo,
-        code
     }: {
         shoppingInfo: shippingInfoType;
-        code: string;
     } = req.body;
+
+    const  {code} = req.query
 
     if (!shoppingInfo) {
         throw new ApiError("Please enter shopping info", 404);
@@ -86,7 +86,17 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
     });
 });
 
-export const createPaymentIntentDirectly = AsyncHandler(async (req: Request, res: Response) => {
+export const createPaymentIntentDirectly = AsyncHandler(async (
+    req:Request<
+    {},
+    {},
+    {
+    shoppingInfo: shippingInfoType,
+    orderItems: OrderItemType[],
+    },
+    {code:string}
+    >, res: Response) => {
+
     const userId = req.user?._id
 
     const user = await User.findById(userId)
@@ -96,14 +106,14 @@ export const createPaymentIntentDirectly = AsyncHandler(async (req: Request, res
     const {
         shoppingInfo,
         orderItems,
-        code
+        
     }:
         {
             shoppingInfo: shippingInfoType,
             orderItems: OrderItemType[],
-            code: string
+            
         } = req.body
-
+    const {code} = req.query
     const productId = orderItems.map(i => i.productId)
     const products = await Product.find({ _id: { $in: productId } })
     const subtotal = products.reduce((total, cur) => {
