@@ -114,14 +114,14 @@ export const loginUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>,
         .status(200)
         .cookie("refreshToken", refreshToken as string, {
             httpOnly: true,
-            secure: false, // true only in production
-            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
+            secure: true, 
+            sameSite: "none",
 
         })
         .cookie("accessToken", accessToken as string, {
             httpOnly: true,
-            secure: false, // true only in production
-            sameSite: "lax", // or "none" if you need cross-site, but then secure:true is required
+            secure: true, 
+            sameSite: "none", 
 
         })
         .json({

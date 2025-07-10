@@ -10,6 +10,7 @@ import redisClient from "../utils/redis";
 import { invalidateKeys } from "../utils/invalidateCache";
 import { addCacheKey } from "../utils/invalidateCache";
 import { Order } from "../models/order.model";
+import { User } from "../models/user.model";
 
 export const newProduct = AsyncHandler(async (req: Request<{}, {}, newProductTypes>, res: Response) => {
     const { name, stock, description, price, ratings, numberOfRating, category } = req.body;
@@ -304,7 +305,14 @@ export const getAllCategories = AsyncHandler(async (req: Request, res: Response)
 export const getSingleProduct = AsyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const key = `product-${id}`;
-
+    const userId = req?.user?._id
+    if(!userId){
+        throw new ApiError("user is not logged in !",400)
+    }
+    const user = await User.findById(userId)
+    if(!user){
+        throw new ApiError("user not found!",404)
+    }
     // Check if the product is cached in Redis
     const cachedProduct = await redisClient.get(key);
     if (cachedProduct) {

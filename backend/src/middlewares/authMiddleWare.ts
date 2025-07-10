@@ -30,11 +30,13 @@ export const verifyJwt = async(req:Request,res:Response,next:NextFunction)=>{
        req.user = user
        next()
     } catch (error:any) {
+        console.log("JWT error:", error)
+
         if(error.name === "TokenExpiredError"){
              res.status(401).json({message:"access token expired!"})
              return;
         }
-        console.log("failed to jwt verification",error)
+        // console.log("failed to jwt verification",error)
          res.status(401).json({message: "Invalid or missing token"})
          return;
     }
