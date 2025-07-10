@@ -1,6 +1,6 @@
 import React from 'react'
 import CartItem from '../components/features/CartItem'
-import OrderDetail from '@/components/features/OrderDetail';
+import OrderDetail from '@/pages/OrderDetail';
 function Cart() {
   return (
     <div className="relative grid grid-cols-12 w-full h-screen overflow-y-auto bg-[#0f0c29] text-white">

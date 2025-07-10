@@ -1,6 +1,6 @@
 import React from 'react'
 import { ArrowDown, ArrowUp } from "lucide-react"
-import Spinner from '@/components/features/LoaderIcon';
+import Spinner from '@/config/LoaderIcon';
 import {
   useDecreaseQuantityMutation,
   useDeleteCartProductMutation,

@@ -1,4 +1,4 @@
-import type { Product, Review, User } from "./types"
+import type { messageAndSuccessProps, Product, Review, User } from "./types"
 
 export type messageResponse = {
     message:string,
@@ -53,4 +53,9 @@ export type getCartProductsType = {
     message:string,
     success:boolean,
     products:cartProduct[]
+}
+export interface couponDiscountProps {
+    message:string,
+    success:boolean
+   discount : number
 }
