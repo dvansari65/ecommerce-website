@@ -358,4 +358,6 @@ export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
             tax,
             shippingCharges
         }
-    }
+    })
+})
+    
