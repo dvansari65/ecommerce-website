@@ -3,7 +3,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors"
 import express from "express";
-import NodeCache from "node-cache";
 const app = express()
 import Stripe from "stripe";
 
@@ -14,7 +13,7 @@ app.use(cors({
     credentials:true,
 }))
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!,{
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string,{
     apiVersion: '2023-10-16' as any
 })
 app.use(express.urlencoded({ extended: true }))

@@ -6,6 +6,8 @@ import ApiError from "../utils/errorHanlder";
 import redis from "../utils/redis";
 import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 import { Product } from "../models/product.model";
+import { User } from "../models/user.model";
+import { cartResponse } from "../types/product";
 
 
 // while creatign the cart default qauntity should be 1 and there will be two funcitons will increase and decrease
@@ -316,6 +318,44 @@ export const deleteProductFromCart = AsyncHandler( async( req:Request,res:Respon
 
 })
 
-export const calculateTotal = AsyncHandler(async (req:Request,res:Response)=>{
-    
+export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
+    const userId = req.user?._id
+    if(!userId){
+        throw new ApiError("please login first!",401)
+    }
+    const user  = await User.findById(userId)
+    if(!user){
+        return res.status(404).json({
+            message:"user not found!",
+            success:true,
+        })
+    }
+    const cart = await Cart.findOne({ user: userId })
+    .populate("items.productId") as unknown as cartResponse;
+    if(!cart){
+        throw new ApiError("cart not found!",404)
+    }
+    const CartProductIds = cart.items.map(i => i.productId)
+    const product = await Product.find({ _id: { $in: CartProductIds } })
+    const subtotal = cart?.items.reduce((total, curr) => {
+        const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id.toString())
+        if (!productToBeBuy) throw new ApiError("Product mismatch", 500);
+        const price = curr.productId.discount && curr.productId.discount > 0
+            ? curr.productId.price - (curr.productId.price * curr.productId.discount) / 100
+            : curr.productId.price;
+        const quantity = curr.quantity
+        return total += price * quantity
+    }, 0);
+    const tax = subtotal * 0.18;
+    const shippingCharges = subtotal > 1000 ? 0 : 200;
+    return res.status(200).json({
+        message:"cart detailes fetched successfully!",
+        success:true,
+        cartDetails:{
+            subtotal,
+            tax,
+            shippingCharges
+        }
+    })
+
 })

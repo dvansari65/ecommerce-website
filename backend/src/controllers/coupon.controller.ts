@@ -8,6 +8,8 @@ import { Product } from "../models/product.model";
 import { stripe } from "../app";
 import { Cart } from "../models/addToCart";
 import { cartItem, cartResponse } from "../types/product";
+import { invalidateKeys } from "../utils/invalidateCache";
+import { log } from "console";
 
 export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
@@ -18,9 +20,9 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
     const cart = await Cart.findOne({ user: userId })
         .populate("items.productId") as unknown as cartResponse;
 
-    const inCartProductIds = cart.items.map(i => i.productId)
+    const CartProductIds = cart.items.map(i => i.productId)
+    const product = await Product.find({ _id: { $in: CartProductIds } })
     const user = await User.findById(userId);
-    const product = await Product.find({ _id: { $in: inCartProductIds } })
     const {
         shoppingInfo,
     }: {
@@ -37,9 +39,12 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
     if (!coupon) {
         throw new ApiError("Invalid coupon code", 404);
     }
+    // console.log("product id from products:",product)
+    // console.log("product from cart:",cart.items);
+    
     discountAmount = coupon.amount;
     const subtotal = cart?.items.reduce((total, curr) => {
-        const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id)
+        const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id.toString())
         if (!productToBeBuy) throw new ApiError("Product mismatch", 500);
         const price = curr.productId.discount && curr.productId.discount > 0
             ? curr.productId.price - (curr.productId.price * curr.productId.discount) / 100
@@ -78,13 +83,20 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
             )
         )
     );
-
+    await invalidateKeys({product:true,cart:true,admin:true})
     return res.status(200).json({
         message: "Payment intent created successfully!",
         success: true,
-        clientSecret: paymentIntent.client_secret
+        transactionDetails:{
+            clientSecret: paymentIntent.client_secret,
+            shippingCharges,
+            subtotal,
+            total,
+            tax
+        }
     });
 });
+
 
 export const createPaymentIntentDirectly = AsyncHandler(async (
     req:Request<
@@ -106,7 +118,6 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
     const {
         shoppingInfo,
         orderItems,
-        
     }:
         {
             shoppingInfo: shippingInfoType,
@@ -157,6 +168,7 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
             },
         },
     });
+    await invalidateKeys({product:true,admin:true})
     return res.status(200).json({
         message: "payment created successfully!",
         success: true,

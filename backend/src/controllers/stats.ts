@@ -1,7 +1,5 @@
 
 
-// PRODUCT
-
 import { User } from "../models/user.model";
 import AsyncHandler from "../utils/asyncHandler";
 
@@ -12,12 +10,9 @@ import { Review } from "../models/review.model";
 import { Product } from "../models/product.model";
 import redis from "../utils/redis";
 import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
-// import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 
 export const stats = AsyncHandler(async (req: Request, res: Response) => {
     const key = "stats";
-
-    // Check Redis cache
     const cachedStats = await redis.get(key);
     if (cachedStats) {
         return res.status(200).json({
