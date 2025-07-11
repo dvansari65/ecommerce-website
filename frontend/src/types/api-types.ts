@@ -54,8 +54,13 @@ export type getCartProductsType = {
     success:boolean,
     products:cartProduct[]
 }
-export interface couponDiscountProps {
+export interface cartDetailProps {
+    shippingCharges:number,
+    tax:number,
+    subtotal:number
+}
+export type cartDetailTypes = {
     message:string,
-    success:boolean
-   discount : number
+    success:boolean,
+    cartDetail:cartDetailProps
 }

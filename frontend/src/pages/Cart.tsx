@@ -1,6 +1,7 @@
 import React from 'react'
 import CartItem from '../components/features/CartItem'
-import OrderDetail from '@/pages/OrderDetail';
+
+import CartDetails from '@/components/features/CartDetails';
 function Cart() {
   return (
     <div className="relative grid grid-cols-12 w-full h-screen overflow-y-auto bg-[#0f0c29] text-white">
@@ -18,7 +19,7 @@ function Cart() {
       </div>
 
       {/* Right: Order Summary */}
-      <OrderDetail/>
+      <CartDetails/>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { server } from "@/config/constants";
-import type { getCartProductsType } from "@/types/api-types";
+import type { cartDetailTypes, getCartProductsType } from "@/types/api-types";
 import type { CartProps, messageAndSuccessProps } from "@/types/types";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -84,6 +84,11 @@ export const cartApi = createApi({
                     patch.undo();
                 }
             }
+        }),
+        getCartDetails : builder.query<cartDetailTypes,void>({
+            query:()=>({
+                url:"/cart/cart-details",
+            })
         })
 
         
@@ -96,4 +101,6 @@ export const {
     useGetCartProductsQuery,
     useDeleteCartProductMutation,
     useIncreaseProductQuantityMutation,
-    useDecreaseQuantityMutation}  = cartApi
+    useDecreaseQuantityMutation,
+    useGetCartDetailsQuery
+}  = cartApi
