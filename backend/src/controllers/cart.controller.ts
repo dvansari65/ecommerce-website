@@ -6,6 +6,7 @@ import ApiError from "../utils/errorHanlder";
 import redis from "../utils/redis";
 import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 import { Product } from "../models/product.model";
+
 import { User } from "../models/user.model";
 import { cartResponse } from "../types/product";
 
@@ -318,6 +319,7 @@ export const deleteProductFromCart = AsyncHandler( async( req:Request,res:Respon
 
 })
 
+
 export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
     const userId = req.user?._id
     if(!userId){
@@ -356,6 +358,4 @@ export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
             tax,
             shippingCharges
         }
-    })
-
-})
+    }

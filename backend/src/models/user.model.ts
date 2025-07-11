@@ -96,8 +96,23 @@ userSchema.methods.isPasswordCorrect = async function(password: string) {
     }
 }
 
+// userSchema.methods.generateAccessToken = function() {
+//     const secret = process.env.ACCESS_TOKEN_SECRET;
+//     if (!secret) throw new Error("ACCESS_TOKEN_SECRET is not defined");
+
+//     return jwt.sign(
+//         {
+//             _id: this._id,
+//             userName: this.userName,
+//             email: this.email,
+//         },
+//         secret,
+//         { expiresIn: "1d" }  // Use a literal string instead of variable
+//     );
+// }
 userSchema.methods.generateAccessToken = function() {
     const secret = process.env.ACCESS_TOKEN_SECRET;
+
 
     if (!secret) throw new Error("ACCESS_TOKEN_SECRET is not defined");
 
@@ -106,7 +121,10 @@ userSchema.methods.generateAccessToken = function() {
             _id: this._id
         },
         secret,
+
         { expiresIn: "1d" }  
+
+        
     );
 }
 userSchema.methods.generateRefreshToken = function() {
