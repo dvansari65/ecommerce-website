@@ -3,7 +3,7 @@ dotenv.config();
 
 export const config = {
     port: process.env.PORT || 3000,
-    mongoUri: process.env.MONGODB_URI,
+    mongoUri: process.env.MONGO_URI,
     jwtSecret: process.env.JWT_SECRET,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'],
