@@ -11,18 +11,18 @@ export const userApi = createApi({
     endpoints: (builder) => ({
         login: builder.mutation<messageResponse, User>({
             query: (user) => ({
-                url: "/login",
+                url: "/user/login",
                 method: "POST",
                 body: user,
             })
         }),
         getMyProfile: builder.query<messageResponse, void>({
-            query: () => "/me",
+            query: () => "/user/me",
         }),
         logout : builder.mutation<logoutResponse,void>({
             query:()=>(
                 {
-                    url:"/logout",
+                    url:"/user/logout",
                     method:"POST",
                 }
             )

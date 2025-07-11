@@ -1,15 +1,12 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { server } from "../../config/constants";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import type {  categoriesType, productResponse, searchProductInputType, singleProductResponse } from "../../types/api-types";
+import { customBaseQuery } from "../customBaseQuery/customeBaseQuery";
 
 
 export const productApi = createApi({
     reducerPath:"productApi",
     
-    baseQuery:fetchBaseQuery({
-        baseUrl:`${server}/api/v1/product`,
-        credentials:"include",
-    }),
+    baseQuery:customBaseQuery,
     endpoints:(builder)=>({
         latestProducts : builder.query<productResponse,void>({
             query:()=>{
@@ -18,11 +15,11 @@ export const productApi = createApi({
             }
         }),
         getProductsByCategories : builder.query<categoriesType,void>({
-            query:()=>`/get-all-categories`
+            query:()=>`/product/get-all-categories`
         }),
         searchProducts : builder.query<productResponse,searchProductInputType>({
                 query:({search,category,price,page,sort})=>{
-                    let base = `/filter-product?search=${search}&page=${page}`
+                    let base = `/product/filter-product?search=${search}&page=${page}`
                     if(category) base += `&category=${category}`
                     if(price) base += `&price=${price}`
                     if(sort) base +=`&sort=${sort}`
@@ -30,7 +27,7 @@ export const productApi = createApi({
                 }
         }),
         getSingleProducts: builder.query<singleProductResponse,{id:string}>({
-            query:({id})=>`/get-single-product/${id}`
+            query:({id})=>`/product/get-single-product/${id}`
         })
     })
 })

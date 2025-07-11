@@ -6,6 +6,7 @@ import Spinner from '@/components/features/LoaderIcon'
 import Reviews from '@/components/features/Reviews'
 import { useCreateCartMutation, useGetCartProductsQuery } from '@/redux/api/cartApi'
 import toast from 'react-hot-toast'
+import { Loader, Space } from 'lucide-react'
 function ProductDetail() {
   const { id } = useParams() as { id: string }
   const { data, isLoading: productLoading, isError: productError } = useGetSingleProductsQuery(
@@ -32,33 +33,39 @@ function ProductDetail() {
   }
   
   const product = data?.product
+  useEffect(()=>{
+    console.log("productsDataFromCart",productsDataFromCart)
+  },[productsDataFromCart])
   if (productLoading) return <Spinner />
-  if (productError) return <div className="text-red-500 text-center mt-10">Failed to load product details!</div>
-  const isProductExistInCart = productsDataFromCart?.products.some(i => i.productId._id === id as string)
+  
+  const isProductExistInCart = productsDataFromCart?.products.map(i => i.productId._id.toString() === id as string)
+  console.log("isProductExistInCart",isProductExistInCart)
   return (
     <div className="min-h-screen px-6 py-16 bg-[#0f0c29] text-white ">
       <div className="max-w-5xl mx-auto bg-[#1b1321] border border-[#3f2e40] hover:border-[#b075f5] hover:shadow-purple-500/20 shadow-lg transition-all rounded-2xl p-6 md:flex gap-10">
 
         {/* Product Image */}
         <div className="flex-shrink-0 w-full md:w-1/2 h-72 flex items-center justify-center bg-[#2a1e30] rounded-xl border border-[#3f2e40] p-4">
-          <img
+          {
+            productError ? <Loader/> : <img
             src={product?.photo}
             alt={product?.photo}
             className="max-h-full object-contain rounded"
           />
+          }
         </div>
 
         {/* Product Info */}
         <div className="flex-1 mt-6 md:mt-0">
           <div className="flex items-start justify-between mb-4">
-            <h2 className="text-2xl font-semibold text-white">{product?.name}</h2>
+           { productError ? <Loader/> :  <h2 className="text-2xl font-semibold text-white">{product?.name}</h2>}
             <button className="text-white/50 hover:text-pink-400 transition">
               <FaHeart size={18} />
             </button>
           </div>
 
-          <p className="text-sm text-gray-400 mb-1">Category: {product?.category}</p>
-          <p className="text-lg text-purple-300 font-bold mb-4">₹{product?.price.toFixed(2)}</p>
+         {productError ? <span className="text-sm text-gray-400 mb-1" >?</span> :  <p className="text-sm text-gray-400 mb-1">Category: {product?.category}</p>}
+          {productError ? <span className="text-sm text-gray-400 mb-1">?</span> : <p className="text-lg text-purple-300 font-bold mb-4">₹{product?.price.toFixed(2)}</p>}
 
           {/* Ratings */}
           <div className="flex items-center gap-1 text-yellow-400 mb-4">

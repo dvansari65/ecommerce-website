@@ -62,5 +62,17 @@ export interface cartDetailProps {
 export type cartDetailTypes = {
     message:string,
     success:boolean,
-    cartDetail:cartDetailProps
+    cartDetails:cartDetailProps
+}
+export type paymentFromCartTypes = {
+    message:string,
+    success:true,
+    clientSecret:string
+}
+export type shippingInfo = {
+    address:string,
+    pinCode:number,
+    city:string,
+    state:string,
+    country:string
 }

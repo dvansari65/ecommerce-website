@@ -12,6 +12,7 @@ import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
 import Cart from "./pages/Cart"
 import PrivateRoute from "./components/features/PrivateRoute"
+import PlaceOrderFromCart from "./pages/PlaceOrderFromCart"
 
 function App() {
   const dispatch = useDispatch()
@@ -22,7 +23,6 @@ function App() {
     if (userFromStorage && token) {
       const user = JSON.parse(userFromStorage);
       dispatch(userExist(user));
-      console.log("user:", user)
     } else {
       dispatch(userNotExist());
     }
@@ -37,6 +37,7 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={user ? <ProductDetail /> : <Navigate to='/login' />} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          <Route path="/place-order-from-cart" element={<PrivateRoute><PlaceOrderFromCart /></PrivateRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>

@@ -1,32 +1,19 @@
 import { server } from "@/config/constants";
 import type { cartDetailTypes, getCartProductsType } from "@/types/api-types";
 import type { CartProps, messageAndSuccessProps } from "@/types/types";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { customBaseQuery } from "../customBaseQuery/customeBaseQuery";
 
 
 
 export const cartApi = createApi({
     reducerPath : "cartApi",
-    baseQuery: fetchBaseQuery({
-        baseUrl:`${server}/api/v1/cart`,
-        credentials:"include",
-        prepareHeaders:(headers)=>{
-            try {
-                const token = localStorage.getItem("token")
-                if(token){
-                    headers.set("authorization", `Bearer ${token}`);
-                }
-            } catch (error) {
-                console.log("failed to set header:",error)
-            }
-            return headers
-        }
-    }),
+    baseQuery: customBaseQuery,
     tagTypes: ["Cart"],
     endpoints : (builder)=>({
         createCart : builder.mutation<CartProps,{id:string}>({
             query:({id})=>({
-                url:`/create-cart/${id}`,
+                url:`cart/c/create-cart/${id}`,
                 method:"POST",
             }),
             invalidatesTags:["Cart"]
@@ -34,13 +21,13 @@ export const cartApi = createApi({
         }),
         getCartProducts : builder.query <getCartProductsType,void>({
             query : ()=>({
-                url:"/get-cart-products"
+                url:"/cart/get-cart-products"
             }),
             providesTags:["Cart"]
         }),
         deleteCartProduct : builder.mutation<messageAndSuccessProps,{productId:string}>({
             query:({productId})=>({
-                url:`/delete-product/${productId}`,
+                url:`/cart/delete-product/${productId}`,
                 method:"DELETE",
             }),
             invalidatesTags:['Cart']
@@ -67,7 +54,7 @@ export const cartApi = createApi({
         }),
         decreaseQuantity : builder.mutation<messageAndSuccessProps,{productId:string}>({
             query:({productId})=>({
-                url:`/decrease-quantity/${productId}`,
+                url:`/cart/decrease-quantity/${productId}`,
                 method:"POST",
             }),
             invalidatesTags:['Cart'],
