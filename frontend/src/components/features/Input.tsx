@@ -7,7 +7,8 @@ interface inputProps {
     onChange:(e:React.ChangeEvent<HTMLInputElement>
     )=>void
     placehHolder:string,
-    htmlFor:string
+    htmlFor:string,
+    required:boolean
 }
 function Input({
     label,
@@ -16,16 +17,18 @@ function Input({
     type,
     onChange,
     placehHolder,
+    required
     
 }:inputProps) {
 
   return (
     <div className='flex flex-col gap-1'>
-    <label htmlFor={id}>{label}</label>
+    <label className='text-[14px] ml-2 text-gray-300' htmlFor={id}>{label}</label>
       <input 
       id={id}
+      required={required}
       type={type}
-      className='text-white border-[1px] min-w-[300px] border-[#322d5e] p-2 rounded-[4px]'
+      className='text-white border-[1px] min-w-[300px] border-color p-2 rounded-[4px]'
       placeholder={placehHolder}
       value={value} 
       onChange={onChange} />

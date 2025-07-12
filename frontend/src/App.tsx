@@ -12,7 +12,8 @@ import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
 import Cart from "./pages/Cart"
 import PrivateRoute from "./components/features/PrivateRoute"
-import PlaceOrderFromCart from "./pages/ShippingInfo"
+import ShippingInfo from "./pages/ShippingInfo"
+import Payment from "./pages/Payment"
 
 function App() {
   const dispatch = useDispatch()
@@ -37,7 +38,8 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={user ? <ProductDetail /> : <Navigate to='/login' />} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
-          <Route path="/place-order-from-cart" element={<PrivateRoute><PlaceOrderFromCart /></PrivateRoute>} />
+          <Route path="/place-order-from-cart" element={<PrivateRoute><ShippingInfo /></PrivateRoute>} />
+          <Route path="/create-payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>
