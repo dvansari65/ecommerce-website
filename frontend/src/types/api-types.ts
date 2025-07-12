@@ -71,7 +71,7 @@ export type paymentFromCartTypes = {
 }
 export type shippingInfo = {
     address:string,
-    pinCode:number,
+    pinCode:number ,
     city:string,
     state:string,
     country:string

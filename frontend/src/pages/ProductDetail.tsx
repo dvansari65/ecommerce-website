@@ -6,7 +6,7 @@ import Spinner from '@/components/features/LoaderIcon'
 import Reviews from '@/components/features/Reviews'
 import { useCreateCartMutation, useGetCartProductsQuery } from '@/redux/api/cartApi'
 import toast from 'react-hot-toast'
-import { Loader, Space } from 'lucide-react'
+import { Loader } from 'lucide-react'
 function ProductDetail() {
   const { id } = useParams() as { id: string }
   const { data, isLoading: productLoading, isError: productError } = useGetSingleProductsQuery(
@@ -18,7 +18,6 @@ function ProductDetail() {
     // console.log("product added to the cart!")
     try {
       const res = await createCart({ id })
-      console.log("es.data?.success", res.data?.success)
       if (res.data?.success) {
         toast.success(res.data.message)
         // console.log("product added to the cart!")
@@ -33,9 +32,6 @@ function ProductDetail() {
   }
   
   const product = data?.product
-  useEffect(()=>{
-    console.log("productsDataFromCart",productsDataFromCart)
-  },[productsDataFromCart])
   if (productLoading) return <Spinner />
   
   const isProductExistInCart = productsDataFromCart?.products.map(i => i.productId._id.toString() === id as string)

@@ -12,7 +12,7 @@ import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
 import Cart from "./pages/Cart"
 import PrivateRoute from "./components/features/PrivateRoute"
-import PlaceOrderFromCart from "./pages/PlaceOrderFromCart"
+import PlaceOrderFromCart from "./pages/ShippingInfo"
 
 function App() {
   const dispatch = useDispatch()

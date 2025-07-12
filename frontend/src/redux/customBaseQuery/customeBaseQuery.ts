@@ -10,17 +10,16 @@ import type { refreshDataResponse } from "@/types/types";
 import {  userNotExist } from "../reducer/userReducer";
 
 
-console.log("danish:")
 const baseQuery = fetchBaseQuery({
     baseUrl: `${server}/api/v1`,
     credentials: "include",
-    prepareHeaders: (headers) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-          headers.set("authorization", `Bearer ${token}`);
-        }
-        return headers;
-      }
+    // prepareHeaders: (headers) => {
+    //     const token = localStorage.getItem("token");
+    //     if (token) {
+    //       headers.set("authorization", `Bearer ${token}`);
+    //     }
+    //     return headers;
+    //   }
 })
 
 export const customBaseQuery: BaseQueryFn<
@@ -29,12 +28,10 @@ export const customBaseQuery: BaseQueryFn<
     FetchBaseQueryError
 > = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions)
-    
-
+    console.log("result:",result)
     if (result.error?.status === 401) {
         // console.log("401 detected, trying refresh...");
         const refreshResult = await baseQuery("/refreshToken", api, extraOptions)
-
         const refreshData = refreshResult.data as refreshDataResponse
         // console.log("refreshData?.success",refreshData?.success)
         if (refreshData?.success && refreshData.accessToken) {
