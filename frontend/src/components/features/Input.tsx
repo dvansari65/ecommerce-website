@@ -28,7 +28,7 @@ function Input({
       id={id}
       required={required}
       type={type}
-      className='text-white border-[1px] min-w-[300px] border-color p-2 rounded-[4px]'
+      className=' text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
       placeholder={placehHolder}
       value={value} 
       onChange={onChange} />

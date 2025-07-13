@@ -76,3 +76,43 @@ export type shippingInfo = {
     state:string,
     country:string
 }
+export type productTypeFromOrder = {
+    name:string,
+    photo:string,
+    price : number,
+    quantity:number,
+    productId:string
+
+}
+
+export interface Order {
+    _id:string,
+    success:boolean,
+    message:string,
+    order:shippingInfo,
+    user:User,
+    subtotal:number,
+    tax:number,
+    shippingCharges:number,
+    discount:number,
+    total:number,
+    status:string,
+    orderitems:productTypeFromOrder[],
+    createdAt:string
+}
+
+export type couponInitialStateTypes = {
+    code:number | null,
+    amount:number | null,
+    _id:string
+ }
+ export type applyDiscountResponseTypes = {
+    message:string,
+    success:boolean,
+    discount:couponInitialStateTypes
+ }
+export type createPaymentResponse = {
+    clientSecret:string,
+    message:string,
+    success:boolean
+}

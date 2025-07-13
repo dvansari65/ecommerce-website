@@ -7,7 +7,7 @@ import type { shippingInfo } from "@/types/api-types"
 const initialState:userReducerInitialState = {
     user:null!,
     loading:true,
-    shippingInfo : null
+    
 }
 
 export const userReducer = createSlice({
@@ -21,11 +21,8 @@ export const userReducer = createSlice({
         userNotExist : (state)=>{
             state.loading = false,
             state.user = null!
-        },
-        setShippingInfo :(state,action:PayloadAction<shippingInfo>)=>{
-            state.shippingInfo = action.payload 
         }
     }
 })
 
-export const {userExist,userNotExist,setShippingInfo} = userReducer.actions
+export const {userExist,userNotExist} = userReducer.actions

@@ -7,8 +7,9 @@ import { Coupon } from "../models/coupon.model";
 import { Product } from "../models/product.model";
 import { stripe } from "../app";
 import { Cart } from "../models/addToCart";
-import { cartItem, cartResponse } from "../types/product";
+import { cartResponse } from "../types/product";
 import { invalidateKeys } from "../utils/invalidateCache";
+import { couponType } from "../types/types";
 export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
     if (!userId) {
@@ -23,28 +24,29 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
     const product = await Product.find({ _id: { $in: CartProductIds } })
     const user = await User.findById(userId);
 
-    const inCartProductIds = cart.items.map(i => i.productId)
-    
     const {
-        shoppingInfo,
+        shippingInfo,
     }: {
-        shoppingInfo: shippingInfoType;
+        shippingInfo: shippingInfoType;
     } = req.body;
 
-    const  {code} = req.query
+    const { code } = req.query
 
-    if (!shoppingInfo) {
+    if (!shippingInfo) {
         throw new ApiError("Please enter shopping info", 404);
     }
     let discountAmount = 0;
-    const coupon = await Coupon.findOne({ code: code });
-    if (!coupon) {
-        throw new ApiError("Invalid coupon code", 404);
+    let coupon;
+    if (code) {
+        coupon = await Coupon.findOne({ code: code });
+        if (!coupon) {
+            throw new ApiError("Invalid coupon code", 404);
+        }
     }
 
-    discountAmount = coupon.amount;
+    discountAmount = coupon?.amount ?? 0;
     const subtotal = cart?.items.reduce((total, curr) => {
-        const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id)
+        const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id.toString())
         if (!productToBeBuy) throw new ApiError("Product mismatch", 500);
         const price = curr.productId.discount && curr.productId.discount > 0
             ? curr.productId.price - (curr.productId.price * curr.productId.discount) / 100
@@ -65,11 +67,11 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         shipping: {
             name: user?.userName as string,
             address: {
-                line1: shoppingInfo.address,
-                postal_code: shoppingInfo.pinCode.toString(),
-                city: shoppingInfo.city,
-                state: shoppingInfo.state,
-                country: shoppingInfo.country
+                line1: shippingInfo.address,
+                postal_code: shippingInfo.pinCode.toString(),
+                city: shippingInfo.city,
+                state: shippingInfo.state,
+                country: shippingInfo.country
             }
         }
     });
@@ -83,31 +85,25 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
             )
         )
     );
- 
-    await invalidateKeys({product:true,cart:true,admin:true})
+
+    await invalidateKeys({ product: true, cart: true, admin: true })
     return res.status(200).json({
         message: "Payment intent created successfully!",
         success: true,
-        transactionDetails:{
-            clientSecret: paymentIntent.client_secret,
-            shippingCharges,
-            subtotal,
-            total,
-            tax
-        }
+        clientSecret: paymentIntent.client_secret,
     });
 });
 
 
 export const createPaymentIntentDirectly = AsyncHandler(async (
-    req:Request<
-    {},
-    {},
-    {
-    shoppingInfo: shippingInfoType,
-    orderItems: OrderItemType[],
-    },
-    {code:string}
+    req: Request<
+        {},
+        {},
+        {
+            shoppingInfo: shippingInfoType,
+            orderItems: OrderItemType[],
+        },
+        { code: string }
     >, res: Response) => {
 
     const userId = req.user?._id
@@ -123,9 +119,9 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
         {
             shoppingInfo: shippingInfoType,
             orderItems: OrderItemType[],
-            
+
         } = req.body
-    const {code} = req.query
+    const { code } = req.query
     const productId = orderItems.map(i => i.productId)
     const products = await Product.find({ _id: { $in: productId } })
     const subtotal = products.reduce((total, cur) => {
@@ -170,7 +166,7 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
         },
     });
 
-    await invalidateKeys({product:true,admin:true})
+    await invalidateKeys({ product: true, admin: true })
     return res.status(200).json({
         message: "payment created successfully!",
         success: true,
@@ -246,11 +242,14 @@ export const applyDiscount = AsyncHandler(async (req: Request, res: Response) =>
     }
     const coupon = await Coupon.findOne({ code: code });
     if (!coupon) {
-        throw new ApiError("Coupon not found", 404);
+        return res.status(404).json({
+            message: "coupon not found!",
+            success: false
+        })
     }
     return res.status(200).json({
         message: "Coupon obtained successfully!",
         success: true,
-        discount: coupon.amount
+        discount: coupon
     });
 });

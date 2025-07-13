@@ -21,14 +21,15 @@ const baseQuery = fetchBaseQuery({
     //     return headers;
     //   }
 })
-
+console.log("danish")
 export const customBaseQuery: BaseQueryFn<
     string | FetchArgs,
     unknown,
     FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+    console.log("danish2")
     let result = await baseQuery(args, api, extraOptions)
-    console.log("result:",result)
+    console.log("status code:",result.error?.status)
     if (result.error?.status === 401) {
         // console.log("401 detected, trying refresh...");
         const refreshResult = await baseQuery("/refreshToken", api, extraOptions)

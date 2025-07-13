@@ -73,3 +73,8 @@ export type CartType = {
         item
     ]
 }
+export type couponType = {
+    code:string,
+    amount:number,
+    _id:string
+}
