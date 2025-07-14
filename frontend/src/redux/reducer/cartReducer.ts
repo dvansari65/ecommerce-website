@@ -24,25 +24,26 @@ export const cartReducer = createSlice({
     name: "cartReducer",
     initialState,
     reducers: {
-        saveShippingInfo: (State, action) => {
-            const { address, state, country, pinCode, city } = action.payload
-            State.shippingInfo.address = address,
-                State.shippingInfo.state = state,
-                State.shippingInfo.country = country,
-                State.shippingInfo.pinCode = pinCode,
-                State.shippingInfo.city = city
+        saveShippingInfo: (state, action) => {
+            const { address, state: st, country, pinCode, city } = action.payload
+            state.shippingInfo.address = address;
+            state.shippingInfo.state = st;
+            state.shippingInfo.country = country;
+            state.shippingInfo.pinCode = pinCode;
+            state.shippingInfo.city = city;
         },
         saveNumericalData: (state, action) => {
-            state.discount = action.payload
-            state.tax = action.payload
-            state.total = action.payload
-            state.subtotal = action.payload
-            state.shippingCharges = action.payload
+            const { subtotal, tax, shippingCharges, discount, total } = action.payload;
+            state.subtotal = subtotal;
+            state.tax = tax;
+            state.shippingCharges = shippingCharges;
+            state.discount = discount;
+            state.total = total;
         },
         saveOrderItems: (state, action) => {
-           state.orderItems = action.payload
+            state.orderItems = action.payload
         }
     }
 })
 
-export const { saveShippingInfo,saveNumericalData,saveOrderItems } = cartReducer.actions
+export const { saveShippingInfo, saveNumericalData, saveOrderItems } = cartReducer.actions
