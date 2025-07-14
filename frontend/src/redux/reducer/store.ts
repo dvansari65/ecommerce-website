@@ -7,6 +7,7 @@ import { cartApi } from "../api/cartApi";
 import { couponApi } from "../api/couponApi";
 import { couponReducer } from "./couponReducer";
 import { cartReducer } from "./cartReducer";
+import { orderApi } from "../api/orderApi";
 
 
 
@@ -19,7 +20,8 @@ export const store = configureStore({
         [productApi.reducerPath] : productApi.reducer,
         [reviewApi.reducerPath] : reviewApi.reducer,
         [cartApi.reducerPath] : cartApi.reducer,
-        [couponApi.reducerPath] : couponApi.reducer
+        [couponApi.reducerPath] : couponApi.reducer,
+        [orderApi.reducerPath] : orderApi.reducer
     },
     middleware: (mid) =>
         mid()
@@ -28,6 +30,7 @@ export const store = configureStore({
             .concat(reviewApi.middleware)
             .concat(cartApi.middleware)
             .concat(couponApi.middleware)
+            .concat(orderApi.middleware)
 })
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

@@ -1,4 +1,4 @@
-import type { messageAndSuccessProps, Product, Review, User } from "./types"
+import type { Cart, messageAndSuccessProps, Product, Review, User } from "./types"
 
 export type messageResponse = {
     message:string,
@@ -69,7 +69,7 @@ export type paymentFromCartTypes = {
     success:true,
     clientSecret:string
 }
-export type shippingInfo = {
+export interface shippingInfo  {
     address:string,
     pinCode:number ,
     city:string,
@@ -82,7 +82,6 @@ export type productTypeFromOrder = {
     price : number,
     quantity:number,
     productId:string
-
 }
 
 export interface Order {
@@ -111,8 +110,27 @@ export type couponInitialStateTypes = {
     success:boolean,
     discount:couponInitialStateTypes
  }
+
+
+export type orderReponse = {
+    subtotal:number,
+    total:number,
+    tax:number,
+    shippingCharges:number,
+    discount:number
+    shippingInfo:shippingInfo,
+    orderItems:productTypeFromOrder[]
+
+}
 export type createPaymentResponse = {
     clientSecret:string,
     message:string,
-    success:boolean
+    success:boolean,
+    subtotal:number,
+    total:number,
+    tax:number,
+    shippingCharges:number,
+    discount:number
+    shippingInfo:shippingInfo,
+    cart:Cart
 }

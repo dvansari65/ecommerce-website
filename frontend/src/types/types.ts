@@ -26,6 +26,7 @@ export interface Product {
   discountedPrice?: number;
   createdAt?: string;
   updatedAt?: string;
+  quantity? :number,
   onClick?: () => void;
   onWishlistClick?: () => void;
 }
@@ -37,14 +38,14 @@ export interface Review {
   product:Product,
   createdAt:string,
 }
-
+export type partialProductType = Partial<Product>
 export type refreshDataResponse = {
   success:boolean,
   message:string,
   accessToken:string,
 }
  export type messageAndSuccessProps = {
-  message:string ,
+  message:string 
   success:boolean
  }
 
@@ -54,7 +55,7 @@ export type error = {
 }
 export type cartItem = {
   _id: string;
-  productId: string;
+  productId: Product;
   quantity: number;
 }
 

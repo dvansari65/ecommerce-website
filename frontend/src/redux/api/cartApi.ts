@@ -1,10 +1,7 @@
-import { server } from "@/config/constants";
 import type { cartDetailTypes, getCartProductsType } from "@/types/api-types";
 import type { CartProps, messageAndSuccessProps } from "@/types/types";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { customBaseQuery } from "../customBaseQuery/customeBaseQuery";
-
-
 
 export const cartApi = createApi({
     reducerPath : "cartApi",
@@ -13,11 +10,11 @@ export const cartApi = createApi({
     endpoints : (builder)=>({
         createCart : builder.mutation<CartProps,{id:string}>({
             query:({id})=>({
-                url:`cart/c/create-cart/${id}`,
+                url:`cart/create-cart/${id}`,
                 method:"POST",
+                
             }),
             invalidatesTags:["Cart"]
-
         }),
         getCartProducts : builder.query <getCartProductsType,void>({
             query : ()=>({
@@ -76,6 +73,13 @@ export const cartApi = createApi({
             query:()=>({
                 url:"/cart/cart-details",
             })
+        }),
+        clearCart : builder.mutation<messageAndSuccessProps,void>({
+            query:()=>({
+                url:"/cart/clear-cart",
+                method:'DELETE'
+            }),
+            invalidatesTags:["Cart"]
         })
 
         
@@ -89,5 +93,6 @@ export const {
     useDeleteCartProductMutation,
     useIncreaseProductQuantityMutation,
     useDecreaseQuantityMutation,
-    useGetCartDetailsQuery
+    useGetCartDetailsQuery,
+    useClearCartMutation
 }  = cartApi

@@ -55,7 +55,6 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         return total += price * quantity
     }, 0);
 
-    console.log("subtotal:", subtotal)
     const tax = subtotal * 0.18;
     const shippingCharges = subtotal > 1000 ? 0 : 200;
     const total = subtotal + tax + shippingCharges - discountAmount;
@@ -91,6 +90,12 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         message: "Payment intent created successfully!",
         success: true,
         clientSecret: paymentIntent.client_secret,
+        cart,
+        subtotal,
+        tax,
+        total,
+        discount:discountAmount,
+        shippingCharges
     });
 });
 

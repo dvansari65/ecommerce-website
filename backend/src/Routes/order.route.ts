@@ -14,7 +14,7 @@ import { updateLastActive } from "../middlewares/updateLastActiveMiddleWare";
 export const orderRouter = Router()
 orderRouter.route("/my-orders").get(verifyJwt,updateLastActive, myOrders);
 orderRouter.route("/create-order").post(verifyJwt, updateLastActive,createOrder);
-orderRouter.route("/delete-order/:orderId").delete(verifyJwt,updateLastActive, deleteOrder);
+orderRouter.route("/delete-order/:id").delete(verifyJwt,updateLastActive, deleteOrder);
 
 
 

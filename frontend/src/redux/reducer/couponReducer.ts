@@ -14,12 +14,10 @@ export const couponReducer = createSlice({
     initialState,
     reducers: {
         setCoupon: (state, action) => {
-            const { code, amount, _id } = action.payload
-            return (
-                state.code = code,
-                state.amount = amount,
-                state._id = _id
-            )
+            const { code, amount, _id } = action.payload;
+            state.code = code;
+            state.amount = amount;
+            state._id = _id;
         }
     }
 })

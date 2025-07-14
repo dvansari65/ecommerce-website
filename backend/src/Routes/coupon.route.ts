@@ -4,13 +4,18 @@ import { updateLastActive } from "../middlewares/updateLastActiveMiddleWare";
 import {
      createPaymentIntentFromCart,
      createCoupon,
-     applyDiscount
+     applyDiscount,
+     deleteCoupon
      } from "../controllers/coupon.controller";
 import { Admin } from "../middlewares/adminMiddleWare";
  const couponRouter = Router()
 
 
+
  couponRouter.route("/create-payment-from-cart").post(verifyJwt,updateLastActive, createPaymentIntentFromCart);
- couponRouter.route("/create-coupon").post( Admin,createCoupon);
  couponRouter.route("/apply-discount").get(verifyJwt, applyDiscount);
+ couponRouter.route("/delete-coupon/:id").delete(verifyJwt, deleteCoupon);
+
+//  admin route
+couponRouter.route("/create-coupon").post( Admin,createCoupon);
  export default couponRouter

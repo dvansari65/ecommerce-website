@@ -8,7 +8,8 @@ import {createCart,
     increaseQuantity,
     getSingleProductFromCart,
     cartDetails,
-    deleteProductFromCart
+    deleteProductFromCart,
+    clearCart
 
 } from "../controllers/cart.controller"
 
@@ -26,3 +27,4 @@ cartRouter.route("/getSingleProduct/:productId").get(verifyJwt,getSingleProductF
 cartRouter.route("/delete-product/:productId").delete(verifyJwt,deleteProductFromCart);
 cartRouter.route("/cart-details").get(verifyJwt,cartDetails);
 
+cartRouter.route("/clear-cart").delete(verifyJwt,clearCart);

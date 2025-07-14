@@ -332,20 +332,27 @@ export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
             success:true,
         })
     }
-    const cart = await Cart.findOne({ user: userId })
-    .populate("items.productId") as unknown as cartResponse;
+    const cart = await Cart.findOne({ user: userId }).populate("items.productId") as unknown as cartResponse;
+
     if(!cart){
         throw new ApiError("cart not found!",404)
     }
+
     const CartProductIds = cart.items.map(i => i.productId)
+
     const product = await Product.find({ _id: { $in: CartProductIds } })
+
     const subtotal = cart?.items.reduce((total, curr) => {
         const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id.toString())
+
         if (!productToBeBuy) throw new ApiError("Product mismatch", 500);
+
         const price = curr.productId.discount && curr.productId.discount > 0
             ? curr.productId.price - (curr.productId.price * curr.productId.discount) / 100
             : curr.productId.price;
+
         const quantity = curr.quantity
+
         return total += price * quantity
     }, 0);
     const tax = subtotal * 0.18;
@@ -360,4 +367,18 @@ export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
         }
     })
 })
+
+export const clearCart = AsyncHandler( async(req:Request,res:Response)=>{
+    const user = req.user?._id
+    if(!user){
+        throw new ApiError("lavde! logged in first!",401)
+    }
+    await Cart.findByIdAndDelete(user)
+    await invalidateKeys({product:true,cart:true,admin:true})
+    return res.status(200).json({
+        message:"cart deleted successfully!",
+        success:true
+    })
+})
+
     
