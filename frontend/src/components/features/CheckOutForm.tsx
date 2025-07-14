@@ -4,7 +4,7 @@ import { useCreateOrderMutation } from '@/redux/api/orderApi'
 import type { RootState } from '@/redux/reducer/store'
 import type { orderReponse } from '@/types/api-types'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -17,22 +17,23 @@ function CheckOutForm() {
     const stripe = useStripe()
     const elements = useElements()
 
-    const [clearCart] = useClearCartMutation()
-    const [createOrder] = useCreateOrderMutation()
+    const [clearCart,{isError:cartError}] = useClearCartMutation()
+    const [createOrder,{isError:orderError}] = useCreateOrderMutation()
     const [deleteCoupon] = useDeleteCouponMutation()
 
     const { shippingCharges, shippingInfo, orderItems, total, subtotal, tax } = useSelector((state: RootState) => state.cartReducer)
     const { amount, _id } = useSelector((state: RootState) => state.couponReducer)
 
+    useEffect(()=>{
+        console.log(
+            "shippingCharges, shippingInfo, orderItems, total, subtotal, tax",
+            shippingCharges, shippingInfo, orderItems, total, subtotal, tax
+        )
+    },[shippingCharges, shippingInfo, orderItems, total, subtotal, tax])
+
     const createOrderData: orderReponse = {
         orderItems,
-        shippingInfo:{
-            address:shippingInfo.address,
-            state:shippingInfo.state,
-            country:shippingInfo.country,
-            city:shippingInfo.city,
-            pinCode:shippingInfo.pinCode,
-        },
+        shippingInfo,
         shippingCharges,
         total,
         subtotal,
@@ -84,6 +85,12 @@ function CheckOutForm() {
             toast.error(error.message)
             navigate("/place-order-from-cart")
         }
+    }
+    if(cartError){
+        console.log(cartError)
+    }
+    if(orderError){
+        console.log(orderError)
     }
 
     return (
