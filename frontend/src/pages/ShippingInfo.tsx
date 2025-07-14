@@ -1,17 +1,18 @@
 import Input from '@/components/features/Input'
-import type { createPaymentResponse, shippingInfo } from '@/types/api-types'
-import React, { useState } from 'react'
+import type { createPaymentResponse, productTypeFromOrder, shippingInfo } from '@/types/api-types'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import axios from "axios"
-import { saveShippingInfo } from '@/redux/reducer/cartReducer'
-import CheckCoupon from '@/components/features/CheckCoupon'
+import { saveNumericalData, saveOrderItems, saveShippingInfo } from '@/redux/reducer/cartReducer'
+import CheckCoupon from '@/components/features/CreateCoupon'
 import { server } from '@/config/constants'
 import type { RootState } from '@/redux/reducer/store'
-
+import Spinner from '@/components/features/LoaderIcon'
 
 
 function ShippingInfo() {
+  const [isLoading, setIsLoading] = useState(false)
   const dispatch = useDispatch()
   const { code } = useSelector((state: RootState) => state.couponReducer)
   const [message, setMessage] = useState("")
@@ -24,47 +25,93 @@ function ShippingInfo() {
     country: "",
   })
 
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true)
     dispatch(saveShippingInfo(formData))
     try {
       if (!code) {
-        const { data }: { data: createPaymentResponse } = await axios.post(`${server}/api/v1/coupon/create-payment-from-cart`,{
-          shippingInfo:formData
+        const { data }: { data: createPaymentResponse } = await axios.post(`${server}/api/v1/coupon/create-payment-from-cart`, {
+          shippingInfo: formData
         },
           {
-            withCredentials:true
+            withCredentials: true
           }
         )
+        let items: productTypeFromOrder[] = data.cart.items.map(i => ({
+          name: i.productId?.name || "",
+          photo: i.productId?.photo || "",
+          price: i.productId?.price || 0,
+          quantity: i.quantity || 1,
+          productId: i.productId?._id || ""
+        }));
+        dispatch(saveOrderItems(items))
+
+        console.log("item:", items)
+        dispatch(saveOrderItems(items))
+
+        dispatch(saveNumericalData({
+          subtotal: data.subtotal,
+          tax: data.tax,
+          shippingCharges: data.shippingCharges,
+          discount: data.discount,
+          total: data.total
+        }))
+
+        console.log("item:", items)
         console.log("res:", data)
-        navigate("/create-payment", {
+
+        navigate("/payment", {
           state: data.clientSecret
         })
-      }else{
+        setIsLoading(false)
+      } else {
+        setIsLoading(true)
         const { data }: { data: createPaymentResponse } = await axios.post(`${server}/api/v1/coupon/create-payment-from-cart?code=${code}`,
           {
-            shippingInfo:formData
+            shippingInfo: formData
           },
           {
-            withCredentials:true
+            withCredentials: true
           }
         )
         console.log("res:", data)
-        navigate("/create-payment", {
+
+        let items: productTypeFromOrder[] = data.cart.items.map(i => ({
+          name: i.productId?.name || "",
+          photo: i.productId?.photo || "",
+          price: i.productId?.price || 0,
+          quantity: i.quantity || 1,
+          productId: i.productId?._id || ""
+        }));
+        dispatch(saveOrderItems(items))
+
+        dispatch(saveNumericalData({
+          subtotal: data.subtotal,
+          tax: data.tax,
+          shippingCharges: data.shippingCharges,
+          discount: data.discount,
+          total: data.total
+        }))
+
+        navigate("/payment", {
           state: data.clientSecret
         })
+        setIsLoading(false)
       }
-    } catch (error:any) {
+    } catch (error: any) {
       console.log(error.message)
     }
   }
+  if (isLoading) return <div className='w-full h-screen flex justify-center items-center '><Spinner /></div>
 
   return (
     <div className='h-screen w-full' >
       <div className='grid grid-cols-2 '>
         <div className='col-span-1 flex flex-col justify-center items-end h-[80vh] mr-5'>
           <span>{message}</span>
-          <form className='p-4  w-[60vh] h-full flex flex-col justify-center items-center gap-2 bg-[#1b1321] border-[1px] border-color ' onSubmit={handleSubmit}>
+          <form className='p-4  w-[60vh] h-full flex flex-col justify-center items-center gap-2 bg-transparent border-[1px] border-color ' onSubmit={handleSubmit}>
             <Input
               required={true}
               label='ADDRESS'
