@@ -79,7 +79,7 @@ function ProductDetail() {
           {/* Actions */}
           <div className="mt-6 flex gap-4">
             {
-              isProductExistInCart.length > 0 && isProductExistInCart ?
+              isProductExistInCart.length > 0 && isProductExistInCart[0]===true ?
                 (
                   <button onClick={() => addToCart(product?._id as string)} className="bg-white text-black px-5 py-2 rounded-full hover:bg-gray-200 transition font-semibold">
                     Added..
