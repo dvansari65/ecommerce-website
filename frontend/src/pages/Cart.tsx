@@ -24,7 +24,7 @@ function Cart() {
       {/* Left: Cart Items */}
       <div className="col-span-8 z-10 h-full border-r border-[#6b65e1]/30 p-6 bg-transparent">
         <h2 className="text-2xl font-semibold text-white mb-4">Your Cart</h2>
-        <CartItem />
+        <CartItem products={data?.products || []}/>
       </div>
 
       {/* Right: Order Summary */}
