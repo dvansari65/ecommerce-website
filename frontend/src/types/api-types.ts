@@ -113,6 +113,7 @@ export type couponInitialStateTypes = {
 
 
 export type orderReponse = {
+    status:string,
     subtotal:number,
     total:number,
     tax:number,
@@ -133,4 +134,11 @@ export type createPaymentResponse = {
     discount:number
     shippingInfo:shippingInfo,
     cart:Cart
+}
+
+export type myOrdersResponse = {
+    message:string,
+    success:boolean,
+    numberOfOrders:number,
+    orders:orderReponse[]
 }

@@ -11,10 +11,7 @@ const stripePromise = loadStripe("pk_test_51RaqgaENC7R2J1iYc3VvI8iPGx3PyP0CZw8Tl
 function CheckOut() {
   const location = useLocation()
   const clientSecret = location.state ?? null
-  useEffect(()=>{
-    console.log("clientSecret",clientSecret)
-  },[clientSecret,location])
-
+  
   if (!clientSecret)return <Navigate to="/place-order-from-cart"/>
   const options = {
     clientSecret

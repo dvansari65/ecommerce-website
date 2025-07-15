@@ -21,7 +21,7 @@ const baseQuery = fetchBaseQuery({
     //     return headers;
     //   }
 })
-console.log("danish")
+
 export const customBaseQuery: BaseQueryFn<
     string | FetchArgs,
     unknown,

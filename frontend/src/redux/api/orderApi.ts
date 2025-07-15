@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { customBaseQuery } from "../customBaseQuery/customeBaseQuery";
-import type { Order, orderReponse } from "@/types/api-types";
+import type { myOrdersResponse, Order, orderReponse } from "@/types/api-types";
 
 
 export const orderApi = createApi({
@@ -15,8 +15,14 @@ export const orderApi = createApi({
                 body:orderReponse
             }),
             invalidatesTags:["order"]
+        }),
+        myOrder:builder.query<myOrdersResponse,void>({
+            query:()=>({
+                url:"/order/my-orders"
+            }),
+            providesTags:["order"]
         })
     })
 })
 
-export const {useCreateOrderMutation} = orderApi
+export const {useCreateOrderMutation,useMyOrderQuery} = orderApi

@@ -76,7 +76,7 @@ export const cartApi = createApi({
         }),
         clearCart : builder.mutation<messageAndSuccessProps,void>({
             query:()=>({
-                url:"/cart/clear-cart",
+                url:"/cart/deleteCart",
                 method:'DELETE'
             }),
             invalidatesTags:["Cart"]

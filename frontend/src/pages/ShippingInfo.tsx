@@ -48,7 +48,6 @@ function ShippingInfo() {
         }));
         dispatch(saveOrderItems(items))
 
-        console.log("item:", items)
         dispatch(saveOrderItems(items))
 
         dispatch(saveNumericalData({
@@ -58,9 +57,6 @@ function ShippingInfo() {
           discount: data.discount,
           total: data.total
         }))
-
-        console.log("item:", items)
-        console.log("res:", data)
 
         navigate("/payment", {
           state: data.clientSecret
@@ -76,7 +72,6 @@ function ShippingInfo() {
             withCredentials: true
           }
         )
-        console.log("res:", data)
 
         let items: productTypeFromOrder[] = data.cart.items.map(i => ({
           name: i.productId?.name || "",

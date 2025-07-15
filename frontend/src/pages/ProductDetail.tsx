@@ -34,7 +34,7 @@ function ProductDetail() {
   const product = data?.product
   if (productLoading) return <Spinner />
   
-  const isProductExistInCart = productsDataFromCart?.products.map(i => i.productId._id.toString() === id as string)
+  const isProductExistInCart = productsDataFromCart?.products?.map(i => i.productId._id.toString() === id as string) || []
   console.log("isProductExistInCart",isProductExistInCart)
   return (
     <div className="min-h-screen px-6 py-16 bg-[#0f0c29] text-white ">
@@ -79,7 +79,7 @@ function ProductDetail() {
           {/* Actions */}
           <div className="mt-6 flex gap-4">
             {
-              isProductExistInCart ?
+              isProductExistInCart.length > 0 && isProductExistInCart ?
                 (
                   <button onClick={() => addToCart(product?._id as string)} className="bg-white text-black px-5 py-2 rounded-full hover:bg-gray-200 transition font-semibold">
                     Added..

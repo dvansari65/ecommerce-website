@@ -1,10 +1,9 @@
 import { useClearCartMutation } from '@/redux/api/cartApi'
-import { useDeleteCouponMutation } from '@/redux/api/couponApi'
 import { useCreateOrderMutation } from '@/redux/api/orderApi'
 import type { RootState } from '@/redux/reducer/store'
 import type { orderReponse } from '@/types/api-types'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import React, { useEffect, useState } from 'react'
+import React, {  useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -19,22 +18,17 @@ function CheckOutForm() {
 
     const [clearCart,{isError:cartError}] = useClearCartMutation()
     const [createOrder,{isError:orderError}] = useCreateOrderMutation()
-    const [deleteCoupon] = useDeleteCouponMutation()
+
 
     const { shippingCharges, shippingInfo, orderItems, total, subtotal, tax } = useSelector((state: RootState) => state.cartReducer)
     const { amount, _id } = useSelector((state: RootState) => state.couponReducer)
 
-    useEffect(()=>{
-        console.log(
-            "shippingCharges, shippingInfo, orderItems, total, subtotal, tax",
-            shippingCharges, shippingInfo, orderItems, total, subtotal, tax
-        )
-    },[shippingCharges, shippingInfo, orderItems, total, subtotal, tax])
 
     const createOrderData: orderReponse = {
         orderItems,
         shippingInfo,
         shippingCharges,
+        status:"",
         total,
         subtotal,
         tax,
@@ -59,23 +53,24 @@ function CheckOutForm() {
             console.log("started creating order>>1")
             if (paymentIntent.status === "succeeded") {
                 try {
-                    console.log("started creating order>>")
-                    console.log("_id", _id)
+                   
                     const [orderRes, couponRes] = await Promise.all([
                         createOrder(createOrderData).unwrap(),
                         clearCart().unwrap()
                     ])
                     if (orderRes.success && couponRes?.success) {
                         toast.success("order process is done successfully!")
-                        console.log("order successfull!")
+                        console.log("orderRes:",orderRes)
                         navigate("/my-orders", {
-                            state: orderRes
+                            state: {
+                                orderRes,
+                                _id
+                            }
                         })
                     }
 
                 } catch (error: any) {
                     const message = error?.message  || "Order processing failed";
-                    console.error("error:", message);
                     toast.error(message);
                     navigate("/place-order-from-cart")
                 }

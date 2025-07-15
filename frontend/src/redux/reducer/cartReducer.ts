@@ -5,6 +5,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState: orderReponse = {
     shippingCharges: 0,
+    status,
     total: 0,
     tax: 0,
     subtotal: 0,
@@ -33,12 +34,13 @@ export const cartReducer = createSlice({
             state.shippingInfo.city = city;
         },
         saveNumericalData: (state, action) => {
-            const { subtotal, tax, shippingCharges, discount, total } = action.payload;
+            const { subtotal, tax, shippingCharges, discount, total ,status} = action.payload;
             state.subtotal = subtotal;
             state.tax = tax;
             state.shippingCharges = shippingCharges;
             state.discount = discount;
             state.total = total;
+            state.status = status
         },
         saveOrderItems: (state, action) => {
             state.orderItems = action.payload

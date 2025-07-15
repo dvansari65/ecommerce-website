@@ -35,7 +35,7 @@ function CheckCoupon() {
 
         } catch (error:any) {
             console.log("error:", error.message);
-            toast.error(error.data.message || "something went wrong")
+            toast.error(error.data.message || "something went wrong!")
         }
     }
     
