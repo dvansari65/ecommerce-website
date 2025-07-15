@@ -2,7 +2,16 @@ import React from 'react'
 import CartItem from '../components/features/CartItem'
 
 import CartDetails from '@/components/features/CartDetails';
+import { useGetCartProductsQuery } from '@/redux/api/cartApi';
+import Spinner from '@/components/features/LoaderIcon';
 function Cart() {
+  const { data, isError, isLoading } = useGetCartProductsQuery();
+
+  if (isLoading) return <Spinner />;
+  if (isError) return <div className="text-red-500 text-center mt-10">Failed to fetch cart products!</div>;
+  if (data?.success === false || data?.products?.length === 0)
+    return <div className="text-gray-400 text-xl text-center mt-10">Your cart is empty.</div>;
+
   return (
     <div className="relative grid grid-cols-12 w-full h-screen overflow-y-auto bg-[#0f0c29] text-white">
 
