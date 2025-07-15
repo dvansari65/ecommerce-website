@@ -36,7 +36,7 @@ export const createCart = AsyncHandler(async (req: Request<productIdType, {}, {}
                 productId
             })
             await cart.save()
-            invalidateKeys({ cart: true })
+            await invalidateKeys({ cart: true })
             console.log("cart:", cart)
             return res.status(200).json({
                 message: "product successfully added to the cart!",
@@ -52,7 +52,7 @@ export const createCart = AsyncHandler(async (req: Request<productIdType, {}, {}
                 }
             ]
         })
-        invalidateKeys({ cart: true })
+        await invalidateKeys({ cart: true })
         console.log("new cart:", cart)
         return res.status(200).json({
             message: "cart successfully created !",
@@ -71,7 +71,6 @@ export const deleteCart = AsyncHandler(async (req: Request, res: Response) => {
         })
     }
     const existingCart = await Cart.findOne({ user: userId })
-    console.log("cart:", existingCart)
     if (!existingCart) {
         throw new ApiError("cart not found!", 400)
     }
@@ -100,7 +99,7 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
         })
     }
 
-    const item = cart.items.find(i => i.productId?.toString() === productId)
+    const item = cart.items.find(i => i.productId?.toString() === productId.toString())
 
     if (!item) {
         return res.status(404).json({
@@ -117,7 +116,7 @@ export const decreaseProductQuantity = AsyncHandler(async (req: Request<productI
     if (item.quantity > 1) {
         item.quantity -= 1
     } else {
-        const index = cart.items.findIndex(i => i.productId?.toString() === productId)
+        const index = cart.items.findIndex(i => i.productId?.toString() === productId.toString())
         if (index > -1) {
             cart.items.splice(index, 1)
         }
@@ -176,7 +175,7 @@ export const increaseQuantity = AsyncHandler(async (req: Request, res: Response)
     if (!updatedCart) {
         throw new ApiError("cart can not be update", 500)
     }
-    const updatedItem = updatedCart.items.find(i => i.productId?.toString() === productId);
+    const updatedItem = updatedCart.items.find(i => i.productId?.toString() === productId.toString());
     await invalidateKeys({cart:true})
     return res.status(200).json({
         message: "quantity increased!",
@@ -186,31 +185,30 @@ export const increaseQuantity = AsyncHandler(async (req: Request, res: Response)
 })
 
 export const getAllCartProducts = AsyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user?._id as string
+    const userId = req.user?._id 
     if (!userId) {
-        throw new ApiError("please provide user ID! ", 400)
+        throw new ApiError("please provide user ID! ", 401)
     }
     const key = `all-cart-products-${userId}`
     const cachedData = await redis.get(key)
     if (cachedData) {
         return res.status(200).json({
-            message: "all cart products fetched successfully!",
+            message: "all cart products fetched successfully from cache!",
             success: true,
             products: JSON.parse(cachedData)
         })
     }
     const cart = await Cart.findOne({
         user: userId
-
     }).populate("items.productId")
+    console.log("cart:",cart)
     if (!cart || cart == null) {
         return res.status(200).json({
             message: "cart not found!",
             success: false
         })
     }
-    const products = cart.items.map(i => i)
-    console.log('product:', products)
+    const products = cart.items
     if (products.length === 0) {
         return res.status(200).json({
             message: "your product cart is empty !",
@@ -311,7 +309,7 @@ export const deleteProductFromCart = AsyncHandler( async( req:Request,res:Respon
     cart.items.pull(product?._id)
     console.log("product:",product._id)
     await cart.save()
-    await invalidateKeys({cart:true})
+    await invalidateKeys({cart:true,order:true,admin:true})
     return res.status(200).json({
         message:"product deleted !",
         success:true
@@ -370,6 +368,7 @@ export const cartDetails = AsyncHandler(async (req:Request,res:Response)=>{
 
 export const clearCart = AsyncHandler( async(req:Request,res:Response)=>{
     const user = req.user?._id
+    console.log("user:",user)
     if(!user){
         throw new ApiError("lavde! logged in first!",401)
     }

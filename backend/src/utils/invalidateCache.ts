@@ -55,8 +55,7 @@ export const invalidateKeys = async ({
                 key.startsWith("line-chart") ||
                 key.startsWith("key-chart")
             )) ||
-            (
-                cart && (
+            (cart && (
                     key.startsWith("all-carts") ||
                     key.startsWith("single-cart-product")||
                     key.startsWith("all-cart-products")
