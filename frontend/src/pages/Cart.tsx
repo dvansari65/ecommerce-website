@@ -3,7 +3,7 @@ import CartItem from '../components/features/CartItem'
 
 import CartDetails from '@/components/features/CartDetails';
 import { useGetCartProductsQuery } from '@/redux/api/cartApi';
-import Spinner from '@/components/features/LoaderIcon';
+import Spinner from '@/components/ui/LoaderIcon';
 function Cart() {
   const { data, isError, isLoading } = useGetCartProductsQuery();
 

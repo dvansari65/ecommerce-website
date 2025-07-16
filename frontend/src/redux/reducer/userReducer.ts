@@ -5,7 +5,7 @@ import type { shippingInfo } from "@/types/api-types"
 
 
 const initialState:userReducerInitialState = {
-    user:null!,
+    user:null,
     loading:true,
     
 }
@@ -20,7 +20,7 @@ export const userReducer = createSlice({
         },
         userNotExist : (state)=>{
             state.loading = false,
-            state.user = null!
+            state.user = null
         }
     }
 })

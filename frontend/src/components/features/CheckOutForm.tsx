@@ -1,9 +1,10 @@
 import { useClearCartMutation } from '@/redux/api/cartApi'
+import { useDeleteCouponMutation } from '@/redux/api/couponApi'
 import { useCreateOrderMutation } from '@/redux/api/orderApi'
 import type { RootState } from '@/redux/reducer/store'
 import type { orderReponse } from '@/types/api-types'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import React, {  useState } from 'react'
+import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -16,9 +17,9 @@ function CheckOutForm() {
     const stripe = useStripe()
     const elements = useElements()
 
-    const [clearCart,{isError:cartError}] = useClearCartMutation()
-    const [createOrder,{isError:orderError}] = useCreateOrderMutation()
-
+    const [clearCart, { isError: cartError }] = useClearCartMutation()
+    const [createOrder, { isError: orderError }] = useCreateOrderMutation()
+    const [deleteCoupon, { isError }] = useDeleteCouponMutation()
 
     const { shippingCharges, shippingInfo, orderItems, total, subtotal, tax } = useSelector((state: RootState) => state.cartReducer)
     const { amount, _id } = useSelector((state: RootState) => state.couponReducer)
@@ -28,7 +29,7 @@ function CheckOutForm() {
         orderItems,
         shippingInfo,
         shippingCharges,
-        status:"",
+        status: "",
         total,
         subtotal,
         tax,
@@ -45,22 +46,35 @@ function CheckOutForm() {
                 confirmParams: { return_url: window.location.origin },
                 redirect: "if_required"
             })
-            
+
             if (error) {
                 setProcessing(false)
                 throw error
             }
-            console.log("started creating order>>1")
+
             if (paymentIntent.status === "succeeded") {
                 try {
-                   
+
                     const [orderRes, couponRes] = await Promise.all([
                         createOrder(createOrderData).unwrap(),
                         clearCart().unwrap()
                     ])
+                    if (_id) {
+                        try {
+                            const res = await deleteCoupon({ id: _id })
+                            if(res.data?.success){
+                                toast.success(res.data.message || "coupon deleted!")
+                                console.log("res.data.message",res.data.message)
+                            }
+                        } catch (error:any) {
+                            toast.error(error.data?.message || "failed to delete coupon!")
+                            console.log("error",error)
+                        }
+                    }
+
                     if (orderRes.success && couponRes?.success) {
                         toast.success("order process is done successfully!")
-                        console.log("orderRes:",orderRes)
+
                         navigate("/my-orders", {
                             state: {
                                 orderRes,
@@ -70,21 +84,20 @@ function CheckOutForm() {
                     }
 
                 } catch (error: any) {
-                    const message = error?.message  || "Order processing failed";
+                    const message = error?.message || "Order processing failed";
                     toast.error(message);
                     navigate("/place-order-from-cart")
                 }
             }
         } catch (error: any) {
-            console.log("error:", error.message)
             toast.error(error.message)
             navigate("/place-order-from-cart")
         }
     }
-    if(cartError){
+    if (cartError) {
         console.log(cartError)
     }
-    if(orderError){
+    if (orderError) {
         console.log(orderError)
     }
 

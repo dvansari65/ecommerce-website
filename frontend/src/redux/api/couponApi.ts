@@ -17,7 +17,8 @@ export const couponApi = createApi({
         }),
         deleteCoupon : builder.mutation<messageAndSuccessProps,{id:string}>({
             query:({id})=>({
-                url:`/coupon/delete-coupon/${id}`
+                url:`/coupon/delete-coupon/${id}`,
+                method:'DELETE'
             })
         })
      })

@@ -11,37 +11,47 @@ import type { RootState } from "./redux/reducer/store"
 import Shop from "./pages/Shop"
 import ProductDetail from "./pages/ProductDetail"
 import Cart from "./pages/Cart"
-import PrivateRoute from "./components/features/PrivateRoute"
+import PrivateRoute from "./components/ui/PrivateRoute"
 import ShippingInfo from "./pages/ShippingInfo"
 import CheckOut from "./pages/CheckOut"
 import MyOrders from "./pages/MyOrders"
+import type { User } from "./types/types"
 
 function App() {
-  const dispatch = useDispatch()
+
   const { user, loading } = useSelector((state: RootState) => state.userReducer)
+  const dispatch = useDispatch()
   useEffect(() => {
-    const userFromStorage = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (userFromStorage && token) {
-      const user = JSON.parse(userFromStorage);
-      dispatch(userExist(user));
+    
+    const token = localStorage.getItem("token")
+    const storedUser = localStorage.getItem("user")
+
+    if (storedUser && token) {
+      try {
+        const localUser: User = JSON.parse(storedUser)
+        dispatch(userExist(localUser))
+      } catch (error) {
+        console.error("Error parsing user from localStorage:", error);
+        dispatch(userNotExist());
+      }
     } else {
-      dispatch(userNotExist());
+      dispatch(userNotExist())
     }
+  }, [])
 
-  }, []);
 
-  return loading ? <div>loading..</div> : (
+  return loading ? <div>loading...</div> : (
     <Router>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:id" element={user ? <ProductDetail /> : <Navigate to='/login' />} />
-          <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
-          <Route path="/place-order-from-cart" element={<PrivateRoute><ShippingInfo /></PrivateRoute>} />
-          <Route path="/payment" element={<PrivateRoute><CheckOut /></PrivateRoute>} />
-          <Route path="/my-orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<PrivateRoute isAuthenticated={user ? true : false}><Cart /></PrivateRoute>} />
+          <Route path="/place-order-from-cart" element={<PrivateRoute isAuthenticated={user ? true : false}><ShippingInfo /></PrivateRoute>} />
+          <Route path="/payment" element={<PrivateRoute isAuthenticated={user ? true : false}><CheckOut /></PrivateRoute>} />
+          <Route path="/my-orders" element={<PrivateRoute isAuthenticated={user ? true : false}><MyOrders /></PrivateRoute>} />
+
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>

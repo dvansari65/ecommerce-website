@@ -8,11 +8,13 @@ import { saveNumericalData, saveOrderItems, saveShippingInfo } from '@/redux/red
 import CheckCoupon from '@/components/features/CreateCoupon'
 import { server } from '@/config/constants'
 import type { RootState } from '@/redux/reducer/store'
-import Spinner from '@/components/features/LoaderIcon'
+import Spinner from '@/components/ui/LoaderIcon'
+import toast from 'react-hot-toast'
 
 
 function ShippingInfo() {
   const [isLoading, setIsLoading] = useState(false)
+  const [error,setError] = useState(false)
   const dispatch = useDispatch()
   const { code } = useSelector((state: RootState) => state.couponReducer)
   const [message, setMessage] = useState("")
@@ -30,76 +32,48 @@ function ShippingInfo() {
     e.preventDefault();
     setIsLoading(true)
     dispatch(saveShippingInfo(formData))
+   
     try {
-      if (!code) {
-        const { data }: { data: createPaymentResponse } = await axios.post(`${server}/api/v1/coupon/create-payment-from-cart`, {
-          shippingInfo: formData
-        },
-          {
-            withCredentials: true
-          }
-        )
-        let items: productTypeFromOrder[] = data.cart.items.map(i => ({
-          name: i.productId?.name || "",
-          photo: i.productId?.photo || "",
-          price: i.productId?.price || 0,
-          quantity: i.quantity || 1,
-          productId: i.productId?._id || ""
-        }));
-        dispatch(saveOrderItems(items))
+      const endpoint = code
+        ? `${server}/api/v1/coupon/create-payment-from-cart?code=${code}`
+        : `${server}/api/v1/coupon/create-payment-from-cart`;
 
-        dispatch(saveOrderItems(items))
+      const { data }: { data: createPaymentResponse } = await axios.post(endpoint, {
+        shippingInfo: formData
+      },
+        {
+          withCredentials: true
+        }
+      )
+      
+      let items: productTypeFromOrder[] = data.cart.items.map(i => ({
+        name: i.productId?.name || "",
+        photo: i.productId?.photo || "",
+        price: i.productId?.price || 0,
+        quantity: i.quantity || 1,
+        productId: i.productId?._id || ""
+      }));
+      dispatch(saveOrderItems(items))
 
-        dispatch(saveNumericalData({
-          subtotal: data.subtotal,
-          tax: data.tax,
-          shippingCharges: data.shippingCharges,
-          discount: data.discount,
-          total: data.total
-        }))
+      dispatch(saveNumericalData({
+        subtotal: data.subtotal,
+        tax: data.tax,
+        shippingCharges: data.shippingCharges,
+        discount: data.discount,
+        total: data.total
+      }))
 
-        navigate("/payment", {
-          state: data.clientSecret
-        })
-        setIsLoading(false)
-      } else {
-        setIsLoading(true)
-        const { data }: { data: createPaymentResponse } = await axios.post(`${server}/api/v1/coupon/create-payment-from-cart?code=${code}`,
-          {
-            shippingInfo: formData
-          },
-          {
-            withCredentials: true
-          }
-        )
+      setIsLoading(false)
 
-        let items: productTypeFromOrder[] = data.cart.items.map(i => ({
-          name: i.productId?.name || "",
-          photo: i.productId?.photo || "",
-          price: i.productId?.price || 0,
-          quantity: i.quantity || 1,
-          productId: i.productId?._id || ""
-        }));
-        dispatch(saveOrderItems(items))
-
-        dispatch(saveNumericalData({
-          subtotal: data.subtotal,
-          tax: data.tax,
-          shippingCharges: data.shippingCharges,
-          discount: data.discount,
-          total: data.total
-        }))
-
-        navigate("/payment", {
-          state: data.clientSecret
-        })
-        setIsLoading(false)
-      }
     } catch (error: any) {
-      console.log(error.message)
+      setIsLoading(false)
+      setError(error.message || "failed to proceed! Please visit product page!")
+      console.log(error)
+      toast.error(error?.data?.message || error.message  ||  "failed to submit data!")
     }
   }
   if (isLoading) return <div className='w-full h-screen flex justify-center items-center '><Spinner /></div>
+  if (error) return <div className='w-full h-screen flex justify-center items-center text-red-400 '>{error} !!!</div>
 
   return (
     <div className='h-screen w-full' >

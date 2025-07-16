@@ -8,7 +8,7 @@ export interface User {
     gender?:"male" | "femal" | "transgender",
     photo?:string,
     refreshToken ?  : string,
-
+    _id?:string
     
 }
 

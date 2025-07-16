@@ -133,7 +133,8 @@ export type createPaymentResponse = {
     shippingCharges:number,
     discount:number
     shippingInfo:shippingInfo,
-    cart:Cart
+    cart:Cart,
+    CouponMessage:string
 }
 
 export type myOrdersResponse = {

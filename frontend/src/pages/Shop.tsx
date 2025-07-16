@@ -2,7 +2,7 @@ import ProductCard from '@/components/features/ProductCard'
 import { useGetProductsByCategoriesQuery, useSearchProductsQuery } from '@/redux/api/productApi'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import Skeleton from '@/components/features/Skeleton'
+import Skeleton from '@/components/ui/Skeleton'
 
 function Shop() {
   const navigate = useNavigate()

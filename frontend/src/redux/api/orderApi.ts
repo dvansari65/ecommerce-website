@@ -16,9 +16,9 @@ export const orderApi = createApi({
             }),
             invalidatesTags:["order"]
         }),
-        myOrder:builder.query<myOrdersResponse,void>({
-            query:()=>({
-                url:"/order/my-orders"
+        myOrder:builder.query<myOrdersResponse,{page:number}>({
+            query:({page})=>({
+                url:`/order/my-orders?page-${page}`
             }),
             providesTags:["order"]
         })
