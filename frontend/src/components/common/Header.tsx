@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/api/userApi";
@@ -6,7 +6,7 @@ import { userNotExist } from "@/redux/reducer/userReducer";
 import type { RootState } from "@/redux/reducer/store";
 import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
-import LogoutConfirm from "../features/LogoutConfirm";
+import LogoutConfirm from "../ui/LogoutConfirm";
 import MenuBar from "../features/MenuBar";
 
 const navItems = [
@@ -39,6 +39,10 @@ const Header: React.FC = () => {
     }
   }, [dispatch, logout, navigate]);
 
+  useEffect(()=>{
+    console.log("user:",user)
+  },[])
+
   return (
     <header className="fixed top-0 z-50 w-full bg-[#0f0c29] bg-opacity-90 shadow-lg backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -61,7 +65,9 @@ const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-4 relative">
-          <MenuBar />
+          {
+            user && <MenuBar />
+          }
 
           {!loading && (
             <>
