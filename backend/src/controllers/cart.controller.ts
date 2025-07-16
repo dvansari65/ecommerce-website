@@ -36,7 +36,7 @@ export const createCart = AsyncHandler(async (req: Request<productIdType, {}, {}
                 productId
             })
             await cart.save()
-            await invalidateKeys({ cart: true })
+            await invalidateKeys({ cart: true ,product:true})
             console.log("cart:", cart)
             return res.status(200).json({
                 message: "product successfully added to the cart!",
@@ -52,7 +52,7 @@ export const createCart = AsyncHandler(async (req: Request<productIdType, {}, {}
                 }
             ]
         })
-        await invalidateKeys({ cart: true })
+        await invalidateKeys({ cart: true,product:true })
         console.log("new cart:", cart)
         return res.status(200).json({
             message: "cart successfully created !",

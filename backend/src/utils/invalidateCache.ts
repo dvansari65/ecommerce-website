@@ -34,7 +34,7 @@ export const invalidateKeys = async ({
             )) ||
             (order && (
                 key.startsWith("single-order") ||
-                key.startsWith("my-orders") ||
+                key.startsWith("my-orders-page-") ||
                 key.startsWith("all-orders")
             )) ||
             (review && (
@@ -56,11 +56,10 @@ export const invalidateKeys = async ({
                 key.startsWith("key-chart")
             )) ||
             (cart && (
-                    key.startsWith("all-carts") ||
-                    key.startsWith("single-cart-product")||
-                    key.startsWith("all-cart-products")
-                )
-            )
+                key.startsWith("all-carts") ||
+                key.startsWith("single-cart-product")||
+                key.startsWith("all-cart-products")
+            ))
         ) {
             keysToDelete.push(key);
         }

@@ -9,4 +9,4 @@ export const config = {
     allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'],
     sentryDsn: process.env.SENTRY_DSN,
     nodeEnv: process.env.NODE_ENV || 'development'
-}; 
+}; 0

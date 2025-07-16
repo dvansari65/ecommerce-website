@@ -99,11 +99,15 @@ export const processOrder = AsyncHandler(async (req: Request, res: Response) => 
 });
 
 export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
+    const page = Number(req.query.page) || 1
+    const limit = Number(process.env.PAGE_LIMIT) || 8
+    const skip = (page-1)*limit
+
     const user = req.user?._id;
     if (!user) {
         throw new ApiError("User not authenticated", 401);
     }
-    const key = `my-orders`
+    const key = `my-orders-page-${page}-limit-${limit}`
     const cachedData = await redis.get(key)
     if (cachedData) {
         return res.status(200).json({
@@ -112,20 +116,28 @@ export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
             orders: JSON.parse(cachedData)
         })
     }
-    const orders = await Order.find({ user });
+    const orders = await Order.find({ user }).limit(limit).skip(skip).sort({createdAt:-1});
     const numberOfOrders = await Order.countDocuments({ user });
+
+    const totatPages = Math.ceil(numberOfOrders/limit)
+
     await redis.set(key, JSON.stringify(key))
     await addCacheKey(key)
     return res.status(200).json({
         message: "Here are your orders",
         success: true,
         numberOfOrders,
+        totatPages,
         orders
     });
 });
 
 export const getAllOrders = AsyncHandler(async (req: Request, res: Response) => {
-    const key = `all-orders`
+    const limit = Number(process.env.PAGE_LIMIT) || 8
+    const page = Number(req.query.page) || 1
+    const skip = (page-1)*limit
+
+    const key = `all-orders-page-${page}-limit-${limit}`
     const cachedData = await redis.get(key)
     if (cachedData) {
         return res.status(200).json({
@@ -134,10 +146,15 @@ export const getAllOrders = AsyncHandler(async (req: Request, res: Response) => 
             orders: JSON.parse(cachedData)
         })
     }
-    const orders = await Order.find({});
+    const [orders,numebrOrders] = await Promise.all([
+        Order.find({}).skip(skip).limit(limit),
+        Order.countDocuments({})
+    ])
+    const totalPages  = Math.ceil( numebrOrders / limit)
     return res.status(200).json({
         message: "All orders fetched successfully!",
         success: true,
+        totalPages,
         orders
     });
 });

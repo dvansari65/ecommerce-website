@@ -9,7 +9,7 @@ import { stripe } from "../app";
 import { Cart } from "../models/addToCart";
 import { cartResponse } from "../types/product";
 import { invalidateKeys } from "../utils/invalidateCache";
-import { couponType } from "../types/types";
+
 export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
     if (!userId) {
@@ -23,6 +23,7 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
     const CartProductIds = cart.items.map(i => i.productId)
     const product = await Product.find({ _id: { $in: CartProductIds } })
     const user = await User.findById(userId);
+    let CouponMessage = "";
 
     const {
         shippingInfo,
@@ -36,11 +37,17 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         throw new ApiError("Please enter shopping info", 404);
     }
     let discountAmount = 0;
-    let coupon;
-    if (code) {
+    let coupon = null;
+
+    if (code ) {
         coupon = await Coupon.findOne({ code: code });
         if (!coupon) {
-            throw new ApiError("Invalid coupon code", 404);
+            console.log("Coupon not found!");
+            CouponMessage = "Coupon not applied: Code not found.";
+        } 
+        if(coupon) {
+            console.log("Coupon found:", coupon);
+            CouponMessage = "Coupon applied successfully.";
         }
     }
 
@@ -75,6 +82,7 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         }
     });
 
+
     await Promise.all(
         cart.items.map(i =>
             Product.findByIdAndUpdate(
@@ -87,15 +95,16 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
 
     await invalidateKeys({ product: true, cart: true, admin: true })
     return res.status(200).json({
-        message: "Payment intent created successfully!",
+        message: "payment created successfully!",
         success: true,
         clientSecret: paymentIntent.client_secret,
         cart,
         subtotal,
         tax,
         total,
-        discount:discountAmount,
-        shippingCharges
+        discount: discountAmount,
+        shippingCharges,
+        CouponMessage
     });
 });
 
@@ -205,7 +214,7 @@ export const deleteCoupon = AsyncHandler(async (req: Request, res: Response) => 
     if (!id) {
         throw new ApiError("Please provide coupon ID!", 402);
     }
-    await Coupon.findByIdAndDelete(id);
+    await Coupon.findByIdAndDelete(id.toString());
 
     return res.status(200).json({
         message: "Coupon deleted successfully!",

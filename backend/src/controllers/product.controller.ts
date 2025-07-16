@@ -227,7 +227,7 @@ export const filterProduct = AsyncHandler(async (req: Request<{},{},{},searchQue
 
 export const getAllAdminProducts = AsyncHandler(async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1;
-    const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
+    const limit = Number(process.env.PAGE_LIMIT) || 8;
     const skip = (page - 1) * limit;
     const key = `all-products-page-${page}-limit-${limit}`;
 
