@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import AsyncHandler from "../utils/asyncHandler";
-import { requestOrderBodyType } from "../types/order";
+import { OrderItemType, requestOrderBodyType } from "../types/order";
 import { Order } from "../models/order.model";
 import ApiError from "../utils/errorHanlder";
 import redis from "../utils/redis";
@@ -64,7 +64,7 @@ export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrder
         total,
         status: "Processing"
     });
-    await invalidateKeys({ order: true })
+    await invalidateKeys({ order: true ,product:true})
     return res.status(201).json({
         success: true,
         message: "Order created successfully",
@@ -206,7 +206,8 @@ export const increaseQuantity = AsyncHandler(async (req:Request, res:Response)=>
     if(!productId || !orderId){
         throw new ApiError("please provide product ID & order ID !",401)
     }
-    const existingProduct = await Product.findById(productId).populate("products","")
+    console.log("productId",productId)
+    const existingProduct = await Product.findById(productId)
     console.log("existingProduct",existingProduct)
     if(!existingProduct){
         return res.status(404).json({
@@ -214,7 +215,7 @@ export const increaseQuantity = AsyncHandler(async (req:Request, res:Response)=>
             success:false
         })
     }
-    const existingOrder = await Order.findById(orderId)
+    const existingOrder  = await Order.findById(orderId)
     if(!existingOrder){
         return res.status(404).json({
             message:"order not found!",
@@ -222,20 +223,33 @@ export const increaseQuantity = AsyncHandler(async (req:Request, res:Response)=>
         })
     }
     let product = null
-     product = existingOrder.orderItems.find(product=>product?.productId?.toString() === productId)
+     product = existingOrder.orderItems?.find(product=>product?.productId?.toString() === productId.toString())
     if(!product){
         throw new ApiError("product not matched!",404)
     }
+    console.log("product:",product)
     if(existingProduct.stock <= product.quantity!){
        return res.status(400).json({
         message:"stock out of limit!",
-        success:false
+        success:false,
+        quantity:product?.quantity
        })
     }
-    if(product.quantity) product = product.quantity += 1
+    product.quantity = (product.quantity ?? 0) + 1;
     await existingOrder.save()
+    await invalidateKeys({product:true,order:true})
     return res.status(200).json({
         message:"quantity increased!",
-        success:true
+        success:true,
+        quantity:product.quantity
+    })
+})
+export const deleteAllOrders = AsyncHandler( async (req:Request,res:Response)=>{
+    const orders = await Order.deleteMany({})
+    invalidateKeys({product:true,order:true,cart:true})
+    return res.status(200).json({
+        message:"order deleted!",
+        success:true,
+        orders
     })
 })

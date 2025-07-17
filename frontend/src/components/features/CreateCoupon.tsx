@@ -15,15 +15,15 @@ function CheckCoupon() {
         e.preventDefault();
 
         try {
-            if (couponCode && couponCode !== null) {
+            if (couponCode ) {
                 const res = await applyDiscount({ code: couponCode }).unwrap()
                 if (res?.success) {
                     toast?.success("coupon matched!")
                     setMessage("Please Submit Information To Proceed ! You Will Get DISCOUNT!!")
                     dispatch(setCoupon({
-                        amount: res.discount.amount,
-                        code: res.discount.code,
-                        _id: res.discount._id
+                        amount: res?.discount?.amount,
+                        code: res?.discount?.code,
+                        _id: res?.discount?._id
                     }))
                     setCouponCode("")
                 } else {
@@ -41,7 +41,8 @@ function CheckCoupon() {
         } catch (error: any) {
             setCouponCode("")
             setMessage("")
-            console.log("error:", error.message);
+            dispatch(setCoupon({}))
+            console.log("error:", error.data?.message);
             toast.error(error.data.message || "something went wrong!")
         }
     }

@@ -136,6 +136,7 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
 
         } = req.body
     const { code } = req.query
+    
     const productId = orderItems.map(i => i.productId)
     const products = await Product.find({ _id: { $in: productId } })
     const subtotal = products.reduce((total, cur) => {

@@ -6,6 +6,7 @@ export type messageResponse = {
     user:User,
     accessToken?:string,
 }
+
 export type productResponse = {
     success:boolean,
     message:string,
@@ -118,10 +119,11 @@ export type orderReponse = {
     total:number,
     tax:number,
     shippingCharges:number,
-    discount:number
+    discount:number,
+    createdAt?:string,
     shippingInfo:shippingInfo,
-    orderItems:productTypeFromOrder[]
-
+    orderItems:productTypeFromOrder[],
+    _id:string
 }
 export type createPaymentResponse = {
     clientSecret:string,
@@ -134,12 +136,26 @@ export type createPaymentResponse = {
     discount:number
     shippingInfo:shippingInfo,
     cart:Cart,
-    CouponMessage:string
+    CouponMessage:string,
+   
 }
 
 export type myOrdersResponse = {
     message:string,
     success:boolean,
     numberOfOrders:number,
-    orders:orderReponse[]
+    totatPages:number,
+    createdAt:string
+    orders:orderReponse[],
+    
+}
+export type increaseQuantityResponseProps = {
+    message:string,
+    success:boolean,
+    quantity:number
+}
+export type increaseQuantityInputProps = {
+    orderId:string,
+    productId:string,
+    page?:number
 }

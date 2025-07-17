@@ -47,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={photo}
           alt={name}
-          className="max-h-full object-contain rounded-md"
+          className="max-h-full object-contain rounded-[5px]"
         />
       </div>
 

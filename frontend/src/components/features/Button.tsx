@@ -1,13 +1,15 @@
 import React from 'react'
 
 interface buttonProps{
-    onClick : ()=> void
+    onClick : ()=> void,
+    title:string,
+    disabled?:boolean
 }
 
-function Button({onClick}:buttonProps) {
+function Button({onClick,title,disabled}:buttonProps) {
   return (
-    <div className='bg-transparent px-3 py-2 border-[0.5px] hover:border-[rgb(144,132,149)] rounded-[3px] min-w-[100px]'>
-        <button onClick={onClick} className='text-white text-[15px]'>click me</button>
+    <div className='bg-transparent px-3 py-2 hover:bg-[rgb(40,41,95)]  rounded-[4px] max-w-[100px] m-2'>
+        <button disabled={disabled} onClick={onClick} className={disabled ? `text-gray-500 text-[15px] py-1 px-1` :`text-white text-[15px] py-1 px-1 `}>{title}</button>
     </div>
   )
 }

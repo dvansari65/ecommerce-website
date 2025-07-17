@@ -27,6 +27,8 @@ function CheckOutForm() {
 
     const createOrderData: orderReponse = {
         orderItems,
+        _id,
+        createdAt:"",
         shippingInfo,
         shippingCharges,
         status: "",

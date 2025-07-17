@@ -9,7 +9,8 @@ import {newProduct,
      getAllAdminProducts,
      getAllCategories,
      getSingleProduct,
-     getAllLatestProduct
+     getAllLatestProduct,
+     deleteAllProducts
     } from "../controllers/product.controller"
 
 
@@ -25,3 +26,7 @@ productRouter.route("/get-all-categories").get( getAllCategories);
 productRouter.route("/get-single-product/:id").get(verifyJwt, getSingleProduct);
 productRouter.route("/latest").get(getAllLatestProduct);
 productRouter.route("/filter-product").get(filterProduct);
+
+
+// admin route
+productRouter.route("/delete-all-products").delete(deleteAllProducts);

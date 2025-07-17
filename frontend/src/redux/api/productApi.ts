@@ -33,3 +33,4 @@ export const productApi = createApi({
 })
 
 export const {useGetProductsByCategoriesQuery,useLatestProductsQuery,useSearchProductsQuery,useGetSingleProductsQuery} = productApi
+// `filter-products-${page}-${limit}-${category}-${price}-${search}-${sort}`;
