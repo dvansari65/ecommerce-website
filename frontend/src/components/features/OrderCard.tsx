@@ -1,52 +1,103 @@
 import { Cross, CrossIcon, Minus, Plus, Trash } from "lucide-react";
 import React from "react";
-import canonimage from "../../assets/canon.png"
+import canonimage from "../../assets/canon.png";
+import type { productTypeFromOrder } from "@/types/api-types";
 interface oderCardProps {
-  name: string,
-  quantity: number,
-  status: string,
-  photo: string,
-  category: string,
-  decreaseQuantity:()=>void,
-  increaseQuantity:()=>void
+  shippingCharges: number;
+  status: string;
+  tax: number;
+  total: number;
+  discount: number;
+  orderItems: productTypeFromOrder[];
+  createdAt: string;
+  decreaseQuantity: () => void;
+  increaseQuantity: () => void;
 }
 
 function OrderCard({
-  name,
-  quantity,
   status,
-  photo,
-  category,
+  total,
+  tax,
+  discount,
+  shippingCharges,
+  createdAt,
+  orderItems,
   increaseQuantity,
-  decreaseQuantity
-  
+  decreaseQuantity,
 }: oderCardProps) {
   return (
-    <div className="w-[100%] h-[100px]  rounded-[3px] bg-transparent border-t-[1px] border-b-[1px] border-gray-600 flex flex-row justify-between items-center text-black  px-5 ">
-      <div className="flex flex-row items-center gap-4 h-full ">
-        <div className="p-2 "><img src={photo || canonimage} className="size-18 rounded-[4px]" alt="" /></div>
-        <div className="flex flex-col  items-start justify-start mt-10 h-full min-w-[120px] ml-3 text-white ">
-          <span className="text-[13px] text-gray-400 ">{category || "equipment"}</span>
-          <div className="text-white">{name || "cooler"}</div>
+    <div className="flex flex-col justify-start items-start p-2 mx-2 w-full bg-transparent min-h-fit border-b-[1px] border-[rgb(137,129,141)] ">
+      <div className="w-[32vh] mb-2 flex flex-col justify-start items-start gap-2 ">
+        <span className="font-extralight bg-[rgb(78,173,34)] rounded-[2px] px-3">
+          ORDERS:
+        </span>
+        <div className="w-full flex flex-row justify-between ">
+          <span>createdAt</span>
+          <span>
+            {new Date(createdAt).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+        </div>
+        <div className="w-full flex flex-row justify-between ">
+          <span>total</span>
+          <span>{total || 2000}.Rs</span>
+        </div>
+        <div className="w-full flex flex-row justify-between ">
+          <span>tax</span>
+          <span className="text-[rgb(185,40,40)] text-[15px] font-bold">
+            {tax || 200}.Rs
+          </span>
+        </div>
+        <div className="w-full flex flex-row justify-between ">
+          <span>discount</span>
+          <span className="text-green-400">{discount || 0}.Rs</span>
+        </div>
+        <div className="w-full flex flex-row justify-between ">
+          <span>shipping Charges</span>
+          <span className="text-[rgb(185,40,40)] font-bold">
+            {shippingCharges || 0}.Rs
+          </span>
+        </div>
+        <div className="w-full flex flex-row justify-between ">
+          <span>status</span>
+          <span className="text-green-400">{status || "processing"}</span>
         </div>
       </div>
-
-      <div className="text-green-400 ">{status || "processing"}</div>
-      <div className="flex flex-row gap-1">
-        <button className="text-white">
-          <Minus />
-        </button>
-        <span className="border-[1px] border-gray-500 px-2 rounded-[2px] text-white">
-          {quantity || 3}
-        </span>
-        <button onClick={increaseQuantity} className="text-white">
-          <Plus />
-        </button>
-      </div>
-      <div >
-        <button onClick={decreaseQuantity} className="text-white">
-          <Trash />
-        </button>
+      <div className="w-full mt-4">
+        <div className="grid grid-cols-9">
+          <span className="col-span-5 text-end mr-26 flex justify-end text-gray-500">
+            name
+          </span>
+          <span className="col-span-3 text-center mr-22 pl-3 flex justify-end text-gray-500 ">
+            quantity
+          </span>
+          <span className="col-span-1 flex justify-end text-gray-500">
+            price
+          </span>
+        </div>
+        {orderItems.map((order) => (
+          <div id={order.productId}>
+            <div className="w-full min-h-[130px]  flex flex-row justify-between items-center  py-1  ">
+              <div className="rounded-[3px]">
+                <img
+                  src={order.photo || canonimage}
+                  className="size-12 rounded-[3px]"
+                  alt=""
+                />
+              </div>
+              <div>{order.name || "cooler"}</div>
+              <div className="text-white flex flex-row justify-center items-center gap-2 ">
+                <button><Plus/></button>
+                <span className="border-[1px] px-2">{order.quantity || 1}</span>
+                <button><Minus/></button>
+              </div>
+              <div className="text-white pl-2">{order.price || 200}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
