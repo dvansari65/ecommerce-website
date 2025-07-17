@@ -5,6 +5,7 @@ import { Order } from "../models/order.model";
 import ApiError from "../utils/errorHanlder";
 import redis from "../utils/redis";
 import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
+import { Product } from "../models/product.model";
 
 export const createOrder = AsyncHandler(async (req: Request<{}, {}, requestOrderBodyType>, res: Response) => {
     const user = req.user?._id;
@@ -100,7 +101,7 @@ export const processOrder = AsyncHandler(async (req: Request, res: Response) => 
 
 export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1
-    const limit = Number(process.env.PAGE_LIMIT) || 8
+    const limit = Number(process.env.MY_ORDER_PAGE_LIMIT) || 4
     const skip = (page-1)*limit
 
     const user = req.user?._id;
@@ -121,7 +122,7 @@ export const myOrders = AsyncHandler(async (req: Request, res: Response) => {
 
     const totatPages = Math.ceil(numberOfOrders/limit)
 
-    await redis.set(key, JSON.stringify(key))
+    await redis.set(key, JSON.stringify(orders))
     await addCacheKey(key)
     return res.status(200).json({
         message: "Here are your orders",
@@ -198,3 +199,43 @@ export const getSingleOrder = AsyncHandler(async (req: Request, res: Response) =
         order
     });
 });
+
+export const increaseQuantity = AsyncHandler(async (req:Request, res:Response)=>{
+
+   const {orderId,productId} = req.query
+    if(!productId || !orderId){
+        throw new ApiError("please provide product ID & order ID !",401)
+    }
+    const existingProduct = await Product.findById(productId).populate("products","")
+    console.log("existingProduct",existingProduct)
+    if(!existingProduct){
+        return res.status(404).json({
+            message:"product not found!",
+            success:false
+        })
+    }
+    const existingOrder = await Order.findById(orderId)
+    if(!existingOrder){
+        return res.status(404).json({
+            message:"order not found!",
+            success:false
+        })
+    }
+    let product = null
+     product = existingOrder.orderItems.find(product=>product?.productId?.toString() === productId)
+    if(!product){
+        throw new ApiError("product not matched!",404)
+    }
+    if(existingProduct.stock <= product.quantity!){
+       return res.status(400).json({
+        message:"stock out of limit!",
+        success:false
+       })
+    }
+    if(product.quantity) product = product.quantity += 1
+    await existingOrder.save()
+    return res.status(200).json({
+        message:"quantity increased!",
+        success:true
+    })
+})
