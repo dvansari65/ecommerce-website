@@ -10,7 +10,8 @@ import {newProduct,
      getAllCategories,
      getSingleProduct,
      getAllLatestProduct,
-     deleteAllProducts
+     deleteAllProducts,
+
     } from "../controllers/product.controller"
 
 

@@ -10,6 +10,7 @@ interface ProductCardProps {
   onClick?: () => void;
   onWishlistClick?: () => void;
   className?: string;
+  stock:number
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -20,11 +21,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   photo,
   onClick,
   onWishlistClick,
+  stock
 }) => {
   return (
     <div
       onClick={onClick}
-      className="bg-[#1b1321] hover:border-[#b075f5] border border-[#3f2e40] rounded-2xl shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer p-4 flex flex-col justify-between"
+      className="bg-[#1b1321] relative hover:border-[#b075f5] border border-[#3f2e40] rounded-2xl shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer p-4 flex flex-col justify-between"
     >
       {/* Wishlist & Price */}
       <div className="flex justify-between items-start mb-2">
@@ -66,6 +68,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
           />
         ))}
       </div>
+      {stock === 0 && (
+        <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+          OUT OF STOCK
+        </div>
+      )}
     </div>
   );
 };

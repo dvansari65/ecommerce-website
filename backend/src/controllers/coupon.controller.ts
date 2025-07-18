@@ -140,6 +140,19 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
     
     const productId = orderItems.map(i => i.productId)
     const products = await Product.find({ _id: { $in: productId } })
+    
+    for (const product of products) {
+        const item = orderItems.find(i => i.productId.toString() === product._id.toString());
+        if (!item) continue;
+      
+        if (item.quantity >= product.stock) {
+          return res.status(400).json({
+            message: "You have to minimise your product's quantity!",
+            success: false,
+          });
+        }
+      }
+
     const subtotal = products.reduce((total, cur) => {
         const item = orderItems.find(i => i.productId.toString() === cur._id.toString())
         if (!item) return total
@@ -164,9 +177,9 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
         }
     }
     const discount = coupon?.amount ?? 0
-    const tax = subtotal * 0.18
-    const shippingCharges = subtotal > 1000 ? 0 : 200
-    const rawTotal = Math.round(subtotal + tax + shippingCharges - discount);
+    const tax = Math.round( subtotal * 0.18)
+    const shippingCharges = subtotal  > 1000 ? 0 : 200
+    const rawTotal = Math.round(subtotal  + tax + shippingCharges - discount);
 
     const amount = Math.round(rawTotal * 100); // Stripe expects paise
 
