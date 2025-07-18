@@ -237,6 +237,14 @@ export const increaseQuantity = AsyncHandler(async (req:Request, res:Response)=>
     }
     product.quantity = (product.quantity ?? 0) + 1;
     await existingOrder.save()
+    await Product.findByIdAndUpdate(
+        productId,
+        {
+            $inc:{
+                stock:+1
+            }
+        }
+     )
     await invalidateKeys({product:true,order:true})
     return res.status(200).json({
         message:"quantity increased!",
@@ -244,6 +252,58 @@ export const increaseQuantity = AsyncHandler(async (req:Request, res:Response)=>
         quantity:product.quantity
     })
 })
+export const decreaseQuantity = AsyncHandler(async (req:Request, res:Response)=>{
+
+    const {orderId,productId} = req.query
+     if(!productId || !orderId){
+         throw new ApiError("please provide product ID & order ID !",401)
+     }
+    //  console.log("productId",productId)
+     const existingProduct = await Product.findById(productId)
+    //  console.log("existingProduct",existingProduct)
+     if(!existingProduct){
+         return res.status(404).json({
+             message:"product not found!",
+             success:false
+         })
+     }
+     const existingOrder  = await Order.findById(orderId)
+     if(!existingOrder){
+         return res.status(404).json({
+             message:"order not found!",
+             success:false
+         })
+     }
+     let product = null
+      product = existingOrder.orderItems?.find(product=>product?.productId?.toString() === productId.toString())
+     if(!product){
+         throw new ApiError("product not matched!",404)
+     }
+     console.log("product:",product)
+     if(product.quantity! <= 0){
+        return res.status(400).json({
+         message:"can not decrease less than 1!",
+         success:false,
+         quantity:product?.quantity
+        })
+     }
+     product.quantity = (product.quantity ?? 0) - 1;
+     await existingOrder.save()
+     await Product.findByIdAndUpdate(
+        productId,
+        {
+            $inc:{
+                stock:-1
+            }
+        }
+     )
+     await invalidateKeys({product:true,order:true})
+     return res.status(200).json({
+         message:"quantity increased!",
+         success:true,
+         quantity:product.quantity
+     })
+ })
 export const deleteAllOrders = AsyncHandler( async (req:Request,res:Response)=>{
     const orders = await Order.deleteMany({})
     invalidateKeys({product:true,order:true,cart:true})
