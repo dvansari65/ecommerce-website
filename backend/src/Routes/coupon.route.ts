@@ -3,6 +3,7 @@ import { Router } from "express";
 import { updateLastActive } from "../middlewares/updateLastActiveMiddleWare";
 import {
      createPaymentIntentFromCart,
+     createPaymentIntentDirectly,
      createCoupon,
      applyDiscount,
      deleteCoupon
@@ -13,6 +14,7 @@ import { Admin } from "../middlewares/adminMiddleWare";
 
 
  couponRouter.route("/create-payment-from-cart").post(verifyJwt,updateLastActive, createPaymentIntentFromCart);
+ couponRouter.route("/create-payment-directly").post(verifyJwt,updateLastActive, createPaymentIntentDirectly);
  couponRouter.route("/apply-discount").get(verifyJwt, applyDiscount);
  couponRouter.route("/delete-coupon/:id").delete(verifyJwt, deleteCoupon);
 

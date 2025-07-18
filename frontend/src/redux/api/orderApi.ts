@@ -29,42 +29,9 @@ export const orderApi = createApi({
       }),
       providesTags: ["order"],
     }),
-    increaseQuantity: builder.mutation<
-      increaseQuantityResponseProps,
-      increaseQuantityInputProps
-    >({
-      query: ({ productId, orderId, page }) => ({
-        url: `/order/increase-quantity?productId=${productId}&orderId=${orderId}`,
-        method: "PUT",
-      }),
-      invalidatesTags: ["order"],
-      async onQueryStarted(
-        { productId, orderId, page },
-        { dispatch, queryFulfilled }
-      ) {
-        const patch = dispatch(
-          orderApi.util.updateQueryData("myOrder", { page:page ?? 1 }, (draft) => {
-            draft.orders.forEach((order) => {
-              if (order._id.toString() === orderId) {
-                order.orderItems.forEach((product) => {
-                  if (product.productId === productId) {
-                    product.quantity += 1;
-                  } else {
-                    product.quantity === 1;
-                  }
-                });
-              }
-            });
-          })
-        );
-        try {
-          await queryFulfilled;
-        } catch {
-          patch.undo();
-        }
-      },
-    }),
+    
+    
   }),
 });
 
-export const { useCreateOrderMutation, useMyOrderQuery,useIncreaseQuantityMutation } = orderApi;
+export const { useCreateOrderMutation, useMyOrderQuery } = orderApi;

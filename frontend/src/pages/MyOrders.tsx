@@ -2,42 +2,30 @@ import Button from "@/components/features/Button";
 import OrderCard from "@/components/features/OrderCard";
 import SummaryOfOrder from "@/components/features/SummaryOfOrder";
 import Spinner from "@/components/ui/LoaderIcon";
+
 import {
-  useIncreaseQuantityMutation,
+  
   useMyOrderQuery,
 } from "@/redux/api/orderApi";
-import {  useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 function MyOrders() {
   const [page, setPage] = useState<number>(1);
   const { data, isError, isLoading } = useMyOrderQuery({ page });
-  const [increaseQuantityFromOrders] = useIncreaseQuantityMutation();
   const allOrders = data?.orders || [];
+  console.log("alLorder:",allOrders)
+  
 
-  console.log("allOrders",allOrders)
+  
 
-  const handleIncrease = async (productId: string, orderId: string) => {
-    try {
-      const res = await increaseQuantityFromOrders({
-        productId,
-        orderId,
-        page,
-      });
-      console.log("res:", res);
-      if (res.data?.success) {
-        toast.success(res.data.message || "quantity increased!");
-      } else {
-        toast.error(res.data?.message || "failed to increase quantity!");
+  const handleCancelOrder = async ()=>{
+      try {
+        
+      } catch (error) {
+        
       }
-    } catch (error: any) {
-      toast.error(
-        error.data.message || error.message || "stock limit reached!"
-      );
-      console.error("eerror:", error.data);
-    }
-  };
-  const handleDecrease = async () => {};
+  }
 
   if (isLoading) return <Spinner />;
   if (isError)
@@ -51,19 +39,28 @@ function MyOrders() {
   return (
     <div className=" h-screen bg-transparent grid grid-cols-13  ">
       <div className="col-span-8">
-        {
-          
-          allOrders.map(order=>(
-            <div className="border-b-1 border-gray-500">
-              <SummaryOfOrder/>
-              {
-                order?.orderItems?.map(product=>(
-                  <OrderCard/>
-                ))
-              }
-            </div>
-          ))
-        }
+        {allOrders.map((order) => (
+          <div className="border-b-1 border-gray-500">
+            <SummaryOfOrder
+              onCancel={handleCancelOrder}
+              total={order.total}
+              shippingCharges={order?.shippingCharges}
+              tax={order.tax}
+              discount={order.discount}
+              status={order.status}
+            />
+            {order?.orderItems?.map((product) => (
+              <OrderCard
+                discount={order.discount}
+                name={product.name}
+                photo={product.photo}
+                quantity={product.quantity}
+                price={product.price}
+                
+              />
+            ))}
+          </div>
+        ))}
         <div className="w-full flex flex-row justify-center items-center gap-3">
           <Button
             title="prev"

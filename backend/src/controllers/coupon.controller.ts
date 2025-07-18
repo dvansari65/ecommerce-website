@@ -51,7 +51,8 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         }
     }
 
-    discountAmount = coupon?.amount ?? 0;
+    discountAmount = typeof coupon?.amount === "number" ? coupon.amount : 0;
+
     const subtotal = cart?.items.reduce((total, curr) => {
         const productToBeBuy = product.some(i => i._id.toString() === curr.productId._id.toString())
         if (!productToBeBuy) throw new ApiError("Product mismatch", 500);
@@ -62,12 +63,12 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         return total += price * quantity
     }, 0);
 
-    const tax = subtotal * 0.18;
+    const tax = Math.round(subtotal * 0.18);
     const shippingCharges = subtotal > 1000 ? 0 : 200;
-    const total = subtotal + tax + shippingCharges - discountAmount;
+    const total = Math.round(subtotal + tax + shippingCharges - discountAmount) ;
 
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: total * 100,
+        amount: Math.round(total * 100),
         currency: "inr",
         description: "ecommerce website",
         shipping: {
@@ -114,7 +115,7 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
         {},
         {},
         {
-            shoppingInfo: shippingInfoType,
+            shippingInfo: shippingInfoType,
             orderItems: OrderItemType[],
         },
         { code: string }
@@ -127,14 +128,14 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
         throw new ApiError("user not found!", 404)
     }
     const {
-        shoppingInfo,
+        shippingInfo,
         orderItems,
     }:
-        {
-            shoppingInfo: shippingInfoType,
-            orderItems: OrderItemType[],
+    {
+        shippingInfo: shippingInfoType,
+        orderItems: OrderItemType[],
 
-        } = req.body
+    } = req.body
     const { code } = req.query
     
     const productId = orderItems.map(i => i.productId)
@@ -148,44 +149,61 @@ export const createPaymentIntentDirectly = AsyncHandler(async (
         return total + price * item.quantity;
     }, 0)
 
-    let discount = 0;
-    if (code) {
-        const coupon = await Coupon.findOne({ code: code })
+    
+    let coupon = null
+    let CouponMessage = ""
+    if (code ) {
+        coupon = await Coupon.findOne({ code: code });
         if (!coupon) {
-            return res.status(404).json({
-                message: "coupon not found!",
-                success: false
-            })
+            console.log("Coupon not found!");
+            CouponMessage = "Coupon not applied: Code not found.";
+        } 
+        if(coupon) {
+            console.log("Coupon found:", coupon);
+            CouponMessage = "Coupon applied successfully.";
         }
-        discount = coupon.amount
     }
+    const discount = coupon?.amount ?? 0
     const tax = subtotal * 0.18
-    const shippingCharge = subtotal > 1000 ? 0 : 200
-    const rawTotal = subtotal + tax + shippingCharge - discount;
+    const shippingCharges = subtotal > 1000 ? 0 : 200
+    const rawTotal = Math.round(subtotal + tax + shippingCharges - discount);
 
     const amount = Math.round(rawTotal * 100); // Stripe expects paise
 
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount,
-        currency: "inr",
-        description: "MERN-Ecommerce",
-        shipping: {
-            name: user.userName as string,
-            address: {
-                line1: shoppingInfo.address,
-                postal_code: shoppingInfo.pinCode.toString(),
-                city: shoppingInfo.city,
-                state: shoppingInfo.state,
-                country: shoppingInfo.country,
+    let paymentIntent;
+    try {
+         paymentIntent = await stripe.paymentIntents.create({
+            amount,
+            currency: "inr",
+            description: "MERN-Ecommerce",
+            shipping: {
+                name: user.userName as string,
+                address: {
+                    line1: shippingInfo.address,
+                    postal_code: shippingInfo.pinCode.toString(),
+                    city: shippingInfo.city,
+                    state: shippingInfo.state,
+                    country: shippingInfo.country,
+                },
             },
-        },
-    });
+        });
+    } catch (error) {
+        console.error("Stripe Error:", error);
+        throw new ApiError("Failed to create Stripe payment intent", 500);
+    }
 
     await invalidateKeys({ product: true, admin: true })
     return res.status(200).json({
         message: "payment created successfully!",
         success: true,
-        paymentIntent
+        clientSecret:paymentIntent.client_secret,
+        CouponMessage,
+        tax,
+        total:rawTotal,
+        shippingCharges,
+        discount,
+        subtotal,  
+        products
     })
 })
 

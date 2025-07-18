@@ -7,8 +7,7 @@ interface orderCardProps {
   quantity: number;
   price: number;
   discount: number;
-  increaseQuantity: (productId: string, orderId: string) => void;
-  decreaseQuantity: (productId: string, orderId: string) => void;
+
 }
 
 function OrderCard({
@@ -17,8 +16,7 @@ function OrderCard({
   quantity,
   price,
   discount,
-  increaseQuantity,
-  decreaseQuantity,
+ 
 }: orderCardProps) {
   return (
     <div >
@@ -30,16 +28,7 @@ function OrderCard({
         <span>{name || "jeans pant"}</span>
       </div>
       <div className="col-span-6 flex items-center justify-center gap-3">
-        <button onClick={()=>increaseQuantity} className="text-gray-400 hover:text-gray-300">
-          <ArrowUp />
-        </button>
-        <span className="border-[1px] px-2 rounded-[3px] text-gray-400 ">
-          {quantity || 1}
-        </span>
-        <button onClick={()=>decreaseQuantity} className="text-gray-400 hover:text-gray-300">
-          {" "}
-          <ArrowDown />
-        </button>
+        
       </div>
       <div className="mb-5 flex flex-col justify-center gap-2 items-center col-span-2 ">
         <span className="text-gray-500 ">price:</span>
