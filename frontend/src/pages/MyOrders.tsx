@@ -1,5 +1,6 @@
 import Button from "@/components/features/Button";
 import OrderCard from "@/components/features/OrderCard";
+import SummaryOfOrder from "@/components/features/SummaryOfOrder";
 import Spinner from "@/components/ui/LoaderIcon";
 import {
   useIncreaseQuantityMutation,
@@ -13,6 +14,8 @@ function MyOrders() {
   const { data, isError, isLoading } = useMyOrderQuery({ page });
   const [increaseQuantityFromOrders] = useIncreaseQuantityMutation();
   const allOrders = data?.orders || [];
+
+  console.log("allOrders",allOrders)
 
   const handleIncrease = async (productId: string, orderId: string) => {
     try {
@@ -48,27 +51,19 @@ function MyOrders() {
   return (
     <div className=" h-screen bg-transparent grid grid-cols-13  ">
       <div className="col-span-8">
-        {allOrders?.map((order) => (
-          <div key={order._id}>
-            <OrderCard
-              _id={order._id}
-              shippingCharges={order.shippingCharges}
-              total={order.total}
-              discount={order.discount}
-              status={order.status}
-              tax={order.tax}
-              page={page}
-              createdAt={order.createdAt || ""}
-              orderItems={order.orderItems}
-              increaseQuantity={() => {
-                order.orderItems.map((product) => {
-                  handleIncrease(order?._id.toString(), product?.productId.toString());
-                });
-              }}
-              decreaseQuantity={handleDecrease}
-            />
-          </div>
-        ))}
+        {
+          
+          allOrders.map(order=>(
+            <div className="border-b-1 border-gray-500">
+              <SummaryOfOrder/>
+              {
+                order?.orderItems?.map(product=>(
+                  <OrderCard/>
+                ))
+              }
+            </div>
+          ))
+        }
         <div className="w-full flex flex-row justify-center items-center gap-3">
           <Button
             title="prev"
