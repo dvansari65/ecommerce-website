@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetSingleProductsQuery } from "@/redux/api/productApi";
 import { FaStar, FaHeart } from "react-icons/fa";
 import Spinner from "@/components/ui/LoaderIcon";
@@ -15,6 +15,7 @@ import { saveOrderItems } from "@/redux/reducer/cartReducer";
 function ProductDetail() {
   const { id } = useParams() as { id: string };
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const {
     data,
     isLoading: productLoading,
@@ -40,13 +41,9 @@ function ProductDetail() {
 
 
 
-  const buyProduct = async()=>{
+  const handleNavigate = ()=>{
       dispatch(saveOrderItems([data?.product]))
-    try {
-      
-    } catch (error) {
-      
-    }
+      navigate("/buy-product")
   }
 
   const product = data?.product;
@@ -150,7 +147,7 @@ function ProductDetail() {
                 Add to Cart
               </button>
             )}
-            <button disabled={product?.stock === 0} className="bg-[#2a1e30] text-white px-5 py-2 rounded-full hover:bg-[#3a2a40] transition font-semibold">
+            <button disabled={product?.stock === 0} onClick={handleNavigate} className="bg-[#2a1e30] text-white px-5 py-2 rounded-full hover:bg-[#3a2a40] transition font-semibold">
               Buy Now
             </button>
           </div>

@@ -1,4 +1,4 @@
-import { useClearCartMutation } from '@/redux/api/cartApi'
+
 import { useDeleteCouponMutation } from '@/redux/api/couponApi'
 import { useCreateOrderMutation } from '@/redux/api/orderApi'
 import type { RootState } from '@/redux/reducer/store'
@@ -17,7 +17,6 @@ function CheckOutForm() {
     const stripe = useStripe()
     const elements = useElements()
 
-    const [clearCart, { isError: cartError }] = useClearCartMutation()
     const [createOrder, { isError: orderError }] = useCreateOrderMutation()
     const [deleteCoupon, { isError }] = useDeleteCouponMutation()
 
@@ -37,6 +36,7 @@ function CheckOutForm() {
         tax,
         discount: amount || 0
     }
+    console.log("createOrderData",createOrderData)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -57,9 +57,9 @@ function CheckOutForm() {
             if (paymentIntent.status === "succeeded") {
                 try {
 
-                    const [orderRes, couponRes] = await Promise.all([
+                    const [orderRes] = await Promise.all([
                         createOrder(createOrderData).unwrap(),
-                        clearCart().unwrap()
+                        
                     ])
                     if (_id) {
                         try {
@@ -74,7 +74,7 @@ function CheckOutForm() {
                         }
                     }
 
-                    if (orderRes.success && couponRes?.success) {
+                    if (orderRes.success) {
                         toast.success("order process is done successfully!")
 
                         navigate("/my-orders", {
@@ -96,9 +96,7 @@ function CheckOutForm() {
             navigate("/place-order-from-cart")
         }
     }
-    if (cartError) {
-        console.log(cartError)
-    }
+
     if (orderError) {
         console.log(orderError)
     }

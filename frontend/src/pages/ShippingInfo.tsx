@@ -23,10 +23,7 @@ import Shipping from "@/components/features/Shipping";
 function ShippingInfo() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  const dispatch = useDispatch();
-  const { code } = useSelector((state: RootState) => state.couponReducer);
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
   const [formData, setFormData] = useState<shippingInfo>({
     state: "",
     pinCode: 1212,
@@ -34,6 +31,11 @@ function ShippingInfo() {
     city: "",
     country: "",
   });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { code } = useSelector((state: RootState) => state.couponReducer);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

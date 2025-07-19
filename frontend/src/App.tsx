@@ -16,6 +16,7 @@ import ShippingInfo from "./pages/ShippingInfo"
 import CheckOut from "./pages/CheckOut"
 import MyOrders from "./pages/MyOrders"
 import type { User } from "./types/types"
+import BuyProduct from "./pages/BuyProduct"
 
 function App() {
 
@@ -51,7 +52,7 @@ function App() {
           <Route path="/place-order-from-cart" element={<PrivateRoute isAuthenticated={user ? true : false}><ShippingInfo /></PrivateRoute>} />
           <Route path="/payment" element={<PrivateRoute isAuthenticated={user ? true : false}><CheckOut /></PrivateRoute>} />
           <Route path="/my-orders" element={<PrivateRoute isAuthenticated={user ? true : false}><MyOrders /></PrivateRoute>} />
-
+          <Route path="/buy-product" element={<PrivateRoute isAuthenticated={user ? true : false}><BuyProduct /></PrivateRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>
