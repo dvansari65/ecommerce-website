@@ -228,8 +228,9 @@ export const filterProduct = AsyncHandler(
     ]);
 
     const totalPage = Math.ceil(totalCount / limit);
-    
-    await redisClient.set(key, JSON.stringify(products));
+    console.log("total count:",totalCount)
+    console.log("products:",products)
+    await redisClient.set(key, JSON.stringify(products),"EX",3600);
     await addCacheKey(key);
 
     return res.status(200).json({
@@ -251,27 +252,26 @@ export const getAllAdminProducts = AsyncHandler(
     // Check if the products are cached in Redis
     const cachedData = await redisClient.get(key);
     if (cachedData) {
-      const { products, totalPages } = JSON.parse(cachedData);
+      const { products, totalPage } = JSON.parse(cachedData);
       return res.status(200).json({
         message: "Products fetched successfully (from cache)",
         success: true,
         currentPage: page,
         products,
-        totalPages,
+        totalPage,
       });
     }
-
     // Fetch products and total count from the database if not cached
     const [products, totalProducts] = await Promise.all([
       Product.find().limit(limit).skip(skip).sort({ createdAt: -1 }),
       Product.countDocuments(),
     ]);
-    const totalPages = Math.ceil(totalProducts / limit);
+    const totalPage = Math.ceil(totalProducts / limit);
 
     // Cache the fetched data in Redis
     await redisClient.set(
       key,
-      JSON.stringify({ products, totalPages }),
+      JSON.stringify(products),
       "EX",
       3600 // Cache for 1 hour
     );
@@ -281,7 +281,7 @@ export const getAllAdminProducts = AsyncHandler(
       success: true,
       currentPage: page,
       products,
-      totalPages,
+      totalPage,
     });
   }
 );

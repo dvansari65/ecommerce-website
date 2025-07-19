@@ -5,6 +5,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState: orderReponse = {
     shippingCharges: 0,
+    _id:'',
     status,
     total: 0,
     tax: 0,

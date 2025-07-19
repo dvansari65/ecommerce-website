@@ -3,7 +3,8 @@ interface inputProps {
     label:string,
     id:string,
     value:string | number,
-    type:string
+    type:string,
+    name:string | number 
     onChange:(e:React.ChangeEvent<HTMLInputElement>
     )=>void
     placehHolder:string,
@@ -17,7 +18,8 @@ function Input({
     type,
     onChange,
     placehHolder,
-    required
+    required,
+    name
     
 }:inputProps) {
 
@@ -26,11 +28,12 @@ function Input({
     <label className='text-[14px] ml-2 text-gray-300' htmlFor={id}>{label}</label>
       <input 
       id={id}
+      name={typeof name === "number" ? String(name) : name}
       required={required}
       type={type}
       className=' text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
       placeholder={placehHolder}
-      value={value} 
+      value={typeof value === "number" ? String(value) : value} 
       onChange={onChange} />
     </div>
   )

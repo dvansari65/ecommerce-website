@@ -28,7 +28,8 @@ export const productApi = createApi({
         }),
         getSingleProducts: builder.query<singleProductResponse,{id:string}>({
             query:({id})=>`/product/get-single-product/${id}`
-        })
+        }),
+       
     })
 })
 

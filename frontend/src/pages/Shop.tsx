@@ -20,7 +20,7 @@ function Shop() {
   const handleNavigate = (id: string): void => {
     navigate(`/product/${id}`);
   };
-  console.log("data",categoryData)
+  console.log("categoryData",categoryData)
   const { data, isLoading, isError } = useSearchProductsQuery({
     search,
     category,
@@ -28,10 +28,10 @@ function Shop() {
     price,
     page,
   });
-
+console.log("data from porduct:",data)
   const products = data?.products || [];
   const totalPage = data?.totalPage || 1;
-
+  console.log("totalpage:",totalPage)
   const isPrevPage = page > 1;
   const isNextPage = page < totalPage;
 

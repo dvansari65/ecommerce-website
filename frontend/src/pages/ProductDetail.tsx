@@ -9,10 +9,12 @@ import {
 } from "@/redux/api/cartApi";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { saveOrderItems } from "@/redux/reducer/cartReducer";
 
 function ProductDetail() {
   const { id } = useParams() as { id: string };
-
+  const dispatch = useDispatch()
   const {
     data,
     isLoading: productLoading,
@@ -35,6 +37,17 @@ function ProductDetail() {
       toast.error("failed to create cart");
     }
   };
+
+
+
+  const buyProduct = async()=>{
+      dispatch(saveOrderItems([data?.product]))
+    try {
+      
+    } catch (error) {
+      
+    }
+  }
 
   const product = data?.product;
   if (productLoading) return <Spinner />;
@@ -128,6 +141,7 @@ function ProductDetail() {
               </button>
             ) : (
               <button
+                disabled={product?.stock === 0}
                 onClick={() => {
                   addToCart(product?._id as string);
                 }}
@@ -136,7 +150,7 @@ function ProductDetail() {
                 Add to Cart
               </button>
             )}
-            <button className="bg-[#2a1e30] text-white px-5 py-2 rounded-full hover:bg-[#3a2a40] transition font-semibold">
+            <button disabled={product?.stock === 0} className="bg-[#2a1e30] text-white px-5 py-2 rounded-full hover:bg-[#3a2a40] transition font-semibold">
               Buy Now
             </button>
           </div>
