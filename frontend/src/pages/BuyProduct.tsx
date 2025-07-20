@@ -2,7 +2,7 @@ import Input from "@/components/features/Input";
 import Shipping from "@/components/features/Shipping";
 import Spinner from "@/components/ui/LoaderIcon";
 import { server } from "@/config/constants";
-import { saveNumericalData } from "@/redux/reducer/cartReducer";
+import { saveNumericalData, saveShippingInfo } from "@/redux/reducer/cartReducer";
 
 import type { RootState } from "@/redux/reducer/store";
 import type { createPaymentResponse, shippingInfo } from "@/types/api-types";
@@ -12,26 +12,32 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
+
 function BuyProduct() {
   const [message, setMessage] = useState("");
   const [isLoading, setLoading] = useState(false);
   const [isError, setError] = useState();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<shippingInfo>({
     state: "",
     address: "",
     city: "",
     pinCode: "",
     country: "",
   });
+  
   const { orderItems } = useSelector((state: RootState) => state.cartReducer);
   const { code } = useSelector((state: RootState) => state.couponReducer);
   const dispatch = useDispatch();
   console.log("orderItems", orderItems);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+    // 
+    dispatch(saveShippingInfo(formData))
+    e.preventDefault()
     setLoading(true);
     if (orderItems.length === 0) {
+      toast.custom("please select items!")
       navigate("/shop");
     } else {
       try {
@@ -41,10 +47,7 @@ function BuyProduct() {
         const { data }: { data: createPaymentResponse } = await axios.post(
           endPoint,
           {
-            shippingInfo: {
-              ...formData,
-              pinCode: Number(formData.pinCode)
-            },
+            shippingInfo: formData,
             orderItems,
           },
           {
