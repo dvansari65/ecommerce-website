@@ -72,7 +72,7 @@ export type paymentFromCartTypes = {
 }
 export interface shippingInfo  {
     address:string,
-    pinCode:number ,
+    pinCode:string ,
     city:string,
     state:string,
     country:string

@@ -6,14 +6,14 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState: orderReponse = {
     shippingCharges: 0,
     _id:'',
-    status,
+    status:"processing",
     total: 0,
     tax: 0,
     subtotal: 0,
     discount: 0,
     shippingInfo: {
         address: "",
-        pinCode: 0,
+        pinCode: "",
         state: "",
         city: "",
         country: ""

@@ -26,7 +26,7 @@ function ShippingInfo() {
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState<shippingInfo>({
     state: "",
-    pinCode: 1212,
+    pinCode: "",
     address: "",
     city: "",
     country: "",
@@ -121,7 +121,7 @@ function ShippingInfo() {
       state={formData.state}
       city={formData.city}
       country={formData.country}
-      pinCode={formData.pinCode}
+      pinCode={Number(formData.pinCode)}
       onChange={handleChange}
       onSubmit={handleSubmit}
       />

@@ -3,29 +3,31 @@ import OrderCard from "@/components/features/OrderCard";
 import SummaryOfOrder from "@/components/features/SummaryOfOrder";
 import Spinner from "@/components/ui/LoaderIcon";
 
-import {
-  
-  useMyOrderQuery,
-} from "@/redux/api/orderApi";
+import { useDeleteOrderMutation, useMyOrderQuery } from "@/redux/api/orderApi";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 function MyOrders() {
   const [page, setPage] = useState<number>(1);
   const { data, isError, isLoading } = useMyOrderQuery({ page });
+
+  const [deleteOrder] = useDeleteOrderMutation();
+
   const allOrders = data?.orders || [];
-  console.log("alLorder:",allOrders)
-  
 
-  
-
-  const handleCancelOrder = async ()=>{
-      try {
-        
-      } catch (error) {
-        
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const res = await deleteOrder({ orderId });
+      if (res.data?.success) {
+        toast.success(res?.data?.message || "order deleted!");
+      } else {
+        toast.error("failed to delete order!");
       }
-  }
+    } catch (error: any) {
+      console.log("failed to delete the order!", error);
+      toast.error(error.data?.message || "failed to delete the order!");
+    }
+  };
 
   if (isLoading) return <Spinner />;
   if (isError)
@@ -42,7 +44,7 @@ function MyOrders() {
         {allOrders.map((order) => (
           <div className="border-b-1 border-gray-500">
             <SummaryOfOrder
-              onCancel={handleCancelOrder}
+              onCancel={() => handleCancelOrder(order._id)}
               total={order.total}
               shippingCharges={order?.shippingCharges}
               tax={order.tax}
@@ -54,9 +56,7 @@ function MyOrders() {
                 discount={order.discount}
                 name={product.name}
                 photo={product.photo}
-                quantity={product.quantity}
                 price={product.price}
-                
               />
             ))}
           </div>

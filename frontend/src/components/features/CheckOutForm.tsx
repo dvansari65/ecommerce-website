@@ -4,7 +4,7 @@ import { useCreateOrderMutation } from '@/redux/api/orderApi'
 import type { RootState } from '@/redux/reducer/store'
 import type { orderReponse } from '@/types/api-types'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -36,12 +36,26 @@ function CheckOutForm() {
         tax,
         discount: amount || 0
     }
+   useEffect(()=>{
     console.log("createOrderData",createOrderData)
-
+   },[])
+   const {address,state,city,pinCode,country} = shippingInfo
+    // console.log("orderItems",orderItems)
+    console.log("shippingInfo from front:",shippingInfo)
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!stripe || !elements) return;
         setProcessing(true)
+
+        if(orderItems.length === 0  ){
+            toast.error("please buy some items!")
+            return navigate("/shop")
+        }
+        if(address === "" || state === "" || city === "" ||  country === "" || pinCode === ""){
+            toast.error("invalid information!")
+            return  navigate("/shop")
+        }
+
         try {
             const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
@@ -88,12 +102,12 @@ function CheckOutForm() {
                 } catch (error: any) {
                     const message = error?.message || "Order processing failed";
                     toast.error(message);
-                    navigate("/place-order-from-cart")
+                    navigate("/shop")
                 }
             }
         } catch (error: any) {
             toast.error(error.message)
-            navigate("/place-order-from-cart")
+            navigate("/shop")
         }
     }
 

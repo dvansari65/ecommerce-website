@@ -4,7 +4,6 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 interface orderCardProps {
   name: string;
   photo: string;
-  quantity: number;
   price: number;
   discount: number;
 
@@ -13,7 +12,6 @@ interface orderCardProps {
 function OrderCard({
   name,
   photo,
-  quantity,
   price,
   discount,
  

@@ -22,7 +22,7 @@ export const createOrder = AsyncHandler(
       discount,
       total,
     } = req.body;
-    console.log("req.body:",req.body.shippingInfo)
+    // console.log("req.body:",req.body.shippingInfo)
     console.log("Incoming order data:", JSON.stringify(req.body, null, 2));
     // Validate required fields
     if (
@@ -39,6 +39,7 @@ export const createOrder = AsyncHandler(
 
     // Validate shipping info
     const { address, city, state, country, pinCode } = shippingInfo;
+    console.log("shippingInfo",shippingInfo)
     if (!address || !city || !state || !country || !pinCode) {
       throw new ApiError("All shipping information fields are required", 400);
     }
