@@ -9,6 +9,7 @@ import type {
   Order,
   orderReponse,
 } from "@/types/api-types";
+import type { messageAndSuccessProps } from "@/types/types";
 
 export const orderApi = createApi({
   reducerPath: "orderApi",
@@ -29,9 +30,16 @@ export const orderApi = createApi({
       }),
       providesTags: ["order"],
     }),
-    
+    deleteOrder:builder.mutation<messageAndSuccessProps,{orderId:string}>({
+      query:({orderId})=>({
+          url:`/order/delete-order/${orderId}`,
+          method:"DELETE"
+      }),
+      invalidatesTags:["order"]
+    }),
+  
     
   }),
 });
 
-export const { useCreateOrderMutation, useMyOrderQuery } = orderApi;
+export const { useCreateOrderMutation, useMyOrderQuery,useDeleteOrderMutation } = orderApi;
