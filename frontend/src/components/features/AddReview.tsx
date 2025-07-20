@@ -15,15 +15,23 @@ function AddReview({ productId, isOpen, onClose }: propsType) {
   const [addReview, { isLoading, isError }] = useAddReviewMutation();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const res = await addReview({ productId: productId, comment, rating });
-      if (res.data?.success) {
-        toast.success(res.data?.message || "review added!");
-        isOpen = false;
+    if (productId) {
+      try {
+        const res = await addReview({
+          productId: productId,
+          comment: comment,
+          rating: rating,
+        });
+        if (res.data?.success) {
+          toast.success(res.data?.message || "review added!");
+          setRating(0)
+          setComment("")
+          
+        }
+      } catch (error: any) {
+        console.log("failed to add review:", error);
+        toast.error(error.data?.message || "failed to add review!");
       }
-    } catch (error: any) {
-      console.log("failed to add review:", error);
-      toast.error(error.data?.message || "failed to add review!");
     }
   };
 
@@ -35,18 +43,26 @@ function AddReview({ productId, isOpen, onClose }: propsType) {
     max-w-[500px] w-full h-[400px]  sm:min-h-[300px] bg-[#a49ea9] text-black 
     shadow-lg rounded-lg p-6 "
     >
-      {isError ? (
+      {/* {isError ? (
         <div className="w-full text-center text-2xl text-red-700">failed to add reviews!</div>
       ) : (
-        <div>
-          <span className="w-full flex justify-end ">
-            <button
-              onClick={onClose}
-              className=" hover:cursor-pointer hover:text-red-600 ease-in-out duration-150"
-            >
-              <X />
-            </button>
-          </span>
+        
+      )} */}
+
+      <div>
+        <span className="w-full flex justify-end ">
+          <button
+            onClick={onClose}
+            className=" hover:cursor-pointer hover:text-red-600 ease-in-out duration-150"
+          >
+            <X />
+          </button>
+        </span>
+        {isError ? (
+          <div className="w-full text-center text-2xl text-red-700">
+            failed to add reviews!
+          </div>
+        ) : (
           <div>
             <div className="w-full flex justify-center">
               <span className="text-[25px]  text-center">
@@ -84,8 +100,8 @@ function AddReview({ productId, isOpen, onClose }: propsType) {
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

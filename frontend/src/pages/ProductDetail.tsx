@@ -11,8 +11,11 @@ import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { saveOrderItems } from "@/redux/reducer/cartReducer";
+import AddReview from "@/components/features/AddReview";
+import { useState } from "react";
 
 function ProductDetail() {
+  const [isReviewModalOpen,setIsReviewModalOpen] = useState(false)
   const { id } = useParams() as { id: string };
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -54,7 +57,9 @@ function ProductDetail() {
   );
 
   return (
+    
     <div className="min-h-screen px-6 py-16 bg-[#0f0c29] text-white  ">
+      
       <div className="max-w-5xl mx-auto bg-[#1b1321] border border-[#3f2e40] hover:border-[#b075f5] hover:shadow-purple-500/20 shadow-lg transition-all rounded-2xl p-6 md:flex gap-10">
         <div className="flex-shrink-0 w-full md:w-1/2 h-72 flex items-center justify-center bg-[#2a1e30] rounded-xl border border-[#3f2e40] p-4 relative">
           {productError ? (
@@ -150,10 +155,19 @@ function ProductDetail() {
             <button disabled={product?.stock === 0} onClick={handleNavigate} className="bg-[#2a1e30] text-white px-5 py-2 rounded-full hover:bg-[#3a2a40] transition font-semibold">
               Buy Now
             </button>
+            
           </div>
         </div>
       </div>
-      <Reviews className="mt-3" id={id as string} />
+    <button  onClick={()=>setIsReviewModalOpen((prev)=>!prev)} className="bg-[#2a1e30] text-purple-300 mt-6  px-5 py-2 rounded-[4px] hover:bg-[#3a2a40] transition font-semibold">
+            Add Ratings
+    </button>
+    {
+      true && <AddReview productId={id} onClose={()=>setIsReviewModalOpen(false)} isOpen={isReviewModalOpen}/>
+    }
+    
+    <Reviews className="mt-3" id={id as string} />
+    
     </div>
   );
 }

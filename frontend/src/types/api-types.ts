@@ -159,3 +159,19 @@ export type increaseQuantityInputProps = {
     productId:string,
     page?:number
 }
+export type reviewData = {
+    comment:string,
+    rating:number,
+    product:Pick<Product,"name" | "category">
+    user:Pick<User,"userName">
+}
+export type addReviewResponseTypes = {
+    success:boolean,
+    message:string,
+    review:reviewData
+}
+export interface addReviewInputType  {
+    comment:string,
+    rating:number,
+    productId:string
+}

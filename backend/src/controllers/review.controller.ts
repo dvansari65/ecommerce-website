@@ -11,7 +11,7 @@ import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 export const addReview = AsyncHandler(async (req: Request<productIdType, {}, reviewPropsType>, res: Response) => {
     // console.log("re.body:",req.body)
     const { comment, rating } = req.body;
-    const { productId } = req.params;
+    const { productId } = req.query;
     const user = req.user;
 
     if (!user) {
