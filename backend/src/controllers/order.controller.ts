@@ -22,6 +22,7 @@ export const createOrder = AsyncHandler(
       discount,
       total,
     } = req.body;
+    console.log("req.body:",req.body.shippingInfo)
     console.log("Incoming order data:", JSON.stringify(req.body, null, 2));
     // Validate required fields
     if (

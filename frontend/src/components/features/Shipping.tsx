@@ -11,6 +11,7 @@ interface shippingProps {
     city:string,
     onSubmit:(e: React.FormEvent<HTMLFormElement>)=>Promise<void>,
     onChange:(e: React.ChangeEvent<HTMLInputElement>)=>void
+   
 }
 
 function Shipping({
@@ -22,6 +23,7 @@ function Shipping({
     pinCode,
     onSubmit,
     onChange,
+  
 }:shippingProps) {
   return (
     <div className="h-screen w-full">

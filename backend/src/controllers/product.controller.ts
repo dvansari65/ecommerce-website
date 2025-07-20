@@ -191,11 +191,22 @@ export const filterProduct = AsyncHandler(
     const cachedData = await redisClient.get(key);
 
     if (cachedData) {
-      return res.status(200).json({
-        message: "data fetched successfully!",
-        success: true,
-        products: JSON.parse(cachedData),
-      });
+      // console.log("cachedData",cachedData)
+      try {
+        const {products,totalCount,totalPage} = JSON.parse(cachedData) 
+        console.log("cachedData:",JSON.parse(cachedData) )
+       
+        return res.status(200).json({
+          message: "data fetched successfully!",
+          success: true,
+          products,
+          totalCount,
+          totalPage
+        });
+      } catch (error) {
+        console.error("❌ Cache parse error:", error);
+        await redisClient.del(key);
+      }
     }
 
     const basequery: baseQuery = {};
@@ -228,16 +239,23 @@ export const filterProduct = AsyncHandler(
     ]);
 
     const totalPage = Math.ceil(totalCount / limit);
-    console.log("total count:",totalCount)
-    console.log("products:",products)
-    await redisClient.set(key, JSON.stringify(products),"EX",3600);
-    await addCacheKey(key);
+    // console.log("total count:",totalCount)
+    // console.log("products:",products
 
+    if (!products || !Array.isArray(products)) {
+      console.error("❌ Products not fetched correctly");
+      return res.status(500).json({ message: "Failed to fetch products" });
+    }
+
+    await redisClient.set(key, JSON.stringify({products,totalCount,totalPage}), "EX", 3600);
+    await addCacheKey(key);
+   
     return res.status(200).json({
         message: "Filtered successfully",
         success: true,
-        totalPage,
-        products
+       products,
+       totalCount,
+       totalPage
     });
   }
 );

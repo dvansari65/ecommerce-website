@@ -20,7 +20,7 @@ export const createPaymentIntentFromCart = AsyncHandler(async (req: Request, res
         .populate("items.productId") as unknown as cartResponse;
 
 
-    const CartProductIds = cart.items.map(i => i.productId)
+    const CartProductIds = cart?.items.map(i => i.productId)
     const product = await Product.find({ _id: { $in: CartProductIds } })
     const user = await User.findById(userId);
     let CouponMessage = "";

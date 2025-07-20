@@ -33,7 +33,7 @@ function Input({
       type={type}
       className=' text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
       placeholder={placehHolder}
-      value={typeof value === "number" ? String(value) : value} 
+      value={value} 
       onChange={onChange} />
     </div>
   )
