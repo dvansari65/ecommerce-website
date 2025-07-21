@@ -18,11 +18,14 @@ import { addCacheKey, invalidateKeys } from "../utils/invalidateCache";
 export const newUser = AsyncHandler(async (req: Request<{}, {}, newUserTypes>, res: Response) => {
     // console.log("✅ /new-user hit with data:", req.body);
     const { userName, email, password, gender, dob } = req.body
+    
     const photo = req.file
     if (!userName || !email || !password || !gender || !dob || !photo) {
         throw new ApiError("please enter all fields", 402)
     }
-
+    if(password.length < 8 ){
+        throw new ApiError("please enter minimum 8 characters !",400)
+    }
     const existingUser = await User.findOne({
         $or: [
             { userName: userName },

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
 import bcrypt from "bcrypt"
+import { min } from "date-fns";
 export interface IUser extends Document {
   
     userName:String,
@@ -27,11 +28,12 @@ const userSchema  = new mongoose.Schema({
     email:{
         type:String,
         unique:true,
-        required:[true,"please enter email"]
+        required:[true,"please enter email"],
+        lowercase: true,
     },
     password:{
         type:String,
-    
+        minlength: [8, "Password must be at least 8 characters long"],
         required:[true,"please enter password"]
     },
     dob:{
