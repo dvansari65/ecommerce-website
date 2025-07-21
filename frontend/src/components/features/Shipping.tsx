@@ -35,6 +35,7 @@ function Shipping({
           onSubmit={onSubmit}
         >
           <Input
+           className='text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
             name="address"
             required={true}
             label="ADDRESS"
@@ -46,6 +47,7 @@ function Shipping({
             htmlFor="address"
           />
           <Input
+           className='text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
             name="city"
             required={true}
             label="CITY"
@@ -57,6 +59,7 @@ function Shipping({
             htmlFor="city"
           />
           <Input
+           className='text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
          name="state"
             required={true}
             label="STATE"
@@ -68,6 +71,7 @@ function Shipping({
             htmlFor="state"
           />
           <Input
+           className='text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
            name="country"
             required={true}
             label="COUNTRY"
@@ -79,6 +83,7 @@ function Shipping({
             htmlFor="country"
           />
           <Input
+          className='text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
             name="pinCode"
             required={true}
             label="PINCODE"

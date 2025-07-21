@@ -9,7 +9,9 @@ interface inputProps {
     )=>void
     placehHolder:string,
     htmlFor:string,
-    required:boolean
+    required:boolean,
+    className?:string
+    onFocus?:(e: React.FocusEvent<HTMLInputElement>)=>void
 }
 function Input({
     label,
@@ -19,19 +21,21 @@ function Input({
     onChange,
     placehHolder,
     required,
-    name
-    
+    name,
+    className,
+    onFocus
 }:inputProps) {
 
   return (
     <div className='flex flex-col gap-1'>
-    <label className='text-[14px] ml-2 text-gray-300' htmlFor={id}>{label}</label>
+    <label className={`text-[14px] ml-1 text-gray-300 `} htmlFor={id}>{label}</label>
       <input 
+      onFocus={ onFocus}
       id={id}
       name={typeof name === "number" ? String(name) : name}
       required={required}
       type={type}
-      className=' text-white border-[1px] min-w-[350px] border-color p-2 rounded-[4px]'
+      className={`${className}`}
       placeholder={placehHolder}
       value={value} 
       onChange={onChange} />

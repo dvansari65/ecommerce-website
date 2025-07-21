@@ -175,3 +175,11 @@ export interface addReviewInputType  {
     rating:number,
     productId:string
 }
+export interface signupInputData {
+    userName:string,
+    password:string,
+    dob:string,
+    email:string,
+    gender:"male" | "female" | "transgender",
+    photo:string
+}
