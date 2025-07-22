@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import Logo from "../ui/Logo";
 import LogoutConfirm from "../ui/LogoutConfirm";
 import MenuBar from "../features/MenuBar";
+import ProfileIcon from "../features/ProfileIcon";
 
 const navItems = [
   { name: "home", path: "/" },
@@ -44,66 +45,77 @@ const Header: React.FC = () => {
   },[])
 
   return (
-    <header className="fixed top-0 z-50 w-full bg-[#0f0c29] bg-opacity-90 shadow-lg backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <Logo />
+    <header className=" fixed top-0 z-50 w-full  bg-[#0f0c29]  bg-opacity-90 shadow-lg backdrop-blur-md ">
+       
+    <div className="max-w-7xl mx-auto py-3  flex justify-between items-center  ">
+      
+      <Logo />
+    
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {navItems.map(({ name, path }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                `capitalize text-lg transition hover:underline ${
-                  isActive ? "text-white underline" : "text-gray-300 hover:text-white"
-                }`
-              }
-            >
-              {name}
-            </NavLink>
-          ))}
-        </nav>
+      <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+        {navItems.map(({ name, path }) => (
+          <NavLink
+            key={path}
+            to={path}
+            className={({ isActive }) =>
+              `capitalize text-lg transition hover:underline ${
+                isActive ? "text-white underline" : "text-gray-300 hover:text-white"
+              }`
+            }
+          >
+            {name}
+          </NavLink>
+        ))}
+      </nav>
 
-        <div className="flex items-center gap-4 relative">
-          {
-            user && <MenuBar />
-          }
+      <div className="flex items-center gap-4 relative">
+        {
+          user && <MenuBar />
+        }
 
-          {!loading && (
-            <>
-              {user ? (
-                <button
-                  onClick={() => setShowLogoutModal(true)}
-                  className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  to="/login"
-                  className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
-                >
-                  Login
-                </Link>
-              )}
-              <Link
-                to="/signup"
+        {!loading && (
+          <>
+            {user ? (
+             <div className="flex items-center">
+               
+              <button
+                onClick={() => setShowLogoutModal(true)}
                 className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
               >
-                Sign Up
+                Logout
+              </button>
+              <ProfileIcon/>
+             </div>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
+              >
+                Login
               </Link>
-            </>
-          )}
+            )}
+            {
+              user ? null : (
+                <Link
+              to="/signup"
+              className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-full hover:bg-white/20 transition"
+            >
+              Sign Up
+            </Link>
+              )
+            }
+          </>
+        )}
 
-          {showLogoutModal && (
-            <LogoutConfirm
-              onClose={() => setShowLogoutModal(false)}
-              proceedAction={handleLogout}
-            />
-          )}
-        </div>
+        {showLogoutModal && (
+          <LogoutConfirm
+            onClose={() => setShowLogoutModal(false)}
+            proceedAction={handleLogout}
+          />
+        )}
       </div>
-    </header>
+    </div>
+  </header>
   );
 };
 
