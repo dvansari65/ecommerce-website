@@ -2,7 +2,8 @@ import Input from "@/components/features/Input";
 import { useSignupMutation } from "@/redux/api/userApi";
 import { userExist, userNotExist } from "@/redux/reducer/userReducer";
 import type { signupInputData } from "@/types/api-types";
-import React, { useState, type ChangeEventHandler } from "react";
+
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +14,7 @@ function Signup() {
     email: "",
     password: "",
     gender: "male",
-    dob: "07/01/2003",
+    dob: "",
     photo: null,
   });
 
@@ -45,15 +46,15 @@ function Signup() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("FORMDATA:",formData)
     try {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      // emailRegex.test(formData.email) ||
       if (formData.password.length < 8) {
         return toast.error(
           "enter valid email or 8 minimum characters for password!"
         );
       }
-      if (emailRegex.test(formData.email)) {
+      if (!emailRegex.test(formData.email)) {
         return toast.error("please enter valid email format!");
       }
       if (!formData.photo) {
@@ -71,8 +72,7 @@ function Signup() {
       const res = await signup(formPayload);
       const user = res.data?.user;
       if (res.data?.success) {
-        if (user) localStorage.setItem("user", user as string);
-        console.log("user", user);
+        localStorage.setItem("user", JSON.stringify(user) );
         toast.success(res.data.message || "welcome!");
         dispatch(userExist(res.data?.user));
         navigate("/shop");
@@ -85,9 +85,13 @@ function Signup() {
       }
     } catch (error: any) {
       dispatch(userNotExist());
-      console.log("failed to signup!", error);
-      toast.error(error.data?.message || "please try again!");
-      navigate("/shop");
+      const errorMessage =
+        error?.data?.message ||
+        error?.message ||
+        "Something went wrong. Please try again.";
+
+      console.error("Signup error:", error);
+      toast.error(errorMessage);
     }
   };
   if (isError)
