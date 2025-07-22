@@ -1,6 +1,11 @@
 import Input from "@/components/features/Input";
+import { useSignupMutation } from "@/redux/api/userApi";
+import { userExist, userNotExist } from "@/redux/reducer/userReducer";
 import type { signupInputData } from "@/types/api-types";
-import React, { useState } from "react";
+import React, { useState, type ChangeEventHandler } from "react";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const [formData, setFormData] = useState<signupInputData>({
@@ -9,13 +14,19 @@ function Signup() {
     password: "",
     gender: "male",
     dob: "07/01/2003",
-    photo:"" 
+    photo: null,
   });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [signup, { isLoading, isError }] = useSignupMutation();
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData((prev) => ({ ...prev, photo: String(e?.target?.files[0]) }));
+      setFormData((prev) => ({ ...prev, photo: e.target.files![0] }));
     }
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value } = e.target;
     setFormData((prev) => ({
@@ -23,10 +34,68 @@ function Signup() {
       [name]: type === "number" ? Number(value) : value,
     }));
   };
-  const handleSubmit = async () => {
-    try {
-    } catch (error) {}
+
+  const handleGenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value, name } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // emailRegex.test(formData.email) ||
+      if (formData.password.length < 8) {
+        return toast.error(
+          "enter valid email or 8 minimum characters for password!"
+        );
+      }
+      if (emailRegex.test(formData.email)) {
+        return toast.error("please enter valid email format!");
+      }
+      if (!formData.photo) {
+        return toast.error("photo is missing!");
+      }
+
+      const formPayload = new FormData();
+      formPayload.append("userName", formData.userName);
+      formPayload.append("email", formData.email);
+      formPayload.append("password", formData.password);
+      formPayload.append("gender", formData.gender);
+      formPayload.append("dob", formData.dob);
+      formPayload.append("photo", formData.photo);
+
+      const res = await signup(formPayload);
+      const user = res.data?.user;
+      if (res.data?.success) {
+        if (user) localStorage.setItem("user", user as string);
+        console.log("user", user);
+        toast.success(res.data.message || "welcome!");
+        dispatch(userExist(res.data?.user));
+        navigate("/shop");
+      } else {
+        toast.error(res.data?.message || "failed to signup!");
+        console.log("Res3:", res.data?.message);
+
+        dispatch(userNotExist());
+        navigate("/shop");
+      }
+    } catch (error: any) {
+      dispatch(userNotExist());
+      console.log("failed to signup!", error);
+      toast.error(error.data?.message || "please try again!");
+      navigate("/shop");
+    }
+  };
+  if (isError)
+    return (
+      <div className="text-[15px] w-full text-center text-red-500 h-[60vh] flex justify-center items-center ">
+        something went wrong!
+      </div>
+    );
 
   return (
     <div className="w-full h-[70vh] bg-transparent flex justify-center items-center">
@@ -45,11 +114,10 @@ function Signup() {
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoChange}
-                required
                 className="hidden"
               />
               <span className="text-xs text-gray-400">
-                {/* {formData.photo ? formData.photo.name : "No file selected"} */ "not file seel"}
+                {formData.photo ? formData.photo.name : "No file selected"}
               </span>
             </label>
             <Input
@@ -100,12 +168,26 @@ function Signup() {
               required={true}
               value={formData.dob}
               htmlFor="dob"
+              max={new Date().toISOString().split("T")[0]}
             />
+            <label htmlFor="gender" className="text-gray-300 text-sm ml-1">
+              Gender
+            </label>
+            <select
+              className="my border-[1px] p-2 rounded-[4px] border-[rgb(95,89,89)]"
+              name="gender"
+              onChange={handleGenderChange}
+              value={formData.gender}
+            >
+              <option value="male">male</option>
+              <option value="female">female</option>
+              <option value="transgender">transgender</option>
+            </select>
             <button
               type="submit"
               className="px-6 py-2 rounded-xl bg-white/5 backdrop-blur-md text-white border border-white/10 shadow-md hover:bg-white/10 transition duration-200"
             >
-              {"signin"}
+              {isLoading ? "signup..." : "signup"}
             </button>
           </div>
         </form>
