@@ -1,17 +1,47 @@
 import type { RootState } from "@/redux/reducer/store";
-import React, { Profiler, useState } from "react";
-import { useSelector } from "react-redux";
+import React, { Profiler, useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Calendar, MoreVertical, User, X } from "lucide-react";
 import getRelativeTimeFromNow from "@/utils/timeStatusConverter";
 import calculateAge from "@/utils/calculateAge";
 import { FaEnvelope } from "react-icons/fa";
-import Button from "./Button";
+import Spinner from "../ui/LoaderIcon";
+import LogoutConfirm from "../ui/LogoutConfirm";
+import { useLogoutMutation } from "@/redux/api/userApi";
+import toast from "react-hot-toast";
+import { userNotExist } from "@/redux/reducer/userReducer";
+import { useNavigate } from "react-router-dom";
 
 function ProfileIcon() {
   const [openIcon, setOpenIcon] = useState(false);
-  const { user } = useSelector((state: RootState) => state.userReducer);
+  const [isLogoutOpen,setIsLogoutOpen] = useState(false)
+  const [isUpdateProfileModal,setUpdateProfileModal] = useState(false)
+  const { user,loading } = useSelector((state: RootState) => state.userReducer);
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [logout] = useLogoutMutation();
+
   const lastTimeActive = getRelativeTimeFromNow(user?.lastTimeActive || "some time ago!")
   const age = calculateAge(user?.dob || "Age : ? years old")
+
+  const onLogout = useCallback(async () => {
+    try {
+      const res = await logout();
+      setIsLogoutOpen(false);
+      setOpenIcon(false)
+      const message = res?.data?.message || "Logged out successfully!";
+      toast.success(message);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Failed to log out!");
+    } finally {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      dispatch(userNotExist());
+      navigate("/");
+    }
+  }, [ logout]);
+
   return (
     <div className="ml-2 p-2">
       <button
@@ -22,7 +52,10 @@ function ProfileIcon() {
       </button>
       {openIcon && (
         <div className="fixed inset-0 z-50 bg-zinc-100 w-[400px] h-[560px] left-[40%] top-[80%] rounded-2xl ">
-          <div className="relative w-full h-[120px] bg-gradient-to-r from-blue-600 via-[rgb(78,81,234)] to-purple-500 rounded-t-2xl">
+          {
+            loading && <Spinner/>
+          }
+          <div className="relative w-full h-[120px] bg-gradient-to-r from-[rgb(37,1,60)] via-[rgb(143,61,231)] to-[rgb(205,149,237)] rounded-t-2xl">
             <span className="w-full flex justify-between items-center px-3 py-2">
               <button onClick={() => setOpenIcon((prev) => !prev)}>
                 <X />
@@ -69,14 +102,25 @@ function ProfileIcon() {
               <span className="mt-[1px] mr-2">Last Time Active :</span>
               <span className="mt-[1px]">{lastTimeActive}</span>
             </div>
-            <div className="w-full flex justify-center">
-              <button className="w-[90%] bg-blue-600 mr-5 mt-3 py-2 rounded-[7px]">Edit Profile</button>
+            <div className="w-full flex justify-center ">
+              <button onClick={()=>setUpdateProfileModal(false)} className="w-[90%] bg-[#1b1321] border hover:border-[#b075f5] border-[#3f2e40] shadow-lg hover:shadow-purple-500/20 mr-5 mt-3 py-2 rounded-[7px]">
+              Edit Profile
+              </button>
             </div>
+            <div className="flex justify-center items-center gap-18 w-full mt-2">
+              <div className="w-[18vh] flex justify-center py-1  bg-gray-200 mr-2 rounded-2xl">
+              <button className="text-gray-500  ">setting</button>
+              </div>
+              <div className="w-[18vh] flex justify-center  bg-red-100 mr-6 rounded-2xl ">
+              <button onClick={()=>setIsLogoutOpen(true)} className="text-red-400  py-1 ">logout</button>
+              </div>
+            </div>
+            {
+              isLogoutOpen && <LogoutConfirm isOpen={isLogoutOpen} handleLogout={onLogout} onClose={()=>setIsLogoutOpen(false)}/>
+            }
+
           </div>
-          <div className="flex justify-center items-center gap-5 w-full h-full">
-            <Button onClick={()=>{}}  />
-            <Button onClick={()=>{}}/>
-          </div>
+          
         </div>
       )}
     </div>
