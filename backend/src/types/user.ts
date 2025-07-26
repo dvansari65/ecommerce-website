@@ -1,4 +1,5 @@
 export interface newUserTypes  {
+     _id:string,
     userName:String,
     email:String,
     password:String,
@@ -6,6 +7,7 @@ export interface newUserTypes  {
     dob:string,
     gender:"male" | "female" | "transgender",
     role?:"admin" | "user"
+    lastTimeActive?:string
    }
 
    export interface optionsType{
@@ -14,8 +16,10 @@ export interface newUserTypes  {
     sameSite:string
    }
 
+   
    export type updateUsertype = {
-        email?:string,
-        password?:string,
-        dob?:Date
+        email:string,
+        dob:string,
+        userName:string,
+        gender:"male" | "female" | "transgender"
    }

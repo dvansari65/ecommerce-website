@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
 import bcrypt from "bcrypt"
-import { min } from "date-fns";
 export interface IUser extends Document {
   
     userName:String,
