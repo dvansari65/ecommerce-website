@@ -1,11 +1,14 @@
 import React from 'react';
 
 type LogoutConfirmType = {
+  isOpen?:boolean,
   onClose: () => void;
-  proceedAction: () => void;
+  handleLogout: () => void;
+ 
 };
 
-function LogoutConfirm({ onClose, proceedAction }: LogoutConfirmType) {
+const LogoutConfirm = React.memo(function LogoutConfirm({ onClose, handleLogout,isOpen }: LogoutConfirmType) {
+  if(!isOpen) return null
   return (
     <div className="fixed inset-0 top-70  bg-black/40 flex items-center justify-center  z-50">
       <div className="bg-[rgb(135,106,137)] text-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
@@ -20,7 +23,7 @@ function LogoutConfirm({ onClose, proceedAction }: LogoutConfirmType) {
             CANCEL
           </button>
           <button
-            onClick={proceedAction}
+            onClick={handleLogout}
             className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition"
           >
             LOGOUT
@@ -29,6 +32,6 @@ function LogoutConfirm({ onClose, proceedAction }: LogoutConfirmType) {
       </div>
     </div>
   );
-}
+})
 
 export default LogoutConfirm;
